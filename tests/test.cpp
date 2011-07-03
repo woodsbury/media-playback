@@ -38,8 +38,7 @@ namespace test {
 			return true;
 		} else {
 			std::cout << "Equal test failed" << std::endl;
-			std::cout << x << " is not within " << delta << " of " << y
-					<< std::endl;
+			std::cout << x << " is not within " << delta << " of " << y << std::endl;
 			fail();
 			return false;
 		}
@@ -51,8 +50,7 @@ namespace test {
 			return true;
 		} else {
 			std::cout << "Not equal test failed" << std::endl;
-			std::cout << x << " is within " << delta << " of " << y
-					<< std::endl;
+			std::cout << x << " is within " << delta << " of " << y << std::endl;
 			fail();
 			return false;
 		}
@@ -82,14 +80,18 @@ namespace test {
 }
 
 namespace {
-	void printTestsPassed() {
-		std::cout << test::tests_passed << "/" << test::tests_total
-				<< " passed." << std::endl;
+	void printResults() {
+		std::cout << test::tests_passed << "/" << test::tests_total << " passed." << std::endl;
 		test::tests_passed = 0;
 		test::tests_total = 0;
 	}
 }
 
+#include "mediatests.hpp"
+
 int main(int, char **) {
+	test::media::runTests();
+	printResults();
+
 	return 0;
 }

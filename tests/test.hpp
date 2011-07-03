@@ -78,18 +78,14 @@ namespace test {
 		getrusage(RUSAGE_SELF, &end_usage);
 
 		// Convert to a double representation
-		double user_loop_time = (loop_usage.ru_utime.tv_sec
-				- start_usage.ru_utime.tv_sec) + (loop_usage.ru_utime.tv_usec
-				- start_usage.ru_utime.tv_usec) / 1000000.0;
-		double user_spent_time = (end_usage.ru_utime.tv_sec
-				- loop_usage.ru_utime.tv_sec) + (end_usage.ru_utime.tv_usec
-				- loop_usage.ru_utime.tv_usec) / 1000000.0 - user_loop_time;
-		double system_loop_time = (loop_usage.ru_stime.tv_sec
-				- start_usage.ru_stime.tv_sec) + (loop_usage.ru_stime.tv_usec
-				- start_usage.ru_stime.tv_usec) / 1000000.0;
-		double system_spent_time = (end_usage.ru_stime.tv_sec
-				- loop_usage.ru_stime.tv_sec) + (end_usage.ru_stime.tv_usec
-				- loop_usage.ru_stime.tv_usec) / 1000000.0 - system_loop_time;
+		double user_loop_time = (loop_usage.ru_utime.tv_sec - start_usage.ru_utime.tv_sec)
+				+ (loop_usage.ru_utime.tv_usec - start_usage.ru_utime.tv_usec) / 1000000.0;
+		double user_spent_time = (end_usage.ru_utime.tv_sec - loop_usage.ru_utime.tv_sec)
+				+ (end_usage.ru_utime.tv_usec - loop_usage.ru_utime.tv_usec) / 1000000.0 - user_loop_time;
+		double system_loop_time = (loop_usage.ru_stime.tv_sec - start_usage.ru_stime.tv_sec)
+				+ (loop_usage.ru_stime.tv_usec - start_usage.ru_stime.tv_usec) / 1000000.0;
+		double system_spent_time = (end_usage.ru_stime.tv_sec - loop_usage.ru_stime.tv_sec)
+				+ (end_usage.ru_stime.tv_usec - loop_usage.ru_stime.tv_usec) / 1000000.0 - system_loop_time;
 
 		// Normalise
 		user_spent_time /= N;
@@ -97,22 +93,18 @@ namespace test {
 
 		std::cout << "User time spent: ";
 		if (user_spent_time < 1e-3) {
-			std::cout << user_spent_time * 1e6 << " microsecond(s)"
-					<< std::endl;
+			std::cout << user_spent_time * 1e6 << " microsecond(s)" << std::endl;
 		} else if (user_spent_time < 1.0) {
-			std::cout << user_spent_time * 1e3 << " millisecond(s)"
-					<< std::endl;
+			std::cout << user_spent_time * 1e3 << " millisecond(s)" << std::endl;
 		} else {
 			std::cout << user_spent_time << " second(s)" << std::endl;
 		}
 
 		std::cout << "System time spent: ";
 		if (system_spent_time < 1e-3) {
-			std::cout << system_spent_time * 1e6 << " microsecond(s)"
-					<< std::endl;
+			std::cout << system_spent_time * 1e6 << " microsecond(s)" << std::endl;
 		} else if (system_spent_time < 1.0) {
-			std::cout << system_spent_time * 1e3 << " millisecond(s)"
-					<< std::endl;
+			std::cout << system_spent_time * 1e3 << " millisecond(s)" << std::endl;
 		} else {
 			std::cout << system_spent_time << " second(s)" << std::endl;
 		}
