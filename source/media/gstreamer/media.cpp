@@ -37,18 +37,29 @@ namespace gstreamer {
 			if (!gst_is_initialized()) {
 				dprint("Initialising GStreamer");
 				gst_init(NULL, NULL);
+
+#if defined(DEBUG) && !defined(GST_DISABLE_GST_DEBUG)
+				gst_debug_set_default_threshold(GST_LEVEL_ERROR);
+				gst_debug_set_active(true);
+#endif
 			}
 		}
 	};
 }
 
 namespace media {
+// Source base class
 	class SourcePrivate
 		: gstreamer::Initialiser {
 	public:
 		virtual GstElement * createElement() const = 0;
 	};
 
+	Source::~Source() {
+		delete p;
+	}
+
+// Sink base class
 	class SinkPrivate
 		: gstreamer::Initialiser {
 	protected:
@@ -71,6 +82,9 @@ namespace media {
 			gst_object_unref(pipeline_);
 		}
 
+/*
+		Configure this sink to play from the given source
+*/
 		void connect(Source & source) {
 			GstElement * source_element = source.p->createElement();
 			gst_bin_add(GST_BIN(pipeline_), source_element);
@@ -79,23 +93,36 @@ namespace media {
 			gst_element_link(source_element, sink_element());
 		}
 
-		void EOSReached() {
+/*
+		Called when the sink has reached the end of the stream
+*/
+		void eosReached() {
 			gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 			gst_element_seek(pipeline_, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, GST_SEEK_TYPE_SET, 0,
 					GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
 			gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE);
 		}
 
+/*
+		Start playing back pipeline
+*/
 		bool play() {
 			gst_element_set_state(pipeline_, GST_STATE_PLAYING);
 			return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 		}
 
+/*
+		Stop playing back pipeline
+*/
 		bool pause() {
-			gst_element_set_state(pipeline_, GST_STATE_PLAYING);
+			gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 			return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 		}
 	};
+
+	Sink::~Sink() {
+		delete p;
+	}
 
 	bool Sink::play() {
 		return p->play();
@@ -105,6 +132,7 @@ namespace media {
 		return p->pause();
 	}
 
+// Local file source
 	class FileSourcePrivate
 		: public SourcePrivate {
 		std::string const location_;
@@ -125,6 +153,33 @@ namespace media {
 		p = new FileSourcePrivate(location);
 	}
 
+// HTTP file source
+	class HttpSourcePrivate
+		: public SourcePrivate {
+		std::string location_;
+
+	public:
+		HttpSourcePrivate(std::string location) {
+			if (location.find("http://") == 0) {
+				location_ = location;
+			} else {
+				location_ = "http://" + location;
+			}
+		}
+
+		GstElement * createElement() const {
+			GstElement * element = gst_element_factory_make("souphttpsrc", NULL);
+			g_object_set(element, "location", location_.c_str(), NULL);
+
+			return element;
+		}
+	};
+
+	HttpSource::HttpSource(std::string location) {
+		p = new HttpSourcePrivate(location);
+	}
+
+// Local playback sink
 	class PlaySinkPrivate
 		: public SinkPrivate {
 		GstElement * sink_element() {
@@ -164,17 +219,24 @@ namespace media {
 }
 
 namespace {
+// Callbacks
+/*
+	A message has been received on the bus
+*/
 	void message_cb(GstBus *, GstMessage * message, gpointer data) {
 		switch (GST_MESSAGE_TYPE(message)) {
 			case GST_MESSAGE_EOS:
 				dprint("End of stream reached");
-				reinterpret_cast< media::SinkPrivate * >(data)->EOSReached();
+				reinterpret_cast< media::SinkPrivate * >(data)->eosReached();
 				break;
 			default:
 				;
 		}
 	}
 
+/*
+	A new pad has been added to the PlaySink's decoder
+*/
 	void play_pad_added_cb(GstElement * element, GstPad * pad, gpointer data) {
 		GstCaps * caps = gst_pad_get_caps(pad);
 

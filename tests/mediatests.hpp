@@ -28,9 +28,38 @@ namespace test { namespace media {
 		isTrue(play.play());
 		sleep(1);
 		isTrue(play.pause());
+		sleep(1);
+		isTrue(play.play());
+		isTrue(play.play());
+		sleep(1);
+		isTrue(play.pause());
+	}
+
+	void fileNonExist() {
+		::media::FileSource file("./aaaaaaaaaaaaaaaa");
+		::media::PlaySink play(file);
+		isFalse(play.play());
+		isFalse(play.pause());
+	}
+
+	void playHttp() {
+		::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
+		::media::PlaySink play(http);
+		isTrue(play.play());
+		sleep(3);
+		isTrue(play.pause());
+	}
+
+	void httpNonExist() {
+		::media::HttpSource http("aaaaaaaaaaaaaaaa");
+		::media::PlaySink play(http);
+		isFalse(play.play());
+		isFalse(play.pause());
 	}
 
 	void runTests() {
 		playFile();
+		fileNonExist();
+		playHttp();
 	}
 }}

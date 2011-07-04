@@ -24,18 +24,29 @@ namespace media {
 	class SourcePrivate;
 	class SinkPrivate;
 
+/*
+	Base class for sources
+*/
 	class Source {
 		friend class SinkPrivate;
 
 	protected:
 		SourcePrivate * p;
+
+	public:
+		~Source();
 	};
 
+/*
+	Base class for sinks
+*/
 	class Sink {
 	protected:
 		SinkPrivate * p;
 
 	public:
+		~Sink();
+
 		bool play();
 		bool pause();
 	};
@@ -47,6 +58,15 @@ namespace media {
 		: public Source {
 	public:
 		FileSource(std::string location);
+	};
+
+/*
+	Represents a file from an HTTP server
+*/
+	class HttpSource
+		: public Source {
+	public:
+		HttpSource(std::string location);
 	};
 
 /*
