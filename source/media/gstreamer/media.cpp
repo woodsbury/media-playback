@@ -53,6 +53,8 @@ namespace media {
 	class SourcePrivate
 		: gstreamer::Initialiser {
 	public:
+		virtual ~SourcePrivate() {}
+
 		virtual GstElement * createElement() const = 0;
 	};
 
@@ -78,7 +80,7 @@ namespace media {
 			gst_object_unref(bus);
 		}
 
-		~SinkPrivate() {
+		virtual ~SinkPrivate() {
 			gst_element_set_state(pipeline_, GST_STATE_NULL);
 			gst_object_unref(pipeline_);
 		}
@@ -236,21 +238,24 @@ namespace media {
 	FileSink::FileSink(Source const & source, std::string location, Container container, Audio audio, Video video) {
 		std::string container_element;
 		switch (container) {
-			case Ogg:
+			case MatroskaContainer:
+				container_element = "matroskamux";
+				break;
+			case OggContainer:
 				container_element = "oggmux";
 				break;
 		}
 
 		std::string audio_element;
 		switch (audio) {
-			case Vorbis:
+			case VorbisAudio:
 				audio_element = "vorbisenc";
 				break;
 		}
 
 		std::string video_element;
 		switch (video) {
-			case Theora:
+			case TheoraVideo:
 				video_element = "theoraenc";
 				break;
 		}

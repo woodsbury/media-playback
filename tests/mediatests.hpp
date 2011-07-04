@@ -15,6 +15,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstdio>
 #include <media.hpp>
 
 extern "C" {
@@ -58,10 +59,15 @@ namespace test { namespace media {
 	}
 
 	void convertHttp() {
-		::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
-		::media::FileSink file(http, "./tests/convert_result.ogg", ::media::FileSink::Ogg, ::media::FileSink::Vorbis,
-			::media::FileSink::Theora);
-		isTrue(file.play());
+		{
+			::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
+			::media::FileSink file(http, "./tests/convert_result.ogg", ::media::FileSink::OggContainer,
+				::media::FileSink::VorbisAudio, ::media::FileSink::TheoraVideo);
+			isTrue(file.play());
+			isTrue(file.pause());
+			isTrue(file.play());
+		}
+		equal(std::remove("./tests/convert_result.ogg"), 0);
 	}
 
 	void runTests() {

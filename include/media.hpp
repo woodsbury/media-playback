@@ -76,15 +76,16 @@ namespace media {
 		: public Sink {
 	public:
 		enum Container {
-			Ogg
+			MatroskaContainer,
+			OggContainer
 		};
 
 		enum Audio {
-			Vorbis
+			VorbisAudio
 		};
 
 		enum Video {
-			Theora
+			TheoraVideo
 		};
 
 		FileSink(Source const & source, std::string location, Container container, Audio audio, Video video);
