@@ -24,6 +24,7 @@ extern "C" {
 
 namespace {
 	void message_cb(GstBus * bus, GstMessage * message, gpointer data);
+	void file_pad_added_cb(GstElement * element, GstPad * pad, gpointer data);
 	void play_pad_added_cb(GstElement * element, GstPad * pad, gpointer data);
 }
 
@@ -85,7 +86,7 @@ namespace media {
 /*
 		Configure this sink to play from the given source
 */
-		void connect(Source & source) {
+		void connect(Source const & source) {
 			GstElement * source_element = source.p->createElement();
 			gst_bin_add(GST_BIN(pipeline_), source_element);
 			gst_element_sync_state_with_parent(source_element);
@@ -99,7 +100,7 @@ namespace media {
 		void eosReached() {
 			gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 			gst_element_seek(pipeline_, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, GST_SEEK_TYPE_SET, 0,
-					GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
+				GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
 			gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE);
 		}
 
@@ -179,6 +180,85 @@ namespace media {
 		p = new HttpSourcePrivate(location);
 	}
 
+// Local file sink
+	class FileSinkPrivate
+		: public SinkPrivate {
+		std::string const location_;
+
+		std::string const container_name_;
+		std::string const audio_name_;
+		std::string const video_name_;
+
+		GstElement * container_element_;
+
+		GstElement * sink_element() {
+			GstElement * decode_element = gst_element_factory_make("decodebin2", NULL);
+			gst_bin_add(GST_BIN(pipeline_), decode_element);
+			g_signal_connect(decode_element, "pad-added", G_CALLBACK(file_pad_added_cb), this);
+
+			container_element_ = gst_element_factory_make(container_name_.c_str(), NULL);
+			gst_bin_add(GST_BIN(pipeline_), container_element_);
+
+			GstElement * sink_element = gst_element_factory_make("filesink", NULL);
+			g_object_set(sink_element, "location", location_.c_str(), NULL);
+			gst_bin_add(GST_BIN(pipeline_), sink_element);
+
+			gst_element_link(container_element_, sink_element);
+
+			return decode_element;
+		}
+
+	public:
+		FileSinkPrivate(std::string location, std::string containerName, std::string audioName, std::string videoName)
+			: location_(location), container_name_(containerName), audio_name_(audioName), video_name_(videoName) {}
+
+		void audioPadAdded(GstElement * element) {
+			GstElement * encode_element = gst_element_factory_make(audio_name_.c_str(), NULL);
+			GstElement * queue_element = gst_element_factory_make("queue", NULL);
+			gst_bin_add(GST_BIN(pipeline_), queue_element);
+			gst_bin_add(GST_BIN(pipeline_), encode_element);
+			gst_element_link_many(element, queue_element, encode_element, container_element_, NULL);
+			gst_element_sync_state_with_parent(queue_element);
+			gst_element_sync_state_with_parent(encode_element);
+		}
+
+		void videoPadAdded(GstElement * element) {
+			GstElement * encode_element = gst_element_factory_make(video_name_.c_str(), NULL);
+			GstElement * queue_element = gst_element_factory_make("queue", NULL);
+			gst_bin_add(GST_BIN(pipeline_), queue_element);
+			gst_bin_add(GST_BIN(pipeline_), encode_element);
+			gst_element_link_many(element, queue_element, encode_element, container_element_, NULL);
+			gst_element_sync_state_with_parent(queue_element);
+			gst_element_sync_state_with_parent(encode_element);
+		}
+	};
+
+	FileSink::FileSink(Source const & source, std::string location, Container container, Audio audio, Video video) {
+		std::string container_element;
+		switch (container) {
+			case Ogg:
+				container_element = "oggmux";
+				break;
+		}
+
+		std::string audio_element;
+		switch (audio) {
+			case Vorbis:
+				audio_element = "vorbisenc";
+				break;
+		}
+
+		std::string video_element;
+		switch (video) {
+			case Theora:
+				video_element = "theoraenc";
+				break;
+		}
+
+		p = new FileSinkPrivate(location, container_element, audio_element, video_element);
+		p->connect(source);
+	}
+
 // Local playback sink
 	class PlaySinkPrivate
 		: public SinkPrivate {
@@ -192,27 +272,27 @@ namespace media {
 
 	public:
 		void audioPadAdded(GstElement * element) {
-			GstElement * audio_sink = gst_element_factory_make("autoaudiosink", NULL);
-			GstElement * queue = gst_element_factory_make("queue", NULL);
-			gst_bin_add(GST_BIN(pipeline_), queue);
-			gst_bin_add(GST_BIN(pipeline_), audio_sink);
-			gst_element_link_many(element, queue, audio_sink, NULL);
-			gst_element_sync_state_with_parent(audio_sink);
-			gst_element_sync_state_with_parent(queue);
+			GstElement * sink_element = gst_element_factory_make("autoaudiosink", NULL);
+			GstElement * queue_element = gst_element_factory_make("queue", NULL);
+			gst_bin_add(GST_BIN(pipeline_), queue_element);
+			gst_bin_add(GST_BIN(pipeline_), sink_element);
+			gst_element_link_many(element, queue_element, sink_element, NULL);
+			gst_element_sync_state_with_parent(sink_element);
+			gst_element_sync_state_with_parent(queue_element);
 		}
 
 		void videoPadAdded(GstElement * element) {
-			GstElement * video_sink = gst_element_factory_make("xvimagesink", NULL);
-			GstElement * queue = gst_element_factory_make("queue", NULL);
-			gst_bin_add(GST_BIN(pipeline_), video_sink);
-			gst_bin_add(GST_BIN(pipeline_), queue);
-			gst_element_link_many(element, queue, video_sink, NULL);
-			gst_element_sync_state_with_parent(video_sink);
-			gst_element_sync_state_with_parent(queue);
+			GstElement * sink_element = gst_element_factory_make("xvimagesink", NULL);
+			GstElement * queue_element = gst_element_factory_make("queue", NULL);
+			gst_bin_add(GST_BIN(pipeline_), sink_element);
+			gst_bin_add(GST_BIN(pipeline_), queue_element);
+			gst_element_link_many(element, queue_element, sink_element, NULL);
+			gst_element_sync_state_with_parent(sink_element);
+			gst_element_sync_state_with_parent(queue_element);
 		}
 	};
 
-	PlaySink::PlaySink(Source & source) {
+	PlaySink::PlaySink(Source const & source) {
 		p = new PlaySinkPrivate;
 		p->connect(source);
 	}
@@ -235,6 +315,26 @@ namespace {
 	}
 
 /*
+	A new pad has been added to the FileSink's decoder
+*/
+	void file_pad_added_cb(GstElement * element, GstPad * pad, gpointer data) {
+		GstCaps * caps = gst_pad_get_caps(pad);
+
+		GstStructure * caps_str = gst_caps_get_structure(caps, 0);
+		std::string pad_type(gst_structure_get_name(caps_str));
+
+		if (pad_type.find("audio") == 0) {
+			reinterpret_cast< media::FileSinkPrivate * >(data)->audioPadAdded(element);
+		} else if (pad_type.find("video") == 0) {
+			reinterpret_cast< media::FileSinkPrivate * >(data)->videoPadAdded(element);
+		} else {
+			dprint("Unknown pad type");
+		}
+
+		gst_caps_unref(caps);
+	}
+
+/*
 	A new pad has been added to the PlaySink's decoder
 */
 	void play_pad_added_cb(GstElement * element, GstPad * pad, gpointer data) {
@@ -247,6 +347,8 @@ namespace {
 			reinterpret_cast< media::PlaySinkPrivate * >(data)->audioPadAdded(element);
 		} else if (pad_type.find("video") == 0) {
 			reinterpret_cast< media::PlaySinkPrivate * >(data)->videoPadAdded(element);
+		} else {
+			dprint("Unknown pad type");
 		}
 
 		gst_caps_unref(caps);

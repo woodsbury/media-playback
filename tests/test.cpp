@@ -81,7 +81,7 @@ namespace test {
 
 namespace {
 	void printResults() {
-		std::cout << test::tests_passed << "/" << test::tests_total << " passed." << std::endl;
+		std::cout << test::tests_passed << "/" << test::tests_total << " passed" << std::endl;
 		test::tests_passed = 0;
 		test::tests_total = 0;
 	}

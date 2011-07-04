@@ -70,12 +70,33 @@ namespace media {
 	};
 
 /*
+	Encodes a source and stores it in a file
+*/
+	class FileSink
+		: public Sink {
+	public:
+		enum Container {
+			Ogg
+		};
+
+		enum Audio {
+			Vorbis
+		};
+
+		enum Video {
+			Theora
+		};
+
+		FileSink(Source const & source, std::string location, Container container, Audio audio, Video video);
+	};
+
+/*
 	Plays a source locally
 */
 	class PlaySink
 		: public Sink {
 	public:
-		PlaySink(Source & source);
+		PlaySink(Source const & source);
 	};
 }
 

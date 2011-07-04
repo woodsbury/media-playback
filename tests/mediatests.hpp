@@ -46,7 +46,7 @@ namespace test { namespace media {
 		::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
 		::media::PlaySink play(http);
 		isTrue(play.play());
-		sleep(3);
+		sleep(2);
 		isTrue(play.pause());
 	}
 
@@ -57,9 +57,17 @@ namespace test { namespace media {
 		isFalse(play.pause());
 	}
 
+	void convertHttp() {
+		::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
+		::media::FileSink file(http, "./tests/convert_result.ogg", ::media::FileSink::Ogg, ::media::FileSink::Vorbis,
+			::media::FileSink::Theora);
+		isTrue(file.play());
+	}
+
 	void runTests() {
 		playFile();
 		fileNonExist();
 		playHttp();
+		convertHttp();
 	}
 }}
