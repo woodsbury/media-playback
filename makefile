@@ -1,7 +1,7 @@
 NAME = mp
-VERSION =
+VERSION = 0
 
-DEFINES = DEBUG
+DEFINES = DEBUG NAME='"$(NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
 SYSTEM_INCLUDES =
 DIRECTORIES = source
@@ -18,12 +18,12 @@ CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUD
 CXXFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x
 LOADLIBES = $(foreach LIBRARY, $(LIBRARIES), -l$(LIBRARY))
 
-SOURCES = $(wildcard $(patsubst %,%/*.cpp,$(DIRECTORIES)))
-OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
+SOURCES = $(wildcard $(patsubst %, %/*.cpp, $(DIRECTORIES)))
+OBJECTS = $(patsubst %, %.o, $(basename $(SOURCES)))
 
 TEST_SOURCES = $(wildcard $(patsubst %, %/*.cpp, $(TEST_DIRECTORIES)))
 TEST_HEADERS = $(wildcard $(patsubst %, %/*.hpp, $(TEST_DIRECTORIES)))
-TEST_OBJECTS = $(patsubst %.cpp, %.o, $(TEST_SOURCES))
+TEST_OBJECTS = $(patsubst %, %.o, $(basename $(TEST_SOURCES)))
 
 $(NAME): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(LOADLIBES) -o $@
@@ -31,11 +31,12 @@ $(NAME): $(OBJECTS)
 $(NAME)_test: $(OBJECTS) $(TEST_OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(TEST_OBJECTS) $(LOADLIBES) -o $@
 
+$(TEST_OBJECTS): $(TEST_HEADERS) $(TEST_SOURCES)
+
 .PHONY: clean test
 
 clean:
-	-rm $(OBJECTS)
-	-rm $(TEST_OBJECTS)
+	-rm $(OBJECTS) $(TEST_OBJECTS)
 
 test: $(NAME)_test
 	./$(NAME)_test

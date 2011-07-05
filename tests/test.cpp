@@ -90,6 +90,9 @@ namespace {
 #include "mediatests.hpp"
 
 int main(int, char **) {
+	std::cout << "Programme Name: " << NAME << std::endl;
+	std::cout << "Programme Version: " << VERSION << std::endl;
+
 	test::media::runTests();
 	printResults();
 
