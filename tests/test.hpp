@@ -19,6 +19,7 @@
 #define _TEST_HPP
 
 #include <iostream>
+#include <debug.hpp>
 
 extern "C" {
 #include <sys/resource.h>
@@ -65,13 +66,21 @@ namespace test {
 */
 	template<int N>
 	void time(void (* function)()) {
+		// Disable debug output to prevent filling the screen
+		dprint_enable(false);
+
 		rusage start_usage;
 		rusage loop_usage;
 		rusage end_usage;
+
+		// Starting time
 		getrusage(RUSAGE_SELF, &start_usage);
+
 		// Find the overhead of running the loop
 		for (int i = 0; i < N; ++i) {}
 		getrusage(RUSAGE_SELF, &loop_usage);
+
+		// Find the time to run the function
 		for (int i = 0; i < N; ++i) {
 			function();
 		}
@@ -108,6 +117,9 @@ namespace test {
 		} else {
 			std::cout << system_spent_time << " second(s)" << std::endl;
 		}
+
+		// Reenable debug output
+		dprint_enable(true);
 	}
 }
 

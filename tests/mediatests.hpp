@@ -27,12 +27,11 @@ namespace test { namespace media {
 		::media::FileSource file("./tests/test.ogg");
 		::media::PlaySink play(file);
 		isTrue(play.play());
-		sleep(1);
+		usleep(500000);
 		isTrue(play.pause());
-		sleep(1);
+		usleep(500000);
 		isTrue(play.play());
 		isTrue(play.play());
-		sleep(1);
 		isTrue(play.pause());
 	}
 
@@ -47,7 +46,6 @@ namespace test { namespace media {
 		::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
 		::media::PlaySink play(http);
 		isTrue(play.play());
-		sleep(2);
 		isTrue(play.pause());
 	}
 
@@ -67,7 +65,15 @@ namespace test { namespace media {
 			isTrue(file.pause());
 			isTrue(file.play());
 		}
+
 		equal(std::remove("./tests/convert_result.ogg"), 0);
+	}
+
+	void timeFilePlay() {
+		::media::FileSource file("./tests/test.ogg");
+		::media::PlaySink play(file);
+		play.play();
+		play.pause();
 	}
 
 	void runTests() {
@@ -75,5 +81,8 @@ namespace test { namespace media {
 		fileNonExist();
 		playHttp();
 		convertHttp();
+
+		std::cout << "Timing loading a file for playback" << std::endl;
+		time< 50 >(&timeFilePlay);
 	}
 }}

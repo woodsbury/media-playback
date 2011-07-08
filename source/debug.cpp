@@ -15,26 +15,26 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DEBUG_HPP
-#define _DEBUG_HPP
+#ifdef DEBUG
 
-#if defined(DEBUG)
+#include <cstdarg>
+#include <cstdio>
 
-/*
-Control debug output from within the application
-*/
-void dprint_enable(bool enabled);
+namespace {
+	bool dprint_enabled(true);
+}
 
-/*
-Prints a message to the console if DEBUG is defined when compiled
-*/
-void dprint(char const * format, ...);
+void dprint_enable(bool enabled) {
+	dprint_enabled = enabled;
+}
 
-#else
-
-#define dprint_enable(x)
-#define dprint(...)
-
-#endif
-
+void dprint(char const * format, ...) {
+	if (dprint_enabled) {
+		std::va_list args;
+		va_start(args, format);
+		std::vprintf(format, args);
+		std::printf("\n");
+		va_end(args);
+	}
+}
 #endif
