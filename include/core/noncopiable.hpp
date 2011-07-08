@@ -15,9 +15,20 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MEDIA_HPP
-#define _MEDIA_HPP
+#ifndef _CORE_NONCOPIABLE_HPP
+#define _CORE_NONCOPIABLE_HPP
 
-#include "media/elements.hpp"
+namespace core {
+/*
+	Inheriting from this class will prevent copying
+*/
+	class NonCopiable {
+		NonCopiable(NonCopiable const &) = delete;
+		NonCopiable const & operator=(NonCopiable const &) = delete;
+
+	protected:
+		NonCopiable() = default;
+	};
+}
 
 #endif

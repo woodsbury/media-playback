@@ -34,7 +34,10 @@ void dprint(char const * format, ...);
 
 #define dprint_enable(x)
 #define dprint(...)
+#define NDEBUG
 
 #endif
+
+#include <cassert>
 
 #endif

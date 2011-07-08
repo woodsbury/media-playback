@@ -15,9 +15,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MEDIA_HPP
-#define _MEDIA_HPP
+#ifndef _CORE_HPP
+#define _CORE_HPP
 
-#include "media/elements.hpp"
+#include "core/noncopiable.hpp"
 
 #endif
