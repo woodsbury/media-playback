@@ -238,24 +238,24 @@ namespace media {
 	FileSink::FileSink(Source const & source, std::string location, Container container, Audio audio, Video video) {
 		std::string container_element;
 		switch (container) {
-			case MatroskaContainer:
+			case Container::Matroska:
 				container_element = "matroskamux";
 				break;
-			case OggContainer:
+			case Container::Ogg:
 				container_element = "oggmux";
 				break;
 		}
 
 		std::string audio_element;
 		switch (audio) {
-			case VorbisAudio:
+			case Audio::Vorbis:
 				audio_element = "vorbisenc";
 				break;
 		}
 
 		std::string video_element;
 		switch (video) {
-			case TheoraVideo:
+			case Video::Theora:
 				video_element = "theoraenc";
 				break;
 		}

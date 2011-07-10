@@ -78,17 +78,17 @@ namespace media {
 	class FileSink
 		: public Sink {
 	public:
-		enum Container {
-			MatroskaContainer,
-			OggContainer
+		enum class Container {
+			Matroska,
+			Ogg
 		};
 
-		enum Audio {
-			VorbisAudio
+		enum class Audio {
+			Vorbis
 		};
 
-		enum Video {
-			TheoraVideo
+		enum class Video {
+			Theora
 		};
 
 		FileSink(Source const & source, std::string location, Container container, Audio audio, Video video);

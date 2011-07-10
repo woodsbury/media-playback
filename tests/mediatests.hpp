@@ -59,8 +59,8 @@ namespace test { namespace media {
 	void convertHttp() {
 		{
 			::media::HttpSource http("www.archive.org/download/The_Phoenix_Trap_self_titled/pt2002-01-18t12.ogg");
-			::media::FileSink file(http, "./tests/convert_result.ogg", ::media::FileSink::OggContainer,
-				::media::FileSink::VorbisAudio, ::media::FileSink::TheoraVideo);
+			::media::FileSink file(http, "./tests/convert_result.ogg", ::media::FileSink::Container::Ogg,
+				::media::FileSink::Audio::Vorbis, ::media::FileSink::Video::Theora);
 			isTrue(file.play());
 			isTrue(file.pause());
 			isTrue(file.play());
@@ -83,6 +83,6 @@ namespace test { namespace media {
 		convertHttp();
 
 		std::cout << "Timing loading a file for playback" << std::endl;
-		time< 50 >(&timeFilePlay);
+		time(&timeFilePlay, 50);
 	}
 }}
