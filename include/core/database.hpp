@@ -22,11 +22,14 @@
 
 namespace core {
 	class DatabasePrivate;
+	class StatementPrivate;
 
 /*
 	Creates a connection to a database
 */
 	class Database {
+		friend class StatementPrivate;
+
 		DatabasePrivate * p;
 
 	public:
@@ -37,6 +40,21 @@ namespace core {
 
 		Database(std::string location, OpenMode mode = OpenMode::ReadWrite);
 		~Database();
+
+		bool opened() const;
+	};
+
+/*
+	Represents a statement to execute on a database connection
+*/
+	class Statement {
+		StatementPrivate * p;
+
+	public:
+		Statement(Database & db, std::string statement);
+		~Statement();
+
+		bool valid() const;
 	};
 }
 

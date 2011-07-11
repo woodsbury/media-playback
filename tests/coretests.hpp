@@ -18,6 +18,42 @@
 #include <core.hpp>
 
 namespace test { namespace core {
+	void openDb() {
+		{
+			::core::Database db("./tests/test.db");
+			isTrue(db.opened());
+		}
+
+		::core::Database db2("./tests/test.db", ::core::Database::OpenMode::ReadOnly);
+		isTrue(db2.opened());
+
+		::core::Database db3("aaaaaaaaaaaaaaaaaaaaa", ::core::Database::OpenMode::ReadOnly);
+		isFalse(db3.opened());
+
+		equal(std::remove("./tests/test.db"), 0);
+	}
+
+	void invalidStmt() {
+		{
+			::core::Database db("./tests/test.db");
+			isTrue(db.opened());
+			::core::Statement stmt(db, "INVALID STATEMENT");
+			isFalse(stmt.valid());
+		}
+
+		equal(std::remove("./tests/test.db"), 0);
+	}
+
+	void timeConnectDb() {
+		::core::Database db("./tests/test.db");
+	}
+
 	void runTests() {
+		openDb();
+		invalidStmt();
+
+		std::cout << "Timing connecting to a database" << std::endl;
+		time(&timeConnectDb, 25);
+		std::remove("./tests/test.db");
 	}
 }}

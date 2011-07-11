@@ -13,9 +13,13 @@ SYSTEM_INCLUDES += /usr/include/gstreamer-0.10 /usr/include/glib-2.0 /usr/lib/gl
 DIRECTORIES += source/media/gstreamer
 LIBRARIES += gstreamer-0.10
 
+# SQLite specifics
+DIRECTORIES += source/core/sqlite
+LIBRARIES += sqlite3
+
 CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUDE)) \
 	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE))
-CXXFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x
+CXXFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x -O3
 LOADLIBES = $(foreach LIBRARY, $(LIBRARIES), -l$(LIBRARY))
 
 SOURCES = $(wildcard $(patsubst %, %/*.cpp, $(DIRECTORIES)))

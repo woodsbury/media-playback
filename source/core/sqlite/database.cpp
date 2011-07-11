@@ -15,10 +15,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <debug.hpp>
 #include <core/database.hpp>
 
 extern "C" {
-#include <sqlite.h>
+#include <sqlite3.h>
 }
 
 namespace sqlite {
@@ -50,33 +51,43 @@ namespace sqlite {
 		}
 	};
 
-	int Initialiser::counter_(0);
+	unsigned int Initialiser::counter_(0);
 }
 
 namespace core {
+// Database connection
 	class DatabasePrivate
 		: sqlite::Initialiser {
 		sqlite3 * db_;
+		bool opened_;
 
 	public:
 		DatabasePrivate(char const * location, int flags) {
-			sqlite3_open_v2(location, &db_, flags, NULL);
+			opened_ = sqlite3_open_v2(location, &db_, flags, NULL) == SQLITE_OK;
 		}
 
 		~DatabasePrivate() {
 			sqlite3_close(db_);
 		}
+
+		bool opened() const {
+			return opened_;
+		}
+
+		sqlite3 * connection() {
+			return db_;
+		}
 	};
 
 	Database::Database(std::string location, OpenMode mode) {
-		int flags;
+		int flags = 0;
 
 		switch (mode) {
 			case OpenMode::ReadOnly:
 				flags = SQLITE_OPEN_READONLY;
 				break;
-			case OpenMode::ReadWrite:`
-				flags = SQLITE_OPEN_READWRITE;
+			case OpenMode::ReadWrite:
+				flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 				break;
 		};
 
@@ -85,5 +96,39 @@ namespace core {
 
 	Database::~Database() {
 		delete p;
+	}
+
+	bool Database::opened() const {
+		return p->opened();
+	}
+
+// Prepared statement
+	class StatementPrivate {
+		sqlite3_stmt * stmt_;
+		bool valid_;
+
+	public:
+		StatementPrivate(Database & db, char const * statement) {
+			valid_ = sqlite3_prepare_v2(db.p->connection(), statement, -1, &stmt_, NULL) == SQLITE_OK;
+		}
+
+		~StatementPrivate() {
+			sqlite3_finalize(stmt_);
+		}
+
+		bool valid() const {
+			return valid_;
+		}
+	};
+
+	Statement::Statement(Database & db, std::string statement)
+		: p(new StatementPrivate(db, statement.c_str())) {}
+
+	Statement::~Statement() {
+		delete p;
+	}
+
+	bool Statement::valid() const {
+		return p->valid();
 	}
 }
