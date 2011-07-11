@@ -83,6 +83,6 @@ namespace test { namespace media {
 		convertHttp();
 
 		std::cout << "Timing loading a file for playback" << std::endl;
-		time(&timeFilePlay, 50);
+		time(&timeFilePlay, 25);
 	}
 }}

@@ -16,7 +16,7 @@
 */
 
 #include <debug.hpp>
-#include <media.hpp>
+#include <media/elements.hpp>
 
 extern "C" {
 #include <gst/gst.h>

@@ -15,10 +15,29 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CORE_HPP
-#define _CORE_HPP
+#ifndef _CORE_DATABASE_HPP
+#define _CORE_DATABASE_HPP
 
-#include "core/database.hpp"
-#include "core/noncopiable.hpp"
+#include <string>
+
+namespace core {
+	class DatabasePrivate;
+
+/*
+	Creates a connection to a database
+*/
+	class Database {
+		DatabasePrivate * p;
+
+	public:
+		enum class OpenMode {
+			ReadOnly,
+			ReadWrite
+		};
+
+		Database(std::string location, OpenMode mode = OpenMode::ReadWrite);
+		~Database();
+	};
+}
 
 #endif

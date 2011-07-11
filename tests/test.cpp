@@ -144,11 +144,16 @@ namespace {
 	}
 }
 
+#include "coretests.hpp"
 #include "mediatests.hpp"
 
 int main(int, char **) {
 	std::cout << "Programme Name: " << NAME << std::endl;
 	std::cout << "Programme Version: " << VERSION << std::endl;
+
+	std::cout << "\nRunning core tests" << std::endl;
+	test::core::runTests();
+	printResults();
 
 	std::cout << "\nRunning media tests" << std::endl;
 	test::media::runTests();

@@ -15,10 +15,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CORE_HPP
-#define _CORE_HPP
+#include <core.hpp>
 
-#include "core/database.hpp"
-#include "core/noncopiable.hpp"
-
-#endif
+namespace test { namespace core {
+	void runTests() {
+	}
+}}
