@@ -55,6 +55,10 @@ namespace core {
 		~Statement();
 
 		bool valid() const;
+
+		bool execute() const;
+		bool hasData() const;
+		void reset() const;
 	};
 }
 

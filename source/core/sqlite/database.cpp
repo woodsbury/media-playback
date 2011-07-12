@@ -21,6 +21,7 @@
 
 extern "C" {
 #include <sqlite3.h>
+#include <unistd.h>
 }
 
 namespace sqlite {
@@ -83,6 +84,7 @@ namespace core {
 
 		sqlite3_stmt * stmt_;
 		bool valid_;
+		bool has_data_;
 
 		DatabasePrivate * const db_;
 
@@ -91,6 +93,10 @@ namespace core {
 		~StatementPrivate();
 
 		bool valid() const;
+
+		bool execute();
+		bool hasData() const;
+		void reset();
 	};
 
 // Database connection
@@ -161,7 +167,7 @@ namespace core {
 
 // Prepared statement
 	StatementPrivate::StatementPrivate(Database & db, char const * statement)
-		: db_(db.p) {
+		: has_data_(false), db_(db.p) {
 		valid_ = sqlite3_prepare_v2(db_->connection(), statement, -1, &stmt_, NULL) == SQLITE_OK;
 
 		if (valid_) {
@@ -183,6 +189,52 @@ namespace core {
 		return valid_;
 	}
 
+/*
+	Executes the prepared statement
+*/
+	bool StatementPrivate::execute() {
+		if (valid_) {
+			int loop_count = 5;
+
+			do {
+				switch (sqlite3_step(stmt_)) {
+					case SQLITE_BUSY:
+						// Couldn't get lock on database, wait and try again
+						--loop_count;
+						usleep(3);
+						break;
+					case SQLITE_DONE:
+						// The statement executed but didn't return any rows
+						return true;
+					case SQLITE_ROW:
+						// The statement executed and has row database
+						has_data_ = true;
+						return true;
+					default:
+						// An error of some kind occurred
+						return false;
+				}
+			} while (loop_count > 0);
+		}
+
+		return false;
+	}
+
+/*
+	Indicates whether the statement has data available
+*/
+	bool StatementPrivate::hasData() const {
+		return has_data_;
+	}
+
+/*
+	Resets the statement ignoring any remaining rows that could be returned
+*/
+	void StatementPrivate::reset() {
+		has_data_ = false;
+		sqlite3_reset(stmt_);
+	}
+
 	Statement::Statement(Database & db, std::string statement)
 		: p(new StatementPrivate(db, statement.c_str())) {}
 
@@ -192,5 +244,17 @@ namespace core {
 
 	bool Statement::valid() const {
 		return p->valid();
+	}
+
+	bool Statement::execute() const {
+		return p->execute();
+	}
+
+	bool Statement::hasData() const {
+		return p->hasData();
+	}
+
+	void Statement::reset() const {
+		p->reset();
 	}
 }

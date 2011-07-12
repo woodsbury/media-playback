@@ -58,6 +58,23 @@ namespace test { namespace core {
 		equal(std::remove("./tests/test.db"), 0);
 	}
 
+	void stmtHasData() {
+		{
+			::core::Database db("./tests/test.db");
+			isTrue(db.opened());
+			::core::Statement stmt(db, "SELECT 1");
+			isTrue(stmt.valid());
+			isFalse(stmt.hasData());
+			isTrue(stmt.execute());
+			isTrue(stmt.hasData());
+			stmt.reset();
+			isFalse(stmt.hasData());
+			isTrue(stmt.execute());
+		}
+
+		equal(std::remove("./tests/test.db"), 0);
+	}
+
 	void timeConnectDb() {
 		::core::Database db("./tests/test.db");
 	}
@@ -67,6 +84,7 @@ namespace test { namespace core {
 		openDb();
 		invalidStmt();
 		destroyDbBeforeStmt();
+		stmtHasData();
 
 		std::cout << "Timing connecting to a database" << std::endl;
 		time(&timeConnectDb, 25);

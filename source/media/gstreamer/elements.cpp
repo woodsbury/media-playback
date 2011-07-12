@@ -85,7 +85,7 @@ namespace media {
 	}
 
 // Sink base class
-	SinkPrivate() {
+	SinkPrivate::SinkPrivate() {
 		pipeline_ = gst_pipeline_new(NULL);
 
 		GstBus * bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));
@@ -94,7 +94,7 @@ namespace media {
 		gst_object_unref(bus);
 	}
 
-	virtual ~SinkPrivate() {
+	SinkPrivate::~SinkPrivate() {
 		gst_element_set_state(pipeline_, GST_STATE_NULL);
 		gst_object_unref(pipeline_);
 	}
@@ -102,7 +102,7 @@ namespace media {
 /*
 	Configure this sink to play from the given source
 */
-	void connect(Source const & source) {
+	void SinkPrivate::connect(Source const & source) {
 		GstElement * source_element = source.p->createElement();
 		gst_bin_add(GST_BIN(pipeline_), source_element);
 		gst_element_sync_state_with_parent(source_element);
@@ -113,7 +113,7 @@ namespace media {
 /*
 	Called when the sink has reached the end of the stream
 */
-	void eosReached() {
+	void SinkPrivate::eosReached() {
 		gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 		gst_element_seek(pipeline_, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, GST_SEEK_TYPE_SET, 0,
 			GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
@@ -123,7 +123,7 @@ namespace media {
 /*
 	Start playing back pipeline
 */
-	bool play() {
+	bool SinkPrivate::play() {
 		gst_element_set_state(pipeline_, GST_STATE_PLAYING);
 		return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 	}
@@ -131,7 +131,7 @@ namespace media {
 /*
 	Stop playing back pipeline
 */
-	bool pause() {
+	bool SinkPrivate::pause() {
 		gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 		return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 	}
