@@ -18,6 +18,7 @@
 #include <core.hpp>
 
 namespace test { namespace core {
+// Database tests
 	void openDb() {
 		{
 			::core::Database db("./tests/test.db");
@@ -44,13 +45,28 @@ namespace test { namespace core {
 		equal(std::remove("./tests/test.db"), 0);
 	}
 
+	void destroyDbBeforeStmt() {
+		::core::Database * db = new ::core::Database("./tests/test.db");
+		isTrue(db->opened());
+		::core::Statement * stmt = new ::core::Statement(*db, "SELECT 1");
+		isTrue(stmt->valid());
+
+		delete db;
+		isFalse(stmt->valid());
+		delete stmt;
+
+		equal(std::remove("./tests/test.db"), 0);
+	}
+
 	void timeConnectDb() {
 		::core::Database db("./tests/test.db");
 	}
 
 	void runTests() {
+		// Database tests
 		openDb();
 		invalidStmt();
+		destroyDbBeforeStmt();
 
 		std::cout << "Timing connecting to a database" << std::endl;
 		time(&timeConnectDb, 25);

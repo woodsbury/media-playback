@@ -15,6 +15,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <set>
 #include <debug.hpp>
 #include <core/database.hpp>
 
@@ -55,29 +56,85 @@ namespace sqlite {
 }
 
 namespace core {
-// Database connection
+// Private class declarations
 	class DatabasePrivate
 		: sqlite::Initialiser {
 		sqlite3 * db_;
 		bool opened_;
 
+		std::set< StatementPrivate * > statements_;
+
 	public:
-		DatabasePrivate(char const * location, int flags) {
-			opened_ = sqlite3_open_v2(location, &db_, flags, NULL) == SQLITE_OK;
-		}
+		DatabasePrivate(char const * location, int flags);
+		~DatabasePrivate();
 
-		~DatabasePrivate() {
-			sqlite3_close(db_);
-		}
+		bool opened() const;
 
-		bool opened() const {
-			return opened_;
-		}
+		sqlite3 * connection();
 
-		sqlite3 * connection() {
-			return db_;
-		}
+		void addStatement(StatementPrivate * const statement);
+
+		void removeStatement(StatementPrivate * const statement);
 	};
+
+	class StatementPrivate
+		: sqlite::Initialiser {
+		friend class DatabasePrivate;
+
+		sqlite3_stmt * stmt_;
+		bool valid_;
+
+		DatabasePrivate * const db_;
+
+	public:
+		StatementPrivate(Database & db, char const * statement);
+		~StatementPrivate();
+
+		bool valid() const;
+	};
+
+// Database connection
+	DatabasePrivate::DatabasePrivate(char const * location, int flags) {
+		opened_ = sqlite3_open_v2(location, &db_, flags, NULL) == SQLITE_OK;
+	}
+
+	DatabasePrivate::~DatabasePrivate() {
+		// Finalise all statements that still exist
+		for (std::set< StatementPrivate * >::iterator i = statements_.begin(); i != statements_.end(); ++i) {
+			(*i)->valid_ = false;
+			sqlite3_finalize((*i)->stmt_);
+		}
+
+		sqlite3_close(db_);
+	}
+
+/*
+	Indicates whether the database was opened successfully
+*/
+	bool DatabasePrivate::opened() const {
+		return opened_;
+	}
+
+/*
+	Returns the SQLite connection
+*/
+	sqlite3 * DatabasePrivate::connection() {
+		return db_;
+	}
+
+/*
+	Called when a new statement has been created on this connection
+*/
+	void DatabasePrivate::addStatement(StatementPrivate * const statement) {
+		statements_.insert(statement);
+	}
+
+/*
+	Called when a statement on this connection is destroyed
+*/
+	void DatabasePrivate::removeStatement(StatementPrivate * const statement) {
+		statements_.erase(statement);
+	}
 
 	Database::Database(std::string location, OpenMode mode) {
 		int flags = 0;
@@ -103,23 +160,28 @@ namespace core {
 	}
 
 // Prepared statement
-	class StatementPrivate {
-		sqlite3_stmt * stmt_;
-		bool valid_;
+	StatementPrivate::StatementPrivate(Database & db, char const * statement)
+		: db_(db.p) {
+		valid_ = sqlite3_prepare_v2(db_->connection(), statement, -1, &stmt_, NULL) == SQLITE_OK;
 
-	public:
-		StatementPrivate(Database & db, char const * statement) {
-			valid_ = sqlite3_prepare_v2(db.p->connection(), statement, -1, &stmt_, NULL) == SQLITE_OK;
+		if (valid_) {
+			db_->addStatement(this);
 		}
+	}
 
-		~StatementPrivate() {
+	StatementPrivate::~StatementPrivate() {
+		if (valid_) {
+			db_->removeStatement(this);
 			sqlite3_finalize(stmt_);
 		}
+	}
 
-		bool valid() const {
-			return valid_;
-		}
-	};
+/*
+	Indicates whether the statement was prepared successfully
+*/
+	bool StatementPrivate::valid() const {
+		return valid_;
+	}
 
 	Statement::Statement(Database & db, std::string statement)
 		: p(new StatementPrivate(db, statement.c_str())) {}

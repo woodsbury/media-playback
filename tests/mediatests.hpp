@@ -23,6 +23,7 @@ extern "C" {
 }
 
 namespace test { namespace media {
+// Media element tests
 	void playFile() {
 		::media::FileSource file("./tests/test.ogg");
 		::media::PlaySink play(file);
@@ -77,6 +78,7 @@ namespace test { namespace media {
 	}
 
 	void runTests() {
+		// Media element tests
 		playFile();
 		fileNonExist();
 		playHttp();
