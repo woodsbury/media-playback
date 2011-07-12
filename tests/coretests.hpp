@@ -70,6 +70,8 @@ namespace test { namespace core {
 			stmt.reset();
 			isFalse(stmt.hasData());
 			isTrue(stmt.execute());
+			isTrue(stmt.nextRow());
+			isFalse(stmt.hasData());
 		}
 
 		equal(std::remove("./tests/test.db"), 0);

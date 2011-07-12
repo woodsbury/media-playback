@@ -200,11 +200,13 @@ namespace core {
 				switch (sqlite3_step(stmt_)) {
 					case SQLITE_BUSY:
 						// Couldn't get lock on database, wait and try again
+						has_data_ = false;
 						--loop_count;
 						usleep(3);
 						break;
 					case SQLITE_DONE:
 						// The statement executed but didn't return any rows
+						has_data_ = false;
 						return true;
 					case SQLITE_ROW:
 						// The statement executed and has row database
@@ -212,6 +214,7 @@ namespace core {
 						return true;
 					default:
 						// An error of some kind occurred
+						has_data_ = false;
 						return false;
 				}
 			} while (loop_count > 0);
@@ -256,5 +259,9 @@ namespace core {
 
 	void Statement::reset() const {
 		p->reset();
+	}
+
+	bool Statement::nextRow() const {
+		return p->execute();
 	}
 }

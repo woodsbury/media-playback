@@ -19,6 +19,7 @@
 #define _CORE_DATABASE_HPP
 
 #include <string>
+#include <core/noncopiable.hpp>
 
 namespace core {
 	class DatabasePrivate;
@@ -27,7 +28,8 @@ namespace core {
 /*
 	Creates a connection to a database
 */
-	class Database {
+	class Database
+		: core::NonCopiable {
 		friend class StatementPrivate;
 
 		DatabasePrivate * p;
@@ -47,7 +49,8 @@ namespace core {
 /*
 	Represents a statement to execute on a database connection
 */
-	class Statement {
+	class Statement
+		: core::NonCopiable {
 		StatementPrivate * p;
 
 	public:
@@ -59,6 +62,8 @@ namespace core {
 		bool execute() const;
 		bool hasData() const;
 		void reset() const;
+
+		bool nextRow() const;
 	};
 }
 

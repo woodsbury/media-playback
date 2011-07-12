@@ -156,7 +156,7 @@ int main(int, char **) {
 	printResults();
 
 	std::cout << "\nRunning media tests" << std::endl;
-	//test::media::runTests();
+	test::media::runTests();
 	printResults();
 
 	return 0;

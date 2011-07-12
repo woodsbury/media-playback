@@ -50,8 +50,8 @@ namespace media {
 	public:
 		~Sink();
 
-		bool play();
-		bool pause();
+		bool play() const;
+		bool pause() const;
 	};
 
 /*

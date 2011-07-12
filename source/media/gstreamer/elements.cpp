@@ -71,10 +71,10 @@ namespace media {
 
 		void connect(Source const & source);
 
-		void eosReached();
+		void eosReached() const;
 
-		bool play();
-		bool pause();
+		bool play() const;
+		bool pause() const;
 	};
 
 // Source base class
@@ -113,7 +113,7 @@ namespace media {
 /*
 	Called when the sink has reached the end of the stream
 */
-	void SinkPrivate::eosReached() {
+	void SinkPrivate::eosReached() const {
 		gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 		gst_element_seek(pipeline_, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, GST_SEEK_TYPE_SET, 0,
 			GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
@@ -123,7 +123,7 @@ namespace media {
 /*
 	Start playing back pipeline
 */
-	bool SinkPrivate::play() {
+	bool SinkPrivate::play() const {
 		gst_element_set_state(pipeline_, GST_STATE_PLAYING);
 		return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 	}
@@ -131,7 +131,7 @@ namespace media {
 /*
 	Stop playing back pipeline
 */
-	bool SinkPrivate::pause() {
+	bool SinkPrivate::pause() const {
 		gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 		return gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE) != GST_STATE_CHANGE_FAILURE;
 	}
@@ -140,11 +140,11 @@ namespace media {
 		delete p;
 	}
 
-	bool Sink::play() {
+	bool Sink::play() const {
 		return p->play();
 	}
 
-	bool Sink::pause() {
+	bool Sink::pause() const {
 		return p->pause();
 	}
 
