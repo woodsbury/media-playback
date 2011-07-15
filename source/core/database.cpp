@@ -104,7 +104,13 @@ namespace core {
 		std::vector< unsigned char > toBinary(unsigned int column) const;
 		long long toInteger(unsigned int column) const;
 		double toReal(unsigned int column) const;
-		char const * toString(unsigned int column) const;
+		char const * toText(unsigned int column) const;
+
+		bool bind(unsigned int index) const;
+		bool bind(unsigned int index, unsigned char const * binary, unsigned long long size) const;
+		bool bind(unsigned int index, long long integer) const;
+		bool bind(unsigned int index, double real) const;
+		bool bind(unsigned int index, char const * text) const;
 	};
 
 // Database connection
@@ -268,7 +274,7 @@ namespace core {
 			case SQLITE_NULL:
 				return Statement::Type::Null;
 			case SQLITE_TEXT:
-				return Statement::Type::String;
+				return Statement::Type::Text;
 			default:
 				return Statement::Type::Null;
 		};
@@ -301,8 +307,44 @@ namespace core {
 /*
 	Return the value in column as a string
 */
-	char const * StatementPrivate::toString(unsigned int column) const {
+	char const * StatementPrivate::toText(unsigned int column) const {
 		return column < columns() ? reinterpret_cast< char const * >(sqlite3_column_text(stmt_, column)) : "";
+	}
+
+/*
+	Binds a null value to a parameter
+*/
+	bool StatementPrivate::bind(unsigned int index) const {
+		return sqlite3_bind_null(stmt_, index) == SQLITE_OK;
+	}
+
+/*
+	Binds a binary array to a parameter
+*/
+	bool StatementPrivate::bind(unsigned int index, unsigned char const * binary, unsigned long long size) const {
+		return sqlite3_bind_blob(stmt_, index, static_cast< void const * >(binary), size,
+				SQLITE_TRANSIENT) == SQLITE_OK;
+	}
+
+/*
+	Binds an integer to a parameter
+*/
+	bool StatementPrivate::bind(unsigned int index, long long integer) const {
+		return sqlite3_bind_int64(stmt_, index, integer) == SQLITE_OK;
+	}
+
+/*
+	Binds a floating point to a parameter
+*/
+	bool StatementPrivate::bind(unsigned int index, double real) const {
+		return sqlite3_bind_double(stmt_, index, real) == SQLITE_OK;
+	}
+
+/*
+	Binds a string to a parameter
+*/
+	bool StatementPrivate::bind(unsigned int index, char const * text) const {
+		return sqlite3_bind_text(stmt_, index, text, -1, SQLITE_TRANSIENT) == SQLITE_OK;
 	}
 
 // Public class
@@ -349,11 +391,36 @@ namespace core {
 		return p->toInteger(column);
 	}
 
-	std::string Statement::toString(unsigned int column) const {
-		return p->toString(column);
+	std::string Statement::toText(unsigned int column) const {
+		return p->toText(column);
 	}
 
 	double Statement::toReal(unsigned int column) const {
 		return p->toReal(column);
+	}
+
+	bool Statement::bind(unsigned int index) const {
+		p->reset();
+		return p->bind(index);
+	}
+
+	bool Statement::bind(unsigned int index, std::vector< unsigned char > binary) const {
+		p->reset();
+		return p->bind(index, &(binary[0]), binary.size());
+	}
+
+	bool Statement::bind(unsigned int index, long long integer) const {
+		p->reset();
+		return p->bind(index, integer);
+	}
+
+	bool Statement::bind(unsigned int index, double real) const {
+		p->reset();
+		return p->bind(index, real);
+	}
+
+	bool Statement::bind(unsigned int index, std::string text) const {
+		p->reset();
+		return p->bind(index, text.c_str());
 	}
 }

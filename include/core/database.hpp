@@ -60,7 +60,7 @@ namespace core {
 			Binary,
 			Integer,
 			Real,
-			String
+			Text
 		};
 
 		Statement(Database & db, std::string statement);
@@ -78,9 +78,15 @@ namespace core {
 		std::vector< unsigned char > toBinary(unsigned int column) const;
 		long long toInteger(unsigned int column) const;
 		double toReal(unsigned int column) const;
-		std::string toString(unsigned int column) const;
+		std::string toText(unsigned int column) const;
 
 		bool nextRow() const;
+
+		bool bind(unsigned int index) const;
+		bool bind(unsigned int index, std::vector< unsigned char > binary) const;
+		bool bind(unsigned int index, long long integer) const;
+		bool bind(unsigned int index, double real) const;
+		bool bind(unsigned int index, std::string text) const;
 	};
 }
 

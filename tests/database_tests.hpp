@@ -83,7 +83,7 @@ namespace test { namespace database {
 		equal(stmt.toBinary(0u)[0], '1');
 		equal(stmt.toInteger(0u), 1LL);
 		equal(stmt.toReal(0u), 1.0);
-		equal(stmt.toString(0u), "1");
+		equal(stmt.toText(0u), "1");
 		equal(stmt.toInteger(3u), 0LL);
 		isFalse(stmt.nextRow());
 		isFalse(stmt.hasData());
@@ -114,15 +114,61 @@ namespace test { namespace database {
 
 		equal(select.columns(), 2u);
 		equal(select.toInteger(0u), 1);
-		equal(select.toString(1u), "a");
+		equal(select.toText(1u), "a");
 
 		isTrue(select.nextRow());
 		isTrue(select.hasData());
 		equal(select.toInteger(0u), 2);
-		equal(select.toString(1u), "bb");
+		equal(select.toText(1u), "bb");
 
 		isFalse(select.nextRow());
 		isFalse(select.hasData());
+	}
+
+/*
+	Test for binding values
+*/
+	void bindValues() {
+		::core::Database db;
+		::core::Statement stmt(db, "SELECT ?");
+		isTrue(stmt.valid());
+
+		isTrue(stmt.execute());
+		isTrue(stmt.hasData());
+		equal(stmt.columns(), 1u);
+		equalN(stmt.dataType(0u), ::core::Statement::Type::Null);
+
+		stmt.reset();
+		isTrue(stmt.bind(1u, std::vector< unsigned char >(1, 'a')));
+		isTrue(stmt.execute());
+		isTrue(stmt.hasData());
+		equal(stmt.columns(), 1u);
+		equalN(stmt.dataType(0u), ::core::Statement::Type::Binary);
+		equal(stmt.toBinary(0u)[0], 'a');
+
+		stmt.reset();
+		isTrue(stmt.bind(1u, 3LL));
+		isTrue(stmt.execute());
+		isTrue(stmt.hasData());
+		equal(stmt.columns(), 1u);
+		equalN(stmt.dataType(0u), ::core::Statement::Type::Integer);
+		equal(stmt.toInteger(0u), 3LL);
+
+		stmt.reset();
+		isTrue(stmt.bind(1u, 3.2));
+		isTrue(stmt.execute());
+		isTrue(stmt.hasData());
+		equal(stmt.columns(), 1u);
+		equalN(stmt.dataType(0u), ::core::Statement::Type::Real);
+		equal(stmt.toReal(0u), 3.2, 0.0001);
+
+		stmt.reset();
+		isTrue(stmt.bind(1u, "abc"));
+		isTrue(stmt.execute());
+		isTrue(stmt.hasData());
+		equal(stmt.columns(), 1u);
+		equalN(stmt.dataType(0u), ::core::Statement::Type::Text);
+		equal(stmt.toText(0u), "abc");
 	}
 
 	void runTests() {
@@ -131,5 +177,6 @@ namespace test { namespace database {
 		destroyDbBeforeStmt();
 		stmtHasData();
 		insertData();
+		bindValues();
 	}
 }}
