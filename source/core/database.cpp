@@ -24,7 +24,7 @@ extern "C" {
 #include <unistd.h>
 }
 
-namespace sqlite {
+namespace { namespace sqlite {
 /*
 	Inheriting from this class will automatically initialise and shut down SQLite
 */
@@ -54,7 +54,7 @@ namespace sqlite {
 	};
 
 	unsigned int Initialiser::counter_(0);
-}
+}}
 
 namespace core {
 // Private class declarations
@@ -97,6 +97,14 @@ namespace core {
 		bool execute();
 		bool hasData() const;
 		void reset();
+
+		unsigned int columns() const;
+
+		Statement::Type dataType(unsigned int column) const;
+		std::vector< unsigned char > toBinary(unsigned int column) const;
+		long long toInteger(unsigned int column) const;
+		double toReal(unsigned int column) const;
+		char const * toString(unsigned int column) const;
 	};
 
 // Database connection
@@ -142,6 +150,7 @@ namespace core {
 		statements_.erase(statement);
 	}
 
+// Public class
 	Database::Database(std::string location, OpenMode mode) {
 		int flags = 0;
 
@@ -154,7 +163,7 @@ namespace core {
 				break;
 		};
 
-		p = new DatabasePrivate(location.c_str(), flags);
+		p = new DatabasePrivate(location.empty() ? ":memory:" : location.c_str(), flags);
 	}
 
 	Database::~Database() {
@@ -238,6 +247,65 @@ namespace core {
 		sqlite3_reset(stmt_);
 	}
 
+/*
+	Returns the number of columns of any current result set
+*/
+	unsigned int StatementPrivate::columns() const {
+		return sqlite3_data_count(stmt_);
+	}
+
+/*
+	Return the data type of a column
+*/
+	Statement::Type StatementPrivate::dataType(unsigned int column) const {
+		switch (sqlite3_column_type(stmt_, column)) {
+			case SQLITE_INTEGER:
+				return Statement::Type::Integer;
+			case SQLITE_FLOAT:
+				return Statement::Type::Real;
+			case SQLITE_BLOB:
+				return Statement::Type::Binary;
+			case SQLITE_NULL:
+				return Statement::Type::Null;
+			case SQLITE_TEXT:
+				return Statement::Type::String;
+			default:
+				return Statement::Type::Null;
+		};
+	}
+
+/*
+	Return the value as a binary array
+*/
+	std::vector< unsigned char > StatementPrivate::toBinary(unsigned int column) const {
+		unsigned char const * data = static_cast< unsigned char const * >(sqlite3_column_blob(stmt_, column));
+		int size = sqlite3_column_bytes(stmt_, column);
+		assert(size > 0);
+		return std::vector< unsigned char >(data, data + size);
+	}
+
+/*
+	Return the value in column as an integer
+*/
+	long long StatementPrivate::toInteger(unsigned int column) const {
+		return column < columns() ? sqlite3_column_int64(stmt_, column) : 0LL;
+	}
+
+/*
+	Return the value in column as floating point
+*/
+	double StatementPrivate::toReal(unsigned int column) const {
+		return column < columns() ? sqlite3_column_double(stmt_, column) : 0.0;
+	}
+
+/*
+	Return the value in column as a string
+*/
+	char const * StatementPrivate::toString(unsigned int column) const {
+		return column < columns() ? reinterpret_cast< char const * >(sqlite3_column_text(stmt_, column)) : "";
+	}
+
+// Public class
 	Statement::Statement(Database & db, std::string statement)
 		: p(new StatementPrivate(db, statement.c_str())) {}
 
@@ -262,6 +330,30 @@ namespace core {
 	}
 
 	bool Statement::nextRow() const {
-		return p->execute();
+		return p->execute() && p->hasData();
+	}
+
+	unsigned int Statement::columns() const {
+		return p->columns();
+	}
+
+	Statement::Type Statement::dataType(unsigned int column) const {
+		return p->dataType(column);
+	}
+
+	std::vector< unsigned char > Statement::toBinary(unsigned int column) const {
+		return p->toBinary(column);
+	}
+
+	long long Statement::toInteger(unsigned int column) const {
+		return p->toInteger(column);
+	}
+
+	std::string Statement::toString(unsigned int column) const {
+		return p->toString(column);
+	}
+
+	double Statement::toReal(unsigned int column) const {
+		return p->toReal(column);
 	}
 }

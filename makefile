@@ -4,18 +4,14 @@ VERSION = 0
 DEFINES = DEBUG NAME='"$(NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
 SYSTEM_INCLUDES =
-DIRECTORIES = source
+DIRECTORIES = source source/core
 TEST_DIRECTORIES = tests
-LIBRARIES =
+LIBRARIES = sqlite3
 
 # GStreamer specifics
 SYSTEM_INCLUDES += /usr/include/gstreamer-0.10 /usr/include/glib-2.0 /usr/lib/glib-2.0/include /usr/include/libxml2
 DIRECTORIES += source/media/gstreamer
 LIBRARIES += gstreamer-0.10
-
-# SQLite specifics
-DIRECTORIES += source/core/sqlite
-LIBRARIES += sqlite3
 
 CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUDE)) \
 	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE))

@@ -19,6 +19,7 @@
 #define _CORE_DATABASE_HPP
 
 #include <string>
+#include <vector>
 #include <core/noncopiable.hpp>
 
 namespace core {
@@ -29,7 +30,7 @@ namespace core {
 	Creates a connection to a database
 */
 	class Database
-		: core::NonCopiable {
+		: NonCopiable {
 		friend class StatementPrivate;
 
 		DatabasePrivate * p;
@@ -40,7 +41,7 @@ namespace core {
 			ReadWrite
 		};
 
-		Database(std::string location, OpenMode mode = OpenMode::ReadWrite);
+		Database(std::string location = std::string(), OpenMode mode = OpenMode::ReadWrite);
 		~Database();
 
 		bool opened() const;
@@ -50,10 +51,18 @@ namespace core {
 	Represents a statement to execute on a database connection
 */
 	class Statement
-		: core::NonCopiable {
+		: NonCopiable {
 		StatementPrivate * p;
 
 	public:
+		enum class Type {
+			Null,
+			Binary,
+			Integer,
+			Real,
+			String
+		};
+
 		Statement(Database & db, std::string statement);
 		~Statement();
 
@@ -62,6 +71,14 @@ namespace core {
 		bool execute() const;
 		bool hasData() const;
 		void reset() const;
+
+		unsigned int columns() const;
+
+		Type dataType(unsigned int column) const;
+		std::vector< unsigned char > toBinary(unsigned int column) const;
+		long long toInteger(unsigned int column) const;
+		double toReal(unsigned int column) const;
+		std::string toString(unsigned int column) const;
 
 		bool nextRow() const;
 	};

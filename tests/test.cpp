@@ -16,22 +16,89 @@
 */
 
 #include <cmath>
+#include <iostream>
+#include <debug.hpp>
 
-#include "test.hpp"
+extern "C" {
+#include <sys/resource.h>
+}
 
 namespace test {
 	unsigned int tests_passed;
 	unsigned int tests_total;
 
+/*
+	A test has passed
+*/
 	void pass() {
 		++tests_passed;
 		++tests_total;
 	}
 
+/*
+	A test has failed
+*/
 	void fail() {
 		++tests_total;
 	}
 
+/*
+	Test if the arguments are equal
+*/
+	template<typename Tx, typename Ty>
+	bool equal(Tx x, Ty y) {
+		if (x == y) {
+			pass();
+			return true;
+		} else {
+			std::cout << "Equal test failed" << std::endl;
+			std::cout << x << " is not equal to " << y << std::endl;
+			fail();
+			return false;
+		}
+	}
+	template<typename Tx, typename Ty>
+	bool equalN(Tx x, Ty y) {
+		if (x == y) {
+			pass();
+			return true;
+		} else {
+			std::cout << "Equal test failed" << std::endl;
+			fail();
+			return false;
+		}
+	}
+
+/*
+	Test if the arguments are not equal
+*/
+	template<typename Tx, typename Ty>
+	bool notEqual(Tx x, Ty y) {
+		if (x != y) {
+			pass();
+			return true;
+		} else {
+			std::cout << "Not equal test failed" << std::endl;
+			std::cout << x << " is equal to " << y << std::endl;
+			fail();
+			return false;
+		}
+	}
+	template<typename Tx, typename Ty>
+	bool notEqualN(Tx x, Ty y) {
+		if (x != y) {
+			pass();
+			return true;
+		} else {
+			std::cout << "Not equal test failed" << std::endl;
+			fail();
+			return false;
+		}
+	}
+
+/*
+	Test if the arguments are within an acceptable delta
+*/
 	bool equal(double x, double y, double delta) {
 		if (std::abs(x - y) < delta) {
 			pass();
@@ -44,6 +111,9 @@ namespace test {
 		}
 	}
 
+/*
+	Test if the arguments are outside an acceptable delta
+*/
 	bool notEqual(double x, double y, double delta) {
 		if (std::abs(x - y) > delta) {
 			pass();
@@ -56,6 +126,9 @@ namespace test {
 		}
 	}
 
+/*
+	Test if the expression is true
+*/
 	bool isTrue(bool x) {
 		if (x) {
 			pass();
@@ -67,6 +140,9 @@ namespace test {
 		}
 	}
 
+/*
+	Test if the expression is false
+*/
 	bool isFalse(bool x) {
 		if (x) {
 			std::cout << "False test failed" << std::endl;
@@ -78,6 +154,9 @@ namespace test {
 		}
 	}
 
+/*
+	Time how long a function takes to return, averaging over N times
+*/
 	void time(void (* function)(), int N) {
 		// Disable debug output to prevent filling the screen
 		dprint_enable(false);
@@ -144,19 +223,14 @@ namespace {
 	}
 }
 
-#include "coretests.hpp"
-#include "mediatests.hpp"
+#include "database_tests.hpp"
 
 int main(int, char **) {
 	std::cout << "Programme Name: " << NAME << std::endl;
 	std::cout << "Programme Version: " << VERSION << std::endl;
 
-	std::cout << "\nRunning core tests" << std::endl;
-	test::core::runTests();
-	printResults();
-
-	std::cout << "\nRunning media tests" << std::endl;
-	test::media::runTests();
+	std::cout << "\nRunning database tests" << std::endl;
+	test::database::runTests();
 	printResults();
 
 	return 0;
