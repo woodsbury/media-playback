@@ -108,6 +108,7 @@ namespace core {
 
 // Database connection
 	DatabasePrivate::DatabasePrivate(char const * location, int flags) {
+		dprint("Opening %s", location);
 		opened_ = sqlite3_open_v2(location, &db_, flags, NULL) == SQLITE_OK;
 	}
 

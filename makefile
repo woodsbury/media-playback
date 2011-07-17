@@ -4,7 +4,7 @@ VERSION = 0
 DEFINES = DEBUG NAME='"$(NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
 SYSTEM_INCLUDES =
-DIRECTORIES = source source/core
+DIRECTORIES = source source/core source/toolkit
 TEST_DIRECTORIES = tests
 LIBRARIES = sqlite3
 
