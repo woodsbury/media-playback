@@ -29,31 +29,24 @@ namespace { namespace sqlite {
 	Inheriting from this class will automatically initialise and shut down SQLite
 */
 	class Initialiser {
-		static unsigned int counter_;
-
-	public:
-		Initialiser() {
-			if (counter_ == 0) {
-				// SQLite is uninitialised
+		class private_initialiser {
+		public:
+			private_initialiser() {
 				dprint("Initialising SQLite");
 				sqlite3_initialize();
 			}
 
-			++counter_;
-		}
-
-		~Initialiser() {
-			--counter_;
-
-			if (counter_ == 0) {
-				// Last SQLite class destroyed
+			~private_initialiser() {
 				dprint("Shutting down SQLite");
 				sqlite3_shutdown();
 			}
+		};
+
+	public:
+		Initialiser() {
+			static private_initialiser initialiser;
 		}
 	};
-
-	unsigned int Initialiser::counter_(0);
 }}
 
 namespace core {
@@ -161,12 +154,12 @@ namespace core {
 		int flags = 0;
 
 		switch (mode) {
-			case OpenMode::ReadOnly:
-				flags = SQLITE_OPEN_READONLY;
-				break;
-			case OpenMode::ReadWrite:
-				flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
-				break;
+		case OpenMode::ReadOnly:
+			flags = SQLITE_OPEN_READONLY;
+			break;
+		case OpenMode::ReadWrite:
+			flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+			break;
 		};
 
 		p = new DatabasePrivate(location.empty() ? ":memory:" : location.c_str(), flags);
@@ -213,24 +206,24 @@ namespace core {
 
 			do {
 				switch (sqlite3_step(stmt_)) {
-					case SQLITE_BUSY:
-						// Couldn't get lock on database, wait and try again
-						has_data_ = false;
-						--loop_count;
-						usleep(3);
-						break;
-					case SQLITE_DONE:
-						// The statement executed but didn't return any rows
-						has_data_ = false;
-						return true;
-					case SQLITE_ROW:
-						// The statement executed and has row database
-						has_data_ = true;
-						return true;
-					default:
-						// An error of some kind occurred
-						has_data_ = false;
-						return false;
+				case SQLITE_BUSY:
+					// Couldn't get lock on database, wait and try again
+					has_data_ = false;
+					--loop_count;
+					usleep(3);
+					break;
+				case SQLITE_DONE:
+					// The statement executed but didn't return any rows
+					has_data_ = false;
+					return true;
+				case SQLITE_ROW:
+					// The statement executed and has row database
+					has_data_ = true;
+					return true;
+				default:
+					// An error of some kind occurred
+					has_data_ = false;
+					return false;
 				}
 			} while (loop_count > 0);
 		}
@@ -265,18 +258,18 @@ namespace core {
 */
 	Statement::Type StatementPrivate::dataType(unsigned int column) const {
 		switch (sqlite3_column_type(stmt_, column)) {
-			case SQLITE_INTEGER:
-				return Statement::Type::Integer;
-			case SQLITE_FLOAT:
-				return Statement::Type::Real;
-			case SQLITE_BLOB:
-				return Statement::Type::Binary;
-			case SQLITE_NULL:
-				return Statement::Type::Null;
-			case SQLITE_TEXT:
-				return Statement::Type::Text;
-			default:
-				return Statement::Type::Null;
+		case SQLITE_INTEGER:
+			return Statement::Type::Integer;
+		case SQLITE_FLOAT:
+			return Statement::Type::Real;
+		case SQLITE_BLOB:
+			return Statement::Type::Binary;
+		case SQLITE_NULL:
+			return Statement::Type::Null;
+		case SQLITE_TEXT:
+			return Statement::Type::Text;
+		default:
+			return Statement::Type::Null;
 		};
 	}
 

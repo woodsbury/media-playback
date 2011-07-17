@@ -32,8 +32,8 @@ void dprint(char const * format, ...);
 
 #else
 
-#define dprint_enable(x)
-#define dprint(...)
+#define dprint_enable(x) static_cast<void>(0)
+#define dprint(...) static_cast<void>(0)
 #define NDEBUG
 
 #endif

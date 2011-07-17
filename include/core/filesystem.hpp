@@ -15,11 +15,23 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CORE_HPP
-#define _CORE_HPP
+#ifndef _CORE_FILESYSTEM_HPP
+#define _CORE_FILESYSTEM_HPP
 
-#include "core/database.hpp"
-#include "core/filesystem.hpp"
-#include "core/noncopiable.hpp"
+#include <string>
+#include <vector>
+
+namespace core {
+	class Path {
+		std::vector< std::string > path_;
+
+	public:
+		Path(std::string path = std::string());
+
+		std::string toString() const;
+
+		static std::string home();
+	};
+}
 
 #endif
