@@ -39,6 +39,7 @@ namespace test { namespace filesystem {
 	}
 	void runTests() {
 		std::cout << "Detected home directory: " << ::core::Path::home() << std::endl;
+		std::cout << "Application data directory: " << ::core::Path::data() << std::endl;
 
 		strangePaths();
 	}

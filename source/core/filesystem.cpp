@@ -75,6 +75,13 @@ namespace core {
 	}
 
 /*
+	Returns the application's data directory for this user
+*/
+	std::string Path::data() {
+		return home() + "/." + NAME;
+	}
+
+/*
 	Returns the current user's home directory
 */
 	std::string Path::home() {

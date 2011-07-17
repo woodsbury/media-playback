@@ -30,6 +30,7 @@ namespace core {
 
 		std::string toString() const;
 
+		static std::string data();
 		static std::string home();
 	};
 }
