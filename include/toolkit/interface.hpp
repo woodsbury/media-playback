@@ -15,10 +15,22 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#ifndef _TOOLKIT_INTERFACE_HPP
+#define _TOOLKIT_INTERFACE_HPP
 
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+#include <core/noncopiable.hpp>
+
+namespace toolkit {
+	class InterfacePrivate;
+
+	class Interface
+		: core::NonCopiable {
+		InterfacePrivate * p;
+
+	public:
+		Interface();
+		~Interface();
+	};
+}
 
 #endif

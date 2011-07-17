@@ -15,10 +15,10 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#include <toolkit/interface.hpp>
 
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+int main(int, char **) {
+	toolkit::Interface interface;
 
-#endif
+	return 0;
+}
