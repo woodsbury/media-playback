@@ -17,8 +17,14 @@
 
 #include <toolkit/interface.hpp>
 
-int main(int, char **) {
+int main(int argc, char ** argv) {
 	toolkit::Interface interface;
+
+	if (argc > 1) {
+		interface.play(argv[1]);
+	}
+
+	interface.start();
 
 	return 0;
 }

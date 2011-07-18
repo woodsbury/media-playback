@@ -18,6 +18,7 @@
 #ifndef _TOOLKIT_INTERFACE_HPP
 #define _TOOLKIT_INTERFACE_HPP
 
+#include <string>
 #include <core/noncopiable.hpp>
 
 namespace toolkit {
@@ -30,6 +31,10 @@ namespace toolkit {
 	public:
 		Interface();
 		~Interface();
+
+		void play(std::string uri) const;
+
+		void start() const;
 	};
 }
 

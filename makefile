@@ -30,6 +30,8 @@ COMBINED_OBJECTS = $(filter-out source/main.o, $(OBJECTS)) $(TEST_OBJECTS)
 $(NAME): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(LOADLIBES) -o $@
 
+source/toolkit/interface.o: $(wildcard source/toolkit/interface/*.hpp)
+
 $(NAME)_test: $(COMBINED_OBJECTS)
 	$(CXX) $(LDFLAGS) $(COMBINED_OBJECTS) $(LOADLIBES) -o $@
 
