@@ -78,7 +78,7 @@ namespace toolkit {
 	public:
 		InterfacePrivate();
 
-		void play(char const * uri) const;
+		void play(char const * uri);
 
 		void showAndRun() const;
 	};
@@ -111,7 +111,7 @@ namespace toolkit {
 		g_signal_connect(stage, "motion-event", G_CALLBACK(fade_in), fade_state);
 	}
 
-	void InterfacePrivate::play(char const * uri) const {
+	void InterfacePrivate::play(char const * uri) {
 		clutter_media_set_uri(play_area_.media(), uri);
 		clutter_media_set_playing(play_area_.media(), TRUE);
 		media_buttons_.setPlaying(true);
