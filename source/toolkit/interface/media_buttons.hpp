@@ -29,33 +29,65 @@ namespace { namespace clutter {
 		if (clutter_event_get_button(event) == 1) {
 			// Left mouse button pressed
 			dprint("Play clicked");
-			ClutterMedia * media = reinterpret_cast< clutter::MediaButtons * >(data)->media();
+			ClutterMedia * media = reinterpret_cast< MediaButtons * >(data)->media();
 			gchar * uri = clutter_media_get_uri(media);
 
 			if (uri != NULL) {
 				gboolean playing = !clutter_media_get_playing(media);
 				clutter_media_set_playing(media, playing);
-				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(playing);
+				reinterpret_cast< MediaButtons * >(data)->setPlaying(playing);
 				g_free(uri);
 			} else {
 				dprint("No URI set");
-				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(false);
+				reinterpret_cast< MediaButtons * >(data)->setPlaying(false);
 			}
 		}
 
 		return TRUE;
 	}
 
+	static gboolean seek_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			// Left mouse button pressed
+			gfloat x_click;
+			clutter_event_get_coords(event, &x_click, NULL);
+
+			reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+		}
+
+		return TRUE;
+	}
+
+	static gboolean seek_motion(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if ((clutter_event_get_state(event) & CLUTTER_BUTTON1_MASK) != 0) {
+			gfloat x_click;
+			clutter_event_get_coords(event, &x_click, NULL);
+
+			reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+		}
+
+		return TRUE;
+	}
 
 	static gboolean update_seek(gpointer data) {
-		reinterpret_cast< clutter::MediaButtons * >(data)->updateSeek();
+		reinterpret_cast< MediaButtons * >(data)->updateSeek();
 		return TRUE;
+	}
+
+	void seek_by_position(gfloat x) {
+		gfloat x_line;
+		clutter_actor_get_transformed_position(line_, &x_line, NULL);
+		gfloat width_line = clutter_actor_get_width(line_);
+
+		gfloat progress = (x - x_line) / width_line;
+		clutter_media_set_progress(media_, progress);
+		updateSeek();
 	}
 
 	public:
 		MediaButtons(ClutterStage * stage, ClutterMedia * media)
 			: media_(media) {
-			ClutterColor white = {250, 250, 250, 200};
+			ClutterColor white = {250, 250, 250, 255};
 			ClutterColor black = {5, 5, 5, 200};
 
 			ClutterLayoutManager * layout = clutter_box_layout_new();
@@ -81,14 +113,17 @@ namespace { namespace clutter {
 			line_ = clutter_rectangle_new_with_color(&white);
 			clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(line_), &black);
 			clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(line_), 1);
-			clutter_actor_set_size(line_, 400.0f, 3.0f);
-			clutter_box_pack(CLUTTER_BOX(seek_box), line_, NULL, NULL);
+			clutter_actor_set_size(line_, 400.0f, 5.0f);
+			clutter_actor_set_reactive(line_, TRUE);
+			g_signal_connect(line_, "button-press-event", G_CALLBACK(seek_clicked), this);
+			g_signal_connect(line_, "motion-event", G_CALLBACK(seek_motion), this);
+			clutter_box_pack(CLUTTER_BOX(seek_box),line_, NULL, NULL);
 
 			// A seek handle
 			handle_ = clutter_rectangle_new_with_color(&white);
 			clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(handle_), &black);
 			clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(handle_), 1);
-			clutter_actor_set_size(handle_, 5.0f, 10.0f);
+			clutter_actor_set_size(handle_, 7.0f, 14.0f);
 			clutter_box_pack(CLUTTER_BOX(seek_box), handle_, NULL, NULL);
 
 			clutter_box_pack(CLUTTER_BOX(actor_), seek_box, NULL, NULL);
@@ -129,7 +164,7 @@ namespace { namespace clutter {
 				clutter_actor_set_width(line_, width * 0.80f);
 			}
 
-			clutter_actor_set_x(handle_, (clutter_actor_get_width(line_) - 6.0f) * clutter_media_get_progress(media_));
+			clutter_actor_set_x(handle_, (clutter_actor_get_width(line_) - 9.0f) * clutter_media_get_progress(media_));
 		}
 
 		ClutterMedia * media() {
