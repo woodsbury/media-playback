@@ -15,11 +15,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace {
-	gboolean media_buttons_play_clicked(ClutterActor * actor, ClutterEvent * event, gpointer data);
-	gboolean media_buttons_update_seek(gpointer data);
-}
-
 namespace { namespace clutter {
 	class MediaButtons {
 		ClutterActor * actor_;
@@ -29,6 +24,33 @@ namespace { namespace clutter {
 		ClutterActor * handle_;
 
 		ClutterMedia * media_;
+
+	static gboolean play_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			// Left mouse button pressed
+			dprint("Play clicked");
+			ClutterMedia * media = reinterpret_cast< clutter::MediaButtons * >(data)->media();
+			gchar * uri = clutter_media_get_uri(media);
+
+			if (uri != NULL) {
+				gboolean playing = !clutter_media_get_playing(media);
+				clutter_media_set_playing(media, playing);
+				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(playing);
+				g_free(uri);
+			} else {
+				dprint("No URI set");
+				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(false);
+			}
+		}
+
+		return TRUE;
+	}
+
+
+	static gboolean update_seek(gpointer data) {
+		reinterpret_cast< clutter::MediaButtons * >(data)->updateSeek();
+		return TRUE;
+	}
 
 	public:
 		MediaButtons(ClutterStage * stage, ClutterMedia * media)
@@ -47,7 +69,7 @@ namespace { namespace clutter {
 			// A play button actor
 			play_ = clutter_text_new_full("Sans 14px", "Play", &white);
 			clutter_actor_set_reactive(play_, TRUE);
-			g_signal_connect(play_, "button-press-event", G_CALLBACK(media_buttons_play_clicked), this);
+			g_signal_connect(play_, "button-press-event", G_CALLBACK(play_clicked), this);
 			clutter_box_pack(CLUTTER_BOX(actor_), play_, NULL, NULL);
 
 			// Seek widget actor
@@ -91,7 +113,7 @@ namespace { namespace clutter {
 			}
 
 			if (playing && (timeout_id == 0)) {
-				timeout_id = g_timeout_add(500, media_buttons_update_seek, this);
+				timeout_id = g_timeout_add(500, update_seek, this);
 			} else if (!playing && (timeout_id > 0)) {
 				g_source_remove(timeout_id);
 				timeout_id = 0;
@@ -115,33 +137,3 @@ namespace { namespace clutter {
 		}
 	};
 }}
-
-namespace {
-// Event callbacks
-	gboolean media_buttons_play_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
-		if (clutter_event_get_button(event) == 1) {
-			// Left mouse button pressed
-			dprint("Play clicked");
-			ClutterMedia * media = reinterpret_cast< clutter::MediaButtons * >(data)->media();
-			gchar * uri = clutter_media_get_uri(media);
-
-			if (uri != NULL) {
-				gboolean playing = !clutter_media_get_playing(media);
-				clutter_media_set_playing(media, playing);
-				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(playing);
-				g_free(uri);
-			} else {
-				dprint("No URI set");
-				reinterpret_cast< clutter::MediaButtons * >(data)->setPlaying(false);
-			}
-		}
-
-		return TRUE;
-	}
-
-// Timed functions
-	gboolean media_buttons_update_seek(gpointer data) {
-		reinterpret_cast< clutter::MediaButtons * >(data)->updateSeek();
-		return TRUE;
-	}
-}

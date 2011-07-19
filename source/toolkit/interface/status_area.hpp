@@ -15,9 +15,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace {
-// Event callbacks
-	gboolean status_area_fullscreen_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
+namespace { namespace clutter {
+	class StatusArea {
+		ClutterActor * actor_;
+
+		static gboolean fullscreen_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
 		if (clutter_event_get_button(event) == 1) {
 			// Left mouse button pressed
 			dprint("Fullscreen clicked");
@@ -27,7 +29,7 @@ namespace {
 		return TRUE;
 	}
 
-	gboolean status_area_quit_clicked(ClutterActor *, ClutterEvent * event, gpointer) {
+		static gboolean quit_clicked(ClutterActor *, ClutterEvent * event, gpointer) {
 		if (clutter_event_get_button(event) == 1) {
 			// Left mouse button pressed
 			dprint("Quit clicked");
@@ -36,11 +38,6 @@ namespace {
 
 		return TRUE;
 	}
-}
-
-namespace { namespace clutter {
-	class StatusArea {
-		ClutterActor * actor_;
 
 	public:
 		StatusArea(ClutterStage * stage) {
@@ -55,13 +52,13 @@ namespace { namespace clutter {
 			// A fullscreen button actor
 			ClutterActor * fullscreen = clutter_text_new_full("Sans 12px", "Fullscreen", &white);
 			clutter_actor_set_reactive(fullscreen, TRUE);
-			g_signal_connect(fullscreen, "button-press-event", G_CALLBACK(status_area_fullscreen_clicked), stage);
+			g_signal_connect(fullscreen, "button-press-event", G_CALLBACK(fullscreen_clicked), stage);
 			clutter_box_pack(CLUTTER_BOX(actor_), fullscreen, NULL, NULL);
 
 			// A quit button actor
 			ClutterActor * quit = clutter_text_new_full("Sans 12px", "Quit", &white);
 			clutter_actor_set_reactive(quit, TRUE);
-			g_signal_connect(quit, "button-press-event", G_CALLBACK(status_area_quit_clicked), NULL);
+			g_signal_connect(quit, "button-press-event", G_CALLBACK(quit_clicked), NULL);
 			clutter_box_pack(CLUTTER_BOX(actor_), quit, NULL, NULL);
 
 			clutter_container_add_actor(CLUTTER_CONTAINER(stage), actor_);
