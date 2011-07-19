@@ -74,6 +74,51 @@ namespace { namespace clutter {
 		return TRUE;
 	}
 
+	void draw_play_button(bool playing) {
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(play_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(play_));
+
+		if (playing) {
+			// Playing, draw pause button
+			cairo_move_to(context, 4.0, 3.0);
+			cairo_line_to(context, 4.0, 19.0);
+			cairo_line_to(context, 9.0, 19.0);
+			cairo_line_to(context, 9.0, 3.0);
+			cairo_close_path(context);
+
+			cairo_set_line_width(context, 1.0);
+			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+			cairo_fill_preserve(context);
+			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+			cairo_stroke(context);
+
+			cairo_move_to(context, 12.0, 3.0);
+			cairo_line_to(context, 12.0, 19.0);
+			cairo_line_to(context, 17.0, 19.0);
+			cairo_line_to(context, 17.0, 3.0);
+			cairo_close_path(context);
+
+			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+			cairo_fill_preserve(context);
+			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+			cairo_stroke(context);
+		} else {
+			// Not playing, draw play button
+			cairo_move_to(context, 2.0, 2.0);
+			cairo_line_to(context, 2.0, 20.0);
+			cairo_line_to(context, 18.0, 11.0);
+			cairo_close_path(context);
+
+			cairo_set_line_width(context, 1.0);
+			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+			cairo_fill_preserve(context);
+			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+			cairo_stroke(context);
+		}
+
+		cairo_destroy(context);
+	}
+
 	void seek_by_position(gfloat x) {
 		gfloat x_line;
 		clutter_actor_get_transformed_position(line_, &x_line, NULL);
@@ -91,15 +136,17 @@ namespace { namespace clutter {
 			ClutterColor black = {5, 5, 5, 200};
 
 			ClutterLayoutManager * layout = clutter_box_layout_new();
-			clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(layout), 7);
+			clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(layout), 15);
 			actor_ = clutter_box_new(layout);
 			clutter_actor_add_constraint(actor_, clutter_align_constraint_new(CLUTTER_ACTOR(stage),
 					CLUTTER_ALIGN_X_AXIS, 0.5));
 			clutter_actor_add_constraint(actor_, clutter_align_constraint_new(CLUTTER_ACTOR(stage),
-					CLUTTER_ALIGN_Y_AXIS, 0.99));
+					CLUTTER_ALIGN_Y_AXIS, 0.95));
 
 			// A play button actor
-			play_ = clutter_text_new_full("Sans 14px", "Play", &white);
+			//play_ = clutter_text_new_full("Sans 14px", "Play", &white);
+			play_ = clutter_cairo_texture_new(20, 22);
+			draw_play_button(false);
 			clutter_actor_set_reactive(play_, TRUE);
 			g_signal_connect(play_, "button-press-event", G_CALLBACK(play_clicked), this);
 			clutter_box_pack(CLUTTER_BOX(actor_), play_, NULL, NULL);
@@ -141,11 +188,7 @@ namespace { namespace clutter {
 		void setPlaying(bool playing) {
 			static guint timeout_id(0);
 
-			if (playing) {
-				clutter_text_set_text(CLUTTER_TEXT(play_), "Pause");
-			} else {
-				clutter_text_set_text(CLUTTER_TEXT(play_), "Play");
-			}
+			draw_play_button(playing);
 
 			if (playing && (timeout_id == 0)) {
 				timeout_id = g_timeout_add(500, update_seek, this);

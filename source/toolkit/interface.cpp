@@ -19,6 +19,7 @@
 #include <toolkit/interface.hpp>
 
 extern "C" {
+#include <cairo.h>
 #include <clutter-gst/clutter-gst.h>
 #include <glib.h>
 }
