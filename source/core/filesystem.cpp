@@ -20,40 +20,67 @@
 
 extern "C" {
 #include <pwd.h>
+#include <unistd.h>
 }
 
 namespace {
 	char const separator('/');
 	char const * current_dir = ".";
 	char const * parent_dir = "..";
-
-	void tokenise(std::vector< std::string > & tokens, std::string const input) {
-		tokens.clear();
-
-		std::string::size_type start_token = input.find_first_not_of(separator);
-		std::string::size_type end_token = input.find_first_of(separator, start_token);
-
-		while (start_token != input.npos) {
-			if (end_token == input.npos) {
-				end_token = input.length();
-			}
-
-			std::string token = input.substr(start_token, end_token - start_token);
-			if (token == parent_dir) {
-				tokens.pop_back();
-			} else if (token != current_dir) {
-				tokens.push_back(input.substr(start_token, end_token - start_token));
-			}
-
-			start_token = input.find_first_not_of(separator, end_token);
-			end_token = input.find_first_of(separator, start_token);
-		}
-	}
 }
 
 namespace core {
-	Path::Path(std::string path) {
-		tokenise(path_, path);
+	Path::Path(std::string const path) {
+		set(path);
+	}
+
+/*
+	Set the path to a new location
+*/
+	void Path::set(std::string const path) {
+		path_.clear();
+
+		if (path.empty()) {
+			absolute_ = true;
+			return;
+		} else if (path[0] == separator) {
+			absolute_ = true;
+		} else {
+			absolute_ = false;
+		}
+
+		std::string::size_type start_token = path.find_first_not_of(separator);
+		std::string::size_type end_token = path.find_first_of(separator, start_token);
+
+		while (start_token != path.npos) {
+			if (end_token == path.npos) {
+				end_token = path.length();
+			}
+
+			std::string token = path.substr(start_token, end_token - start_token);
+			if (token == parent_dir) {
+				path_.pop_back();
+			} else if (token != current_dir) {
+				path_.push_back(path.substr(start_token, end_token - start_token));
+			}
+
+			start_token = path.find_first_not_of(separator, end_token);
+			end_token = path.find_first_of(separator, start_token);
+		}
+	}
+
+/*
+	Check if the path is absolute or relative
+*/
+	bool Path::absolute() const {
+		return absolute_;
+	}
+
+/*
+	Check if the path exists
+*/
+	bool Path::exists() const {
+		return exists(toString());
 	}
 
 /*
@@ -62,13 +89,20 @@ namespace core {
 	std::string Path::toString() const {
 		std::string result;
 
-		for (std::vector< std::string >::const_iterator i = path_.begin(); i != path_.end(); ++i) {
+		if (absolute_) {
 			result.push_back(separator);
-			result.append(*i);
 		}
 
-		if (result.empty()) {
+		std::vector< std::string >::const_iterator i = path_.begin();
+
+		if (i != path_.end()) {
+			result.append(*i);
+			++i;
+		}
+
+		for (; i != path_.end(); ++i) {
 			result.push_back(separator);
+			result.append(*i);
 		}
 
 		return result;
@@ -92,5 +126,12 @@ namespace core {
 
 		passwd * home_pwd = getpwuid(getuid());
 		return std::string(home_pwd->pw_dir);
+	}
+
+/*
+	Check if the given path exists
+*/
+	bool Path::exists(std::string const path) {
+		return access(path.c_str(), F_OK) == 0;
 	}
 }

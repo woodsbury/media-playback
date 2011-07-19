@@ -24,14 +24,22 @@
 namespace core {
 	class Path {
 		std::vector< std::string > path_;
+		bool absolute_;
 
 	public:
-		Path(std::string path = std::string());
+		Path(std::string const path = std::string());
+
+		void set(std::string const path = std::string());
+
+		bool absolute() const;
+		bool exists() const;
 
 		std::string toString() const;
 
 		static std::string data();
 		static std::string home();
+
+		static bool exists(std::string const path);
 	};
 }
 
