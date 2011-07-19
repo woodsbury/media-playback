@@ -16,8 +16,6 @@
 */
 
 namespace {
-	gfloat const seek_line_width(470.0f);
-
 	gboolean media_buttons_play_clicked(ClutterActor * actor, ClutterEvent * event, gpointer data);
 	gboolean media_buttons_update_seek(gpointer data);
 }
@@ -27,6 +25,7 @@ namespace { namespace clutter {
 		ClutterActor * actor_;
 
 		ClutterActor * play_;
+		ClutterActor * line_;
 		ClutterActor * handle_;
 
 		ClutterMedia * media_;
@@ -57,11 +56,11 @@ namespace { namespace clutter {
 			ClutterActor * seek_box = clutter_box_new(seek_layout);
 
 			// A seek line
-			ClutterActor * seek_line = clutter_rectangle_new_with_color(&white);
-			clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(seek_line), &black);
-			clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(seek_line), 1);
-			clutter_actor_set_size(seek_line, seek_line_width, 3.0f);
-			clutter_box_pack(CLUTTER_BOX(seek_box), seek_line, NULL, NULL);
+			line_ = clutter_rectangle_new_with_color(&white);
+			clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(line_), &black);
+			clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(line_), 1);
+			clutter_actor_set_size(line_, 400.0f, 3.0f);
+			clutter_box_pack(CLUTTER_BOX(seek_box), line_, NULL, NULL);
 
 			// A seek handle
 			handle_ = clutter_rectangle_new_with_color(&white);
@@ -102,8 +101,13 @@ namespace { namespace clutter {
 /*
 		Updates the seek handle position
 */
-		void updateSeek() const {
-			clutter_actor_set_x(handle_, seek_line_width * clutter_media_get_progress(media_) - 6.0f);
+		void updateSeek(gfloat width = 0.0f) const {
+			if (width != 0.0f) {
+				// Update width of seek line
+				clutter_actor_set_width(line_, width * 0.80f);
+			}
+
+			clutter_actor_set_x(handle_, (clutter_actor_get_width(line_) - 6.0f) * clutter_media_get_progress(media_));
 		}
 
 		ClutterMedia * media() {

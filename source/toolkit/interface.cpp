@@ -27,26 +27,6 @@ extern "C" {
 #include "interface/play_area.hpp"
 #include "interface/status_area.hpp"
 
-namespace {
-// Event callbacks
-	gboolean fade_out(gpointer data) {
-		clutter_state_set_state(CLUTTER_STATE(data), "fade-out");
-		return FALSE;
-	}
-
-	gboolean fade_in(ClutterActor *, ClutterEvent *, gpointer data) {
-		static guint timeout_id(0);
-
-		if (timeout_id > 0) {
-			g_source_remove(timeout_id);
-		}
-
-		clutter_state_set_state(CLUTTER_STATE(data), "fade-in");
-		timeout_id = g_timeout_add_seconds(2, fade_out, data);
-		return TRUE;
-	}
-}
-
 namespace { namespace clutter {
 	class Initialiser {
 		static bool initialised_;
@@ -75,6 +55,11 @@ namespace toolkit {
 		clutter::MediaButtons media_buttons_;
 		clutter::StatusArea status_area_;
 
+		static gboolean fade_in(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean fade_out(gpointer data);
+
+		static void width_changed(GObject * object, GParamSpec * param, gpointer data);
+
 	public:
 		InterfacePrivate();
 
@@ -82,6 +67,27 @@ namespace toolkit {
 
 		void showAndRun() const;
 	};
+
+	gboolean InterfacePrivate::fade_in(ClutterActor *, ClutterEvent *, gpointer data) {
+		static guint timeout_id(0);
+
+		if (timeout_id > 0) {
+			g_source_remove(timeout_id);
+		}
+
+		clutter_state_set_state(CLUTTER_STATE(data), "fade-in");
+		timeout_id = g_timeout_add_seconds(2, fade_out, data);
+		return TRUE;
+	}
+
+	gboolean InterfacePrivate::fade_out(gpointer data) {
+		clutter_state_set_state(CLUTTER_STATE(data), "fade-out");
+		return FALSE;
+	}
+
+	void InterfacePrivate::width_changed(GObject * object, GParamSpec *, gpointer data) {
+		reinterpret_cast< clutter::MediaButtons * >(data)->updateSeek(clutter_actor_get_width(CLUTTER_ACTOR(object)));
+	}
 
 	InterfacePrivate::InterfacePrivate()
 		: play_area_(clutter::default_stage()),
@@ -109,6 +115,8 @@ namespace toolkit {
 		clutter_state_warp_to_state(fade_state, "fade-in");
 
 		g_signal_connect(stage, "motion-event", G_CALLBACK(fade_in), fade_state);
+
+		g_signal_connect(stage, "notify::width", G_CALLBACK(width_changed), &media_buttons_);
 	}
 
 	void InterfacePrivate::play(char const * uri) {
