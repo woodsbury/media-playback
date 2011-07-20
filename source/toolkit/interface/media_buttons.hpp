@@ -144,7 +144,6 @@ namespace { namespace clutter {
 					CLUTTER_ALIGN_Y_AXIS, 0.95));
 
 			// A play button actor
-			//play_ = clutter_text_new_full("Sans 14px", "Play", &white);
 			play_ = clutter_cairo_texture_new(20, 22);
 			draw_play_button(false);
 			clutter_actor_set_reactive(play_, TRUE);
