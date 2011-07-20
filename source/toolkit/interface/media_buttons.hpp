@@ -25,109 +25,114 @@ namespace { namespace clutter {
 
 		ClutterMedia * media_;
 
-	static gboolean play_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
-		if (clutter_event_get_button(event) == 1) {
-			// Left mouse button pressed
-			dprint("Play clicked");
-			ClutterMedia * media = reinterpret_cast< MediaButtons * >(data)->media();
-			gchar * uri = clutter_media_get_uri(media);
+		static void media_eos(ClutterMedia *, gpointer data) {
+			reinterpret_cast< MediaButtons * >(data)->setPlaying(false);
+			reinterpret_cast< MediaButtons * >(data)->updateSeek();
+		}
 
-			if (uri != NULL) {
-				gboolean playing = !clutter_media_get_playing(media);
-				clutter_media_set_playing(media, playing);
-				reinterpret_cast< MediaButtons * >(data)->setPlaying(playing);
-				g_free(uri);
-			} else {
-				dprint("No URI set");
-				reinterpret_cast< MediaButtons * >(data)->setPlaying(false);
+		static gboolean play_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
+			if (clutter_event_get_button(event) == 1) {
+				// Left mouse button pressed
+				dprint("Play clicked");
+				ClutterMedia * media = reinterpret_cast< MediaButtons * >(data)->media();
+				gchar * uri = clutter_media_get_uri(media);
+
+				if (uri != NULL) {
+					gboolean playing = !clutter_media_get_playing(media);
+					clutter_media_set_playing(media, playing);
+					reinterpret_cast< MediaButtons * >(data)->setPlaying(playing);
+					g_free(uri);
+				} else {
+					dprint("No URI set");
+					reinterpret_cast< MediaButtons * >(data)->setPlaying(false);
+				}
 			}
+
+			return TRUE;
 		}
 
-		return TRUE;
-	}
+		static gboolean seek_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
+			if (clutter_event_get_button(event) == 1) {
+				// Left mouse button pressed
+				gfloat x_click;
+				clutter_event_get_coords(event, &x_click, NULL);
 
-	static gboolean seek_clicked(ClutterActor *, ClutterEvent * event, gpointer data) {
-		if (clutter_event_get_button(event) == 1) {
-			// Left mouse button pressed
-			gfloat x_click;
-			clutter_event_get_coords(event, &x_click, NULL);
+				reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+			}
 
-			reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+			return TRUE;
 		}
 
-		return TRUE;
-	}
+		static gboolean seek_motion(ClutterActor *, ClutterEvent * event, gpointer data) {
+			if ((clutter_event_get_state(event) & CLUTTER_BUTTON1_MASK) != 0) {
+				gfloat x_click;
+				clutter_event_get_coords(event, &x_click, NULL);
 
-	static gboolean seek_motion(ClutterActor *, ClutterEvent * event, gpointer data) {
-		if ((clutter_event_get_state(event) & CLUTTER_BUTTON1_MASK) != 0) {
-			gfloat x_click;
-			clutter_event_get_coords(event, &x_click, NULL);
+				reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+			}
 
-			reinterpret_cast< MediaButtons * >(data)->seek_by_position(x_click);
+			return TRUE;
 		}
 
-		return TRUE;
-	}
-
-	static gboolean update_seek(gpointer data) {
-		reinterpret_cast< MediaButtons * >(data)->updateSeek();
-		return TRUE;
-	}
-
-	void draw_play_button(bool playing) {
-		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(play_));
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(play_));
-
-		if (playing) {
-			// Playing, draw pause button
-			cairo_move_to(context, 4.0, 3.0);
-			cairo_line_to(context, 4.0, 19.0);
-			cairo_line_to(context, 9.0, 19.0);
-			cairo_line_to(context, 9.0, 3.0);
-			cairo_close_path(context);
-
-			cairo_set_line_width(context, 1.0);
-			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-			cairo_fill_preserve(context);
-			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
-			cairo_stroke(context);
-
-			cairo_move_to(context, 12.0, 3.0);
-			cairo_line_to(context, 12.0, 19.0);
-			cairo_line_to(context, 17.0, 19.0);
-			cairo_line_to(context, 17.0, 3.0);
-			cairo_close_path(context);
-
-			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-			cairo_fill_preserve(context);
-			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
-			cairo_stroke(context);
-		} else {
-			// Not playing, draw play button
-			cairo_move_to(context, 2.0, 2.0);
-			cairo_line_to(context, 2.0, 20.0);
-			cairo_line_to(context, 18.0, 11.0);
-			cairo_close_path(context);
-
-			cairo_set_line_width(context, 1.0);
-			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-			cairo_fill_preserve(context);
-			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
-			cairo_stroke(context);
+		static gboolean update_seek(gpointer data) {
+			reinterpret_cast< MediaButtons * >(data)->updateSeek();
+			return TRUE;
 		}
 
-		cairo_destroy(context);
-	}
+		void draw_play_button(bool playing) {
+			clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(play_));
+			cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(play_));
 
-	void seek_by_position(gfloat x) {
-		gfloat x_line;
-		clutter_actor_get_transformed_position(line_, &x_line, NULL);
-		gfloat width_line = clutter_actor_get_width(line_);
+			if (playing) {
+				// Playing, draw pause button
+				cairo_move_to(context, 4.0, 3.0);
+				cairo_line_to(context, 4.0, 19.0);
+				cairo_line_to(context, 9.0, 19.0);
+				cairo_line_to(context, 9.0, 3.0);
+				cairo_close_path(context);
 
-		gfloat progress = (x - x_line) / width_line;
-		clutter_media_set_progress(media_, progress);
-		updateSeek();
-	}
+				cairo_set_line_width(context, 1.0);
+				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+				cairo_fill_preserve(context);
+				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+				cairo_stroke(context);
+
+				cairo_move_to(context, 12.0, 3.0);
+				cairo_line_to(context, 12.0, 19.0);
+				cairo_line_to(context, 17.0, 19.0);
+				cairo_line_to(context, 17.0, 3.0);
+				cairo_close_path(context);
+
+				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+				cairo_fill_preserve(context);
+				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+				cairo_stroke(context);
+			} else {
+				// Not playing, draw play button
+				cairo_move_to(context, 2.0, 2.0);
+				cairo_line_to(context, 2.0, 20.0);
+				cairo_line_to(context, 18.0, 11.0);
+				cairo_close_path(context);
+
+				cairo_set_line_width(context, 1.0);
+				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+				cairo_fill_preserve(context);
+				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+				cairo_stroke(context);
+			}
+
+			cairo_destroy(context);
+		}
+
+		void seek_by_position(gfloat x) {
+			gfloat x_line;
+			clutter_actor_get_transformed_position(line_, &x_line, NULL);
+			gfloat width_line = clutter_actor_get_width(line_);
+
+			gfloat progress = (x - x_line) / width_line;
+			clutter_media_set_progress(media_, progress);
+			updateSeek();
+		}
 
 	public:
 		MediaButtons(ClutterStage * stage, ClutterMedia * media)
@@ -175,6 +180,8 @@ namespace { namespace clutter {
 			clutter_box_pack(CLUTTER_BOX(actor_), seek_box, NULL, NULL);
 
 			clutter_container_add_actor(CLUTTER_CONTAINER(stage), actor_);
+
+			g_signal_connect(media, "eos", G_CALLBACK(media_eos), this);
 		}
 
 		ClutterActor * actor() const {

@@ -17,7 +17,6 @@
 
 #include <set>
 #include <debug.hpp>
-#include <optimise.hpp>
 #include <core/database.hpp>
 
 extern "C" {
