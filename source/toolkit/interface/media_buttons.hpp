@@ -85,26 +85,11 @@ namespace { namespace clutter {
 
 			if (playing) {
 				// Playing, draw pause button
-				cairo_move_to(context, 4.0, 3.0);
-				cairo_line_to(context, 4.0, 19.0);
-				cairo_line_to(context, 9.0, 19.0);
-				cairo_line_to(context, 9.0, 3.0);
-				cairo_close_path(context);
-
+				cairo_rectangle(context, 4.0, 3.0, 5.0, 16.0);
+				cairo_rectangle(context, 12.0, 3.0, 5.0, 16.0);
+				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+				cairo_fill_preserve(context);
 				cairo_set_line_width(context, 1.0);
-				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-				cairo_fill_preserve(context);
-				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
-				cairo_stroke(context);
-
-				cairo_move_to(context, 12.0, 3.0);
-				cairo_line_to(context, 12.0, 19.0);
-				cairo_line_to(context, 17.0, 19.0);
-				cairo_line_to(context, 17.0, 3.0);
-				cairo_close_path(context);
-
-				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-				cairo_fill_preserve(context);
 				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 				cairo_stroke(context);
 			} else {
@@ -114,9 +99,9 @@ namespace { namespace clutter {
 				cairo_line_to(context, 18.0, 11.0);
 				cairo_close_path(context);
 
-				cairo_set_line_width(context, 1.0);
 				cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
 				cairo_fill_preserve(context);
+				cairo_set_line_width(context, 1.0);
 				cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 				cairo_stroke(context);
 			}
