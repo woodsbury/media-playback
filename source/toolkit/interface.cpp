@@ -64,9 +64,9 @@ namespace toolkit {
 	public:
 		InterfacePrivate();
 
-		void play(char const * uri);
+		inline void play(char const * uri);
 
-		void showAndRun() const;
+		inline void showAndRun() const;
 	};
 
 	gboolean InterfacePrivate::fade_in(ClutterActor *, ClutterEvent *, gpointer data) {

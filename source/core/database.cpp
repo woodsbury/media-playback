@@ -17,6 +17,7 @@
 
 #include <set>
 #include <debug.hpp>
+#include <optimise.hpp>
 #include <core/database.hpp>
 
 extern "C" {
@@ -62,13 +63,13 @@ namespace core {
 		DatabasePrivate(char const * location, int flags);
 		~DatabasePrivate();
 
-		bool opened() const;
+		inline bool opened() const;
 
-		sqlite3 * connection();
+		inline sqlite3 * connection();
 
-		void addStatement(StatementPrivate * const statement);
+		inline void addStatement(StatementPrivate * const statement);
 
-		void removeStatement(StatementPrivate * const statement);
+		inline void removeStatement(StatementPrivate * const statement);
 	};
 
 	class StatementPrivate
@@ -85,25 +86,25 @@ namespace core {
 		StatementPrivate(Database & db, char const * statement);
 		~StatementPrivate();
 
-		bool valid() const;
+		inline bool valid() const;
 
-		bool execute();
-		bool hasData() const;
-		void reset();
+		inline bool execute();
+		inline bool hasData() const;
+		inline void reset();
 
-		unsigned int columns() const;
+		inline unsigned int columns() const;
 
-		Statement::Type dataType(unsigned int column) const;
-		std::vector< unsigned char > toBinary(unsigned int column) const;
-		long long toInteger(unsigned int column) const;
-		double toReal(unsigned int column) const;
-		char const * toText(unsigned int column) const;
+		inline Statement::Type dataType(unsigned int column) const;
+		inline std::vector< unsigned char > toBinary(unsigned int column) const;
+		inline long long toInteger(unsigned int column) const;
+		inline double toReal(unsigned int column) const;
+		inline char const * toText(unsigned int column) const;
 
-		bool bind(unsigned int index) const;
-		bool bind(unsigned int index, unsigned char const * binary, unsigned long long size) const;
-		bool bind(unsigned int index, long long integer) const;
-		bool bind(unsigned int index, double real) const;
-		bool bind(unsigned int index, char const * text) const;
+		inline bool bind(unsigned int index) const;
+		inline bool bind(unsigned int index, unsigned char const * binary, unsigned long long size) const;
+		inline bool bind(unsigned int index, long long integer) const;
+		inline bool bind(unsigned int index, double real) const;
+		inline bool bind(unsigned int index, char const * text) const;
 	};
 
 // Database connection

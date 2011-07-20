@@ -1,7 +1,7 @@
 NAME = mp
 VERSION = 0
 
-DEFINES = DEBUG NAME='"$(NAME)"' VERSION='"$(VERSION)"'
+DEFINES = DEBUG OPTIMISE NAME='"$(NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
 SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/json-glib-1.0 \
 	/usr/include/pango-1.0
