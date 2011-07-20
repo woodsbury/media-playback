@@ -58,7 +58,7 @@ namespace core {
 			}
 
 			std::string token = path.substr(start_token, end_token - start_token);
-			if (token == parent_dir) {
+			if ((token == parent_dir) && (path_.size() > 1)) {
 				path_.pop_back();
 			} else if (token != current_dir) {
 				path_.push_back(path.substr(start_token, end_token - start_token));

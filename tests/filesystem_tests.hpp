@@ -49,6 +49,14 @@ namespace test { namespace filesystem {
 		relative_path.set("new/path/");
 		equal(relative_path.toString(), "new/path");
 		isFalse(relative_path.absolute());
+
+		::core::Path path_start_dots("../starts/with/relative");
+		equal(path_start_dots.toString(), "../starts/with/relative");
+		isFalse(path_start_dots.absolute());
+
+		::core::Path multiple_dots("./../starts/./with/../two/dots");
+		equal(multiple_dots.toString(), "../starts/two/dots");
+		isFalse(multiple_dots.absolute());
 	}
 
 /*
