@@ -44,7 +44,7 @@ namespace { namespace clutter {
 
 	bool Initialiser::initialised_(false);
 
-	ClutterStage * default_stage() {
+	static ClutterStage * default_stage() {
 		return CLUTTER_STAGE(clutter_stage_get_default());
 	}
 }}
@@ -79,13 +79,13 @@ namespace toolkit {
 		clutter_state_set_state(CLUTTER_STATE(data), "fade-in");
 		timeout_id = g_timeout_add_seconds(2, fade_out, data);
 
-		clutter_stage_show_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
+		clutter_stage_show_cursor(clutter::default_stage());
 		return TRUE;
 	}
 
 	gboolean InterfacePrivate::fade_out(gpointer data) {
 		clutter_state_set_state(CLUTTER_STATE(data), "fade-out");
-		clutter_stage_hide_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
+		clutter_stage_hide_cursor(clutter::default_stage());
 		return FALSE;
 	}
 
