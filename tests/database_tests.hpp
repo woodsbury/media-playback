@@ -81,6 +81,7 @@ namespace test { namespace database {
 		equal(stmt.columns(), 1u);
 		equalN(stmt.dataType(0u), ::core::Statement::Type::Integer);
 		equal(stmt.toBinary(0u)[0], '1');
+		equal(stmt.toBinary(0u).size(), 1u);
 		equal(stmt.toInteger(0u), 1LL);
 		equal(stmt.toReal(0u), 1.0);
 		equal(stmt.toText(0u), "1");
@@ -171,6 +172,51 @@ namespace test { namespace database {
 		equal(stmt.toText(0u), "abc");
 	}
 
+	void timeDb() {
+		::core::Database db;
+		if (!db.opened()) {
+			std::cout << "Invalid database in timing test" << std::endl;
+			return;
+		}
+		::core::Statement stmt(db, "CREATE TABLE test (col1 PRIMARY KEY, col2)");
+		if (!stmt.valid()) {
+			std::cout << "Invalid statement in timing test" << std::endl;
+			return;
+		}
+		stmt.execute();
+		::core::Statement stmt2(db, "INSERT INTO test (col1, col2) VALUES (1, 1)");
+		if (!stmt2.valid()) {
+			std::cout << "Invalid statement in timing test" << std::endl;
+			return;
+		}
+		stmt2.execute();
+		::core::Statement stmt3(db, "INSERT INTO test (col1, col2) VALUES (2, 2)");
+		if (!stmt3.valid()) {
+			std::cout << "Invalid statement in timing test" << std::endl;
+			return;
+		}
+		stmt3.execute();
+		::core::Statement stmt4(db, "SELECT * FROM test");
+		if (!stmt4.valid()) {
+			std::cout << "Invalid statement in timing test" << std::endl;
+			return;
+		}
+		stmt4.execute();
+
+		long long value;
+		for (unsigned int i = 0; i < 2; ++i) {
+			value = stmt4.toInteger(1u);
+		}
+		value = value;
+
+		::core::Statement stmt5(db, "DELETE FROM test");
+		if (!stmt5.valid()) {
+			std::cout << "Invalid statement in timing test" << std::endl;
+			return;
+		}
+		stmt5.execute();
+	}
+
 	void runTests() {
 		openDb();
 		invalidStmt();
@@ -178,5 +224,7 @@ namespace test { namespace database {
 		stmtHasData();
 		insertData();
 		bindValues();
+
+		time(timeDb, 50);
 	}
 }}
