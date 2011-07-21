@@ -15,9 +15,19 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MEDIA_HPP
-#define _MEDIA_HPP
+#ifndef _INTERFACE_ACTOR_HPP
+#define _INTERFACE_ACTOR_HPP
 
-#include "media/elements.hpp"
+namespace interface {
+	class Actor {
+	protected:
+		ClutterActor * actor_;
+
+	public:
+		ClutterActor * actor() {
+			return actor_;
+		}
+	};
+}
 
 #endif

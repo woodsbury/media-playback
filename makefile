@@ -3,16 +3,12 @@ VERSION = 0
 
 DEFINES = DEBUG OPTIMISE NAME='"$(NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
-SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/json-glib-1.0 \
-	/usr/include/pango-1.0
-DIRECTORIES = source source/core source/toolkit
+SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/glib-2.0 \
+	/usr/include/gstreamer-0.10 /usr/include/json-glib-1.0 /usr/include/pango-1.0 /usr/include/libxml2 \
+	/usr/lib/glib-2.0/include
+DIRECTORIES = source source/core source/toolkit source/toolkit/interface
 TEST_DIRECTORIES = tests
 LIBRARIES = clutter-glx-1.0 clutter-gst-1.0 sqlite3
-
-# GStreamer specifics
-SYSTEM_INCLUDES += /usr/include/gstreamer-0.10 /usr/include/glib-2.0 /usr/lib/glib-2.0/include /usr/include/libxml2
-DIRECTORIES += source/media/gstreamer
-LIBRARIES += gstreamer-0.10
 
 CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUDE)) \
 	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE))
@@ -29,8 +25,6 @@ COMBINED_OBJECTS = $(filter-out source/main.o, $(OBJECTS)) $(TEST_OBJECTS)
 
 $(NAME): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(LOADLIBES) -o $@
-
-source/toolkit/interface.o: $(wildcard source/toolkit/interface/*.hpp)
 
 $(NAME)_test: $(COMBINED_OBJECTS)
 	$(CXX) $(LDFLAGS) $(COMBINED_OBJECTS) $(LOADLIBES) -o $@
