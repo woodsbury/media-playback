@@ -84,6 +84,23 @@ namespace core {
 	}
 
 /*
+	Change the path to being absolute based on the current working directory
+*/
+	bool Path::makeAbsolute() {
+		if (absolute_) {
+			return true;
+		}
+
+		std::string current_directory = current();
+		if (current_directory.empty()) {
+			return false;
+		}
+
+		set(current() + "/" + toString());
+		return true;
+	}
+
+/*
 	Convert the path to a string
 */
 	std::string Path::toString() const {
@@ -106,6 +123,43 @@ namespace core {
 		}
 
 		return result;
+	}
+
+/*
+	Returns the path to the current working directory
+*/
+	std::string Path::current() {
+		size_t size = 256;
+		char * buffer = static_cast< char * >(std::malloc(size));
+
+		// Use a buffer up to 2^5 * 256
+		for (unsigned int i = 0; i < 5; ++i) {
+			char * temp = getcwd(buffer, size);
+
+			if (temp != nullptr) {
+				std::string path(buffer);
+				std::free(buffer);
+				return path;
+			}
+
+			if (errno != ERANGE) {
+				std::free(buffer);
+				return std::string();
+			}
+
+			size = 2 * size;
+			temp = static_cast< char * >(std::realloc(buffer, size));
+
+			if (temp == nullptr) {
+				std::free(buffer);
+				return std::string();
+			}
+
+			buffer = temp;
+		}
+
+		std::free(buffer);
+		return std::string();
 	}
 
 /*

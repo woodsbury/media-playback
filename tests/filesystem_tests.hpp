@@ -21,7 +21,7 @@ namespace test { namespace filesystem {
 /*
 	Test creating paths
 */
-	void strangePaths() {
+	void createPaths() {
 		::core::Path empty_path;
 		equal(empty_path.toString(), "/");
 		isTrue(empty_path.absolute());
@@ -46,7 +46,7 @@ namespace test { namespace filesystem {
 		equal(relative_path.toString(), "relative/path");
 		isFalse(relative_path.absolute());
 
-		relative_path.set("new/path/");
+		relative_path.set("./new/path/");
 		equal(relative_path.toString(), "new/path");
 		isFalse(relative_path.absolute());
 
@@ -74,11 +74,43 @@ namespace test { namespace filesystem {
 		isFalse(bad_path.exists());
 	}
 
+/*
+	Test for creating absolute directories
+*/
+	void absolutePaths() {
+		::core::Path relative_current(".");
+		isTrue(relative_current.makeAbsolute());
+		equal(relative_current.toString(), ::core::Path::current());
+
+		::core::Path relative_parent("..");
+		isTrue(relative_parent.makeAbsolute());
+		equal(relative_parent.toString(), ::core::Path::current().substr(0, relative_parent.toString().length()));
+	}
+
+	void timeFs() {
+		::core::Path path("..");
+		path.makeAbsolute();
+		path.toString();
+		path.exists();
+		path.set("/new/long/path/with/../various/////./extra/parts/.././../");
+		path.toString();
+		path.exists();
+		path.makeAbsolute();
+		path.set();
+		path.toString();
+		path.exists();
+		path.makeAbsolute();
+	}
+
 	void runTests() {
 		std::cout << "Detected home directory: " << ::core::Path::home() << std::endl;
 		std::cout << "Application data directory: " << ::core::Path::data() << std::endl;
+		std::cout << "Current working directory: " << ::core::Path::current() << std::endl;
 
-		strangePaths();
+		createPaths();
 		checkPaths();
+		absolutePaths();
+
+		time(timeFs, 1000);
 	}
 }}

@@ -34,8 +34,11 @@ namespace core {
 		bool absolute() const;
 		bool exists() const;
 
+		bool makeAbsolute();
+
 		std::string toString() const;
 
+		static std::string current();
 		static std::string data();
 		static std::string home();
 
