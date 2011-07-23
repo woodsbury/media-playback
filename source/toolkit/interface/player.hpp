@@ -27,14 +27,18 @@ extern "C" {
 namespace interface {
 	class Player
 		: public Actor {
+		static gboolean hide_controls_cb(gpointer data);
 		static void media_eos_cb(ClutterMedia * media, gpointer data);
 		static gboolean play_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean seek_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean show_controls_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean update_seek_handle_cb(gpointer data);
 		static void width_changed_cb(GObject * object, GParamSpec * param, gpointer data);
 
 
 		ClutterMedia * media_;
+
+		ClutterActor * play_controls_;
 
 		ClutterActor * play_button_;
 		ClutterActor * seek_line_;
@@ -42,11 +46,15 @@ namespace interface {
 		ClutterActor * seek_hidden_;
 
 		guint update_seek_timeout_id;
+		guint hide_controls_timeout_id;
 
 		void draw_play_button();
+
+		void hide_controls();
 		void media_eos();
 		void play_clicked();
 		void seek_dragged(float x);
+		void show_controls();
 		void update_seek_handle();
 		void width_changed();
 

@@ -23,6 +23,11 @@ extern "C" {
 #include "player.hpp"
 
 namespace interface {
+	gboolean Player::hide_controls_cb(gpointer data) {
+		reinterpret_cast< Player * >(data)->hide_controls();
+		return FALSE;
+	}
+
 	void Player::media_eos_cb(ClutterMedia *, gpointer data) {
 		reinterpret_cast< Player * >(data)->media_eos();
 	}
@@ -63,6 +68,11 @@ namespace interface {
 		return TRUE;
 	}
 
+	gboolean Player::show_controls_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		reinterpret_cast< Player * >(data)->show_controls();
+		return TRUE;
+	}
+
 	gboolean Player::update_seek_handle_cb(gpointer data) {
 		reinterpret_cast< Player * >(data)->update_seek_handle();
 		return TRUE;
@@ -89,19 +99,19 @@ namespace interface {
 		g_signal_connect(media_, "eos", G_CALLBACK(media_eos_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
 
-		ClutterLayoutManager * controls_layout = clutter_box_layout_new();
-		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 20u);
-		ClutterActor * controls = clutter_box_new(controls_layout);
-		clutter_actor_add_constraint(controls, clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()),
-				CLUTTER_ALIGN_X_AXIS, 0.5f));
-		clutter_actor_add_constraint(controls, clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()),
-				CLUTTER_ALIGN_Y_AXIS, 0.93f));
+		ClutterLayoutManager * play_controls_layout = clutter_box_layout_new();
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(play_controls_layout), 20u);
+		play_controls_ = clutter_box_new(play_controls_layout);
+		clutter_actor_add_constraint(play_controls_,
+				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		clutter_actor_add_constraint(play_controls_,
+				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_Y_AXIS, 0.93f));
 
 		play_button_ = clutter_cairo_texture_new(20, 20);
 		draw_play_button();
 		clutter_actor_set_reactive(play_button_, TRUE);
 		g_signal_connect(play_button_, "button-press-event", G_CALLBACK(play_clicked_cb), this);
-		clutter_box_pack(CLUTTER_BOX(controls), play_button_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(play_controls_), play_button_, NULL, NULL);
 
 		ClutterLayoutManager * seek_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -129,9 +139,12 @@ namespace interface {
 		clutter_actor_set_size(seek_handle_, 10.0f, 8.0f);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
-		clutter_box_pack(CLUTTER_BOX(controls), seek, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(play_controls_), seek, NULL, NULL);
 
-		clutter_box_pack(CLUTTER_BOX(actor_), controls, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(actor_), play_controls_, NULL, NULL);
+
+		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_controls_cb), this);
+		hide_controls_timeout_id = g_timeout_add_seconds(3, hide_controls_cb, this);
 	}
 
 /*
@@ -178,6 +191,20 @@ namespace interface {
 	}
 
 /*
+	Hides the buttons and seek bar
+*/
+	void Player::hide_controls() {
+		if (clutter_actor_get_animation(play_controls_) != NULL) {
+			clutter_actor_detach_animation(play_controls_);
+		}
+
+		clutter_actor_animate(play_controls_, CLUTTER_LINEAR, 500, "opacity", 0, NULL);
+		hide_controls_timeout_id = 0;
+
+		clutter_stage_hide_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
+	}
+
+/*
 	Called when the media playing back ends
 */
 	void Player::media_eos() {
@@ -208,6 +235,24 @@ namespace interface {
 		clutter_media_set_progress(media_, progress);
 
 		update_seek_handle();
+	}
+
+/*
+	Shows the buttons and seek bar
+*/
+	void Player::show_controls() {
+		if (clutter_actor_get_animation(play_controls_) != NULL) {
+			return;
+		}
+
+		clutter_actor_animate(play_controls_, CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+
+		if (hide_controls_timeout_id != 0) {
+			g_source_remove(hide_controls_timeout_id);
+		}
+		hide_controls_timeout_id = g_timeout_add_seconds(3, hide_controls_cb, this);
+
+		clutter_stage_show_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
 	}
 
 /*
