@@ -84,8 +84,6 @@ namespace interface {
 
 	Player::Player()
 		: update_seek_timeout_id(0) {
-		g_signal_connect(clutter_stage_get_default(), "notify::width", G_CALLBACK(width_changed_cb), this);
-
 		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
@@ -143,6 +141,7 @@ namespace interface {
 
 		clutter_box_pack(CLUTTER_BOX(actor_), controls_, NULL, NULL);
 
+		g_signal_connect(clutter_stage_get_default(), "notify::width", G_CALLBACK(width_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_controls_cb), this);
 		hide_controls_timeout_id = g_timeout_add_seconds(3, hide_controls_cb, this);
 	}

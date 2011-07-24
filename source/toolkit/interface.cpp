@@ -33,6 +33,7 @@ namespace toolkit {
 		clutter_stage_set_color(CLUTTER_STAGE(clutter_stage_get_default()), &black);
 
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player.actor());
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel.actor());
 	}
 
 /*

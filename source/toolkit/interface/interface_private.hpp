@@ -23,6 +23,7 @@ extern "C" {
 }
 
 #include "player.hpp"
+#include "window_panel.hpp"
 
 namespace clutter {
 /*
@@ -48,6 +49,7 @@ namespace toolkit {
 	class InterfacePrivate
 		: clutter::Initialiser {
 		interface::Player player;
+		interface::WindowPanel panel;
 
 	public:
 		InterfacePrivate();
