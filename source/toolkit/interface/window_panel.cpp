@@ -18,6 +18,11 @@
 #include "window_panel.hpp"
 
 namespace interface {
+	gboolean WindowPanel::close_clicked_cb(ClutterActor *, ClutterEvent *, gpointer) {
+		clutter_main_quit();
+		return TRUE;
+	}
+
 	gboolean WindowPanel::fullscreen_clicked_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 		reinterpret_cast< WindowPanel * >(data)->fullscreen_clicked();
 		return TRUE;
@@ -41,6 +46,35 @@ namespace interface {
 		g_signal_connect(fullscreen_button_, "button-press-event", G_CALLBACK(fullscreen_clicked_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), fullscreen_button_, NULL, NULL);
 
+		close_button_ = clutter_cairo_texture_new(15, 15);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(close_button_));
+
+		cairo_move_to(context, 1.0, 3.0);
+		cairo_line_to(context, 3.0, 1.0);
+		cairo_line_to(context, 8.0, 6.0);
+		cairo_line_to(context, 13.0, 1.0);
+		cairo_line_to(context, 15.0, 3.0);
+		cairo_line_to(context, 10.0, 8.0);
+		cairo_line_to(context, 15.0, 13.0);
+		cairo_line_to(context, 13.0, 15.0);
+		cairo_line_to(context, 8.0, 10.0);
+		cairo_line_to(context, 3.0, 15.0);
+		cairo_line_to(context, 1.0, 13.0);
+		cairo_line_to(context, 6.0, 8.0);
+		cairo_close_path(context);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_actor_set_reactive(close_button_, TRUE);
+		g_signal_connect(close_button_, "button-press-event", G_CALLBACK(close_clicked_cb), NULL);
+		clutter_box_pack(CLUTTER_BOX(actor_), close_button_, NULL, NULL);
+
 		draw_window_controls();
 
 		g_signal_connect(clutter_stage_get_default(), "fullscreen", G_CALLBACK(fullscreen_status_changed_cb), this);
@@ -54,6 +88,7 @@ namespace interface {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(fullscreen_button_));
 
 		if (clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()))) {
+			// Stage is fullscreen
 			cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(fullscreen_button_));
 
 			cairo_rectangle(context, 1.0, 1.0, 16.0, 14.0);
@@ -66,7 +101,10 @@ namespace interface {
 			cairo_stroke(context);
 
 			cairo_destroy(context);
+
+			clutter_actor_show(close_button_);
 		} else {
+			// Stage is windowed
 			cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(fullscreen_button_));
 
 			cairo_rectangle(context, 1.0, 1.0, 16.0, 14.0);
@@ -79,6 +117,8 @@ namespace interface {
 			cairo_stroke(context);
 
 			cairo_destroy(context);
+
+			clutter_actor_hide(close_button_);
 		}
 	}
 

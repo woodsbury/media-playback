@@ -27,9 +27,11 @@ extern "C" {
 namespace interface {
 	class WindowPanel
 		: public Actor {
+		static gboolean close_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean fullscreen_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void fullscreen_status_changed_cb(ClutterStage * stage, gpointer data);
 
+		ClutterActor * close_button_;
 		ClutterActor * fullscreen_button_;
 
 		void draw_window_controls();
