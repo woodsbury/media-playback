@@ -26,7 +26,8 @@ extern "C" {
 
 namespace toolkit {
 	InterfacePrivate::InterfacePrivate() {
-		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), NAME);
+		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), DISPLAY_NAME);
+		clutter_stage_set_throttle_motion_events(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
 		clutter_stage_set_user_resizable(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
 
 		ClutterColor black = {0, 0, 0, 255};

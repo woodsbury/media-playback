@@ -1,7 +1,8 @@
 NAME = mp
+DISPLAY_NAME = Media-Playback
 VERSION = 0
 
-DEFINES = DEBUG OPTIMISE NAME='"$(NAME)"' VERSION='"$(VERSION)"'
+DEFINES = DEBUG OPTIMISE NAME='"$(NAME)"' DISPLAY_NAME='"$(DISPLAY_NAME)"' VERSION='"$(VERSION)"'
 INCLUDES = include
 SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/glib-2.0 \
 	/usr/include/gstreamer-0.10 /usr/include/json-glib-1.0 /usr/include/pango-1.0 /usr/include/libxml2 \
