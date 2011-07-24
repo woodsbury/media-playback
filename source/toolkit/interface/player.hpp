@@ -45,8 +45,8 @@ namespace interface {
 		ClutterActor * seek_handle_;
 		ClutterActor * seek_hidden_;
 
-		guint update_seek_timeout_id;
-		guint hide_controls_timeout_id;
+		guint update_seek_timeout_id_;
+		guint hide_controls_timeout_id_;
 
 		void draw_play_button();
 

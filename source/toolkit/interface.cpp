@@ -34,6 +34,8 @@ namespace toolkit {
 
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel.actor());
+
+		panel.setAutoHide(true);
 	}
 
 /*

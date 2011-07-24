@@ -30,16 +30,26 @@ namespace interface {
 		static gboolean close_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean fullscreen_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void fullscreen_status_changed_cb(ClutterStage * stage, gpointer data);
+		static gboolean hide_panel_cb(gpointer data);
+		static gboolean show_panel_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 
 		ClutterActor * close_button_;
 		ClutterActor * fullscreen_button_;
 
+		guint hide_panel_timeout_id_;
+
+		bool auto_hide_;
+
 		void draw_window_controls();
 
 		void fullscreen_clicked();
+		void hide_panel();
+		void show_panel();
 
 	public:
 		WindowPanel();
+
+		void setAutoHide(bool hide);
 	};
 }
 

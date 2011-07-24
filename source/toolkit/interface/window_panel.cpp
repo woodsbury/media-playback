@@ -32,9 +32,20 @@ namespace interface {
 		reinterpret_cast< WindowPanel * >(data)->draw_window_controls();
 	}
 
-	WindowPanel::WindowPanel() {
+	gboolean WindowPanel::hide_panel_cb(gpointer data) {
+		reinterpret_cast< WindowPanel * >(data)->hide_panel();
+		return FALSE;
+	}
+
+	gboolean WindowPanel::show_panel_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		reinterpret_cast< WindowPanel * >(data)->show_panel();
+		return FALSE;
+	}
+
+	WindowPanel::WindowPanel()
+		: auto_hide_(false) {
 		ClutterLayoutManager * main_layout = clutter_box_layout_new();
-		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 10);
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 10u);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_, clutter_align_constraint_new(clutter_stage_get_default(),
 				CLUTTER_ALIGN_X_AXIS, 0.95f));
@@ -79,6 +90,7 @@ namespace interface {
 
 		g_signal_connect(clutter_stage_get_default(), "fullscreen", G_CALLBACK(fullscreen_status_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "unfullscreen", G_CALLBACK(fullscreen_status_changed_cb), this);
+		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_panel_cb), this);
 	}
 
 /*
@@ -128,5 +140,47 @@ namespace interface {
 	void WindowPanel::fullscreen_clicked() {
 		clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
 				!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+	}
+
+/*
+	Hides the panel
+*/
+	void WindowPanel::hide_panel() {
+		if (clutter_actor_get_animation(actor_) != NULL) {
+			clutter_actor_detach_animation(actor_);
+		}
+
+		clutter_actor_animate(actor_, CLUTTER_LINEAR, 500, "opacity", 0, NULL);
+		hide_panel_timeout_id_ = 0;
+	}
+
+/*
+	Shows the panel
+*/
+	void WindowPanel::show_panel() {
+		if (clutter_actor_get_animation(actor_) != NULL) {
+			return;
+		}
+
+		clutter_actor_animate(actor_, CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+
+		if (hide_panel_timeout_id_ != 0) {
+			g_source_remove(hide_panel_timeout_id_);
+		}
+
+		if (auto_hide_) {
+			hide_panel_timeout_id_ = g_timeout_add_seconds(3, hide_panel_cb, this);
+		}
+	}
+
+/*
+	Changes whether the panel hides itself after a timeout
+*/
+	void WindowPanel::setAutoHide(bool hide) {
+		auto_hide_ = hide;
+
+		if (hide) {
+			hide_panel_timeout_id_ = g_timeout_add_seconds(3, hide_panel_cb, this);
+		}
 	}
 }

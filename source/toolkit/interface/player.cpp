@@ -70,7 +70,7 @@ namespace interface {
 
 	gboolean Player::show_controls_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 		reinterpret_cast< Player * >(data)->show_controls();
-		return TRUE;
+		return FALSE;
 	}
 
 	gboolean Player::update_seek_handle_cb(gpointer data) {
@@ -83,7 +83,7 @@ namespace interface {
 	}
 
 	Player::Player()
-		: update_seek_timeout_id(0) {
+		: update_seek_timeout_id_(0) {
 		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
@@ -143,7 +143,7 @@ namespace interface {
 
 		g_signal_connect(clutter_stage_get_default(), "notify::width", G_CALLBACK(width_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_controls_cb), this);
-		hide_controls_timeout_id = g_timeout_add_seconds(3, hide_controls_cb, this);
+		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
 	}
 
 /*
@@ -163,10 +163,10 @@ namespace interface {
 			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 			cairo_stroke(context);
 
-			if (update_seek_timeout_id != 0) {
-				g_source_remove(update_seek_timeout_id);
+			if (update_seek_timeout_id_ != 0) {
+				g_source_remove(update_seek_timeout_id_);
 			}
-			update_seek_timeout_id = g_timeout_add(250, update_seek_handle_cb, this);
+			update_seek_timeout_id_ = g_timeout_add(250, update_seek_handle_cb, this);
 		} else {
 			// Not playing, draw play button
 			cairo_move_to(context, 2.0, 1.0);
@@ -180,9 +180,9 @@ namespace interface {
 			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 			cairo_stroke(context);
 
-			if (update_seek_timeout_id != 0) {
-				g_source_remove(update_seek_timeout_id);
-				update_seek_timeout_id = 0;
+			if (update_seek_timeout_id_ != 0) {
+				g_source_remove(update_seek_timeout_id_);
+				update_seek_timeout_id_ = 0;
 			}
 		}
 
@@ -198,7 +198,7 @@ namespace interface {
 		}
 
 		clutter_actor_animate(controls_, CLUTTER_LINEAR, 500, "opacity", 0, NULL);
-		hide_controls_timeout_id = 0;
+		hide_controls_timeout_id_ = 0;
 
 		clutter_stage_hide_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
 	}
@@ -246,10 +246,10 @@ namespace interface {
 
 		clutter_actor_animate(controls_, CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
-		if (hide_controls_timeout_id != 0) {
-			g_source_remove(hide_controls_timeout_id);
+		if (hide_controls_timeout_id_ != 0) {
+			g_source_remove(hide_controls_timeout_id_);
 		}
-		hide_controls_timeout_id = g_timeout_add_seconds(3, hide_controls_cb, this);
+		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
 
 		clutter_stage_show_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
 	}
