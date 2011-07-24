@@ -18,10 +18,13 @@
 #ifndef _INTERFACE_PRIVATE_HPP
 #define _INTERFACE_PRIVATE_HPP
 
+#include <debug.hpp>
+
 extern "C" {
 #include <clutter-gst/clutter-gst.h>
 }
 
+#include "browser.hpp"
 #include "player.hpp"
 #include "window_panel.hpp"
 
@@ -33,28 +36,22 @@ namespace clutter {
 		static bool initialised_;
 
 	public:
-		Initialiser() {
-			if (!initialised_) {
-				dprint("Initialising Clutter & GStreamer");
-				clutter_gst_init(NULL, NULL);
-				initialised_ = true;
-			}
-		}
+		Initialiser();
 	};
-
-	bool Initialiser::initialised_(false);
 }
 
 namespace toolkit {
 	class InterfacePrivate
 		: clutter::Initialiser {
+		interface::Browser browser;
 		interface::Player player;
 		interface::WindowPanel panel;
 
 	public:
 		InterfacePrivate();
 
-		inline void play(char const * uri);
+		void browse();
+		void play(char const * uri);
 
 		inline void start() const;
 	};

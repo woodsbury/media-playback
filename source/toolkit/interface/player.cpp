@@ -20,6 +20,7 @@ extern "C" {
 #include <clutter-gst/clutter-gst.h>
 }
 
+#include "interface_private.hpp"
 #include "player.hpp"
 
 namespace interface {
@@ -73,6 +74,11 @@ namespace interface {
 		return FALSE;
 	}
 
+	gboolean Player::stop_clicked_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		reinterpret_cast< Player * >(data)->stop_clicked();
+		return TRUE;
+	}
+
 	gboolean Player::update_seek_handle_cb(gpointer data) {
 		reinterpret_cast< Player * >(data)->update_seek_handle();
 		return TRUE;
@@ -82,8 +88,8 @@ namespace interface {
 		reinterpret_cast< Player * >(data)->width_changed();
 	}
 
-	Player::Player()
-		: update_seek_timeout_id_(0) {
+	Player::Player(toolkit::InterfacePrivate * interface_private)
+		: p(interface_private), update_seek_timeout_id_(0) {
 		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
@@ -98,7 +104,7 @@ namespace interface {
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
 
 		ClutterLayoutManager * controls_layout = clutter_box_layout_new();
-		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 20u);
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 8u);
 		controls_ = clutter_box_new(controls_layout);
 		clutter_actor_add_constraint(controls_,
 				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_X_AXIS, 0.5f));
@@ -110,6 +116,28 @@ namespace interface {
 		clutter_actor_set_reactive(play_button_, TRUE);
 		g_signal_connect(play_button_, "button-press-event", G_CALLBACK(play_clicked_cb), this);
 		clutter_box_pack(CLUTTER_BOX(controls_), play_button_, NULL, NULL);
+
+		ClutterActor * stop_button = clutter_cairo_texture_new(20, 20);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(stop_button));
+
+		cairo_rectangle(context, 2.0, 2.0, 16.0, 16.0);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_actor_set_reactive(stop_button, TRUE);
+		g_signal_connect(stop_button, "button-press-event", G_CALLBACK(stop_clicked_cb), this);
+		clutter_box_pack(CLUTTER_BOX(controls_), stop_button, NULL, NULL);
+
+		ClutterActor * spacing = clutter_rectangle_new();
+		clutter_actor_set_width(spacing, 2.0f);
+		clutter_actor_set_opacity(spacing, 0);
+		clutter_box_pack(CLUTTER_BOX(controls_), spacing, NULL, NULL);
 
 		ClutterLayoutManager * seek_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -208,6 +236,7 @@ namespace interface {
 */
 	void Player::media_eos() {
 		draw_play_button();
+		p->browse();
 	}
 
 /*
@@ -252,6 +281,13 @@ namespace interface {
 		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
 
 		clutter_stage_show_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
+	}
+
+/*
+	Called whenever the stop button is clicked
+*/
+	void Player::stop_clicked() {
+		p->browse();
 	}
 
 /*

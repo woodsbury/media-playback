@@ -24,6 +24,10 @@ extern "C" {
 
 #include "actor.hpp"
 
+namespace toolkit {
+	class InterfacePrivate;
+}
+
 namespace interface {
 	class Player
 		: public Actor {
@@ -32,9 +36,11 @@ namespace interface {
 		static gboolean play_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean seek_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean show_controls_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean stop_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean update_seek_handle_cb(gpointer data);
 		static void width_changed_cb(GObject * object, GParamSpec * param, gpointer data);
 
+		toolkit::InterfacePrivate * p;
 
 		ClutterMedia * media_;
 
@@ -55,11 +61,12 @@ namespace interface {
 		void play_clicked();
 		void seek_dragged(float x);
 		void show_controls();
+		void stop_clicked();
 		void update_seek_handle();
 		void width_changed();
 
 	public:
-		Player();
+		Player(toolkit::InterfacePrivate * interface_private);
 
 		void play(char const * uri);
 	};

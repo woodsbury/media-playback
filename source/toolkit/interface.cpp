@@ -15,7 +15,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <debug.hpp>
 #include <toolkit/interface.hpp>
 
 extern "C" {
@@ -24,8 +23,21 @@ extern "C" {
 
 #include "interface/interface_private.hpp"
 
+namespace clutter {
+	Initialiser::Initialiser() {
+		if (!initialised_) {
+			dprint("Initialising Clutter & GStreamer");
+			clutter_gst_init(NULL, NULL);
+			initialised_ = true;
+		}
+	}
+
+	bool Initialiser::initialised_(false);
+}
+
 namespace toolkit {
-	InterfacePrivate::InterfacePrivate() {
+	InterfacePrivate::InterfacePrivate()
+		: browser(this), player(this) {
 		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), DISPLAY_NAME);
 		clutter_stage_set_throttle_motion_events(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
 		clutter_stage_set_user_resizable(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
@@ -33,16 +45,30 @@ namespace toolkit {
 		ClutterColor black = {0, 0, 0, 255};
 		clutter_stage_set_color(CLUTTER_STAGE(clutter_stage_get_default()), &black);
 
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), browser.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel.actor());
 
-		panel.setAutoHide(true);
+		browse();
+	}
+
+/*
+	Browse the media library
+*/
+	void InterfacePrivate::browse() {
+		clutter_actor_show_all(browser.actor());
+		clutter_actor_hide_all(player.actor());
+		panel.setAutoHide(false);
 	}
 
 /*
 	Plays the URI
 */
 	void InterfacePrivate::play(char const * uri) {
+		clutter_actor_show_all(player.actor());
+		clutter_actor_hide_all(browser.actor());
+		panel.setAutoHide(true);
+
 		player.play(uri);
 	}
 
@@ -59,6 +85,10 @@ namespace toolkit {
 
 	Interface::~Interface() {
 		delete p;
+	}
+
+	void Interface::browse() const {
+		p->browse();
 	}
 
 	void Interface::play(std::string uri) const {
