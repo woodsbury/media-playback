@@ -38,7 +38,7 @@ namespace interface {
 
 		ClutterMedia * media_;
 
-		ClutterActor * play_controls_;
+		ClutterActor * controls_;
 
 		ClutterActor * play_button_;
 		ClutterActor * seek_line_;
