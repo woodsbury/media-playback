@@ -24,6 +24,23 @@ namespace interface {
 		ClutterActor * actor_;
 
 	public:
+/*
+	Removes a highlight from the actor
+*/
+	static gboolean actor_highlight_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		clutter_actor_clear_effects(reinterpret_cast< ClutterActor * >(data));
+		return TRUE;
+	}
+
+/*
+	Highlights the actor
+*/
+	static gboolean actor_highlight_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		ClutterColor highlight = {0, 230, 100, 255};
+		clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
+		return TRUE;
+	}
+
 		ClutterActor * actor() {
 			return actor_;
 		}

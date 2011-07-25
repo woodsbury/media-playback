@@ -15,7 +15,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "interface_private.hpp"
 #include "window_panel.hpp"
 
 namespace interface {
@@ -56,10 +55,8 @@ namespace interface {
 		fullscreen_button_ = clutter_cairo_texture_new(18, 16);
 		clutter_actor_set_reactive(fullscreen_button_, TRUE);
 		g_signal_connect(fullscreen_button_, "button-press-event", G_CALLBACK(fullscreen_clicked_cb), this);
-		g_signal_connect(fullscreen_button_, "enter-event",
-				G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb), fullscreen_button_);
-		g_signal_connect(fullscreen_button_, "leave-event",
-				G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb), fullscreen_button_);
+		g_signal_connect(fullscreen_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb), fullscreen_button_);
+		g_signal_connect(fullscreen_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb), fullscreen_button_);
 		clutter_box_pack(CLUTTER_BOX(actor_), fullscreen_button_, NULL, NULL);
 
 		close_button_ = clutter_cairo_texture_new(15, 15);
@@ -89,10 +86,8 @@ namespace interface {
 
 		clutter_actor_set_reactive(close_button_, TRUE);
 		g_signal_connect(close_button_, "button-press-event", G_CALLBACK(close_clicked_cb), NULL);
-		g_signal_connect(close_button_, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
-				close_button_);
-		g_signal_connect(close_button_, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
-				close_button_);
+		g_signal_connect(close_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb), close_button_);
+		g_signal_connect(close_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb), close_button_);
 		clutter_box_pack(CLUTTER_BOX(actor_), close_button_, NULL, NULL);
 
 		draw_window_controls();

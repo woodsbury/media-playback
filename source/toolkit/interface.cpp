@@ -36,23 +36,6 @@ namespace clutter {
 }
 
 namespace toolkit {
-/*
-	Removes a highlight from the actor
-*/
-	gboolean InterfacePrivate::actor_highlight_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
-		clutter_actor_clear_effects(reinterpret_cast< ClutterActor * >(data));
-		return TRUE;
-	}
-
-/*
-	Highlights the actor
-*/
-	gboolean InterfacePrivate::actor_highlight_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
-		ClutterColor highlight = {0, 230, 100, 255};
-		clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
-		return TRUE;
-	}
-
 	InterfacePrivate::InterfacePrivate()
 		: browser(this), player(this) {
 		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), DISPLAY_NAME);

@@ -93,13 +93,13 @@ namespace interface {
 		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
-		clutter_actor_add_constraint(actor_, clutter_bind_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()),
+		clutter_actor_add_constraint(actor_, clutter_bind_constraint_new(clutter_stage_get_default(),
 				CLUTTER_BIND_SIZE, 0.0f));
 
 		media_ = CLUTTER_MEDIA(clutter_gst_video_texture_new());
 		clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(media_), TRUE);
 		clutter_actor_add_constraint(CLUTTER_ACTOR(media_),
-				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_Y_AXIS, 0.5f));
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 		g_signal_connect(media_, "eos", G_CALLBACK(media_eos_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
 
@@ -107,17 +107,17 @@ namespace interface {
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 8u);
 		controls_ = clutter_box_new(controls_layout);
 		clutter_actor_add_constraint(controls_,
-				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_X_AXIS, 0.5f));
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 		clutter_actor_add_constraint(controls_,
-				clutter_align_constraint_new(CLUTTER_ACTOR(clutter_stage_get_default()), CLUTTER_ALIGN_Y_AXIS, 0.93f));
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.93f));
 
 		play_button_ = clutter_cairo_texture_new(20, 20);
 		draw_play_button();
 		clutter_actor_set_reactive(play_button_, TRUE);
 		g_signal_connect(play_button_, "button-press-event", G_CALLBACK(play_clicked_cb), this);
-		g_signal_connect(play_button_, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+		g_signal_connect(play_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
 				play_button_);
-		g_signal_connect(play_button_, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+		g_signal_connect(play_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
 				play_button_);
 		clutter_box_pack(CLUTTER_BOX(controls_), play_button_, NULL, NULL);
 
@@ -136,9 +136,9 @@ namespace interface {
 
 		clutter_actor_set_reactive(stop_button, TRUE);
 		g_signal_connect(stop_button, "button-press-event", G_CALLBACK(stop_clicked_cb), this);
-		g_signal_connect(stop_button, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+		g_signal_connect(stop_button, "enter-event", G_CALLBACK(actor_highlight_on_cb),
 				stop_button);
-		g_signal_connect(stop_button, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+		g_signal_connect(stop_button, "leave-event", G_CALLBACK(actor_highlight_off_cb),
 				stop_button);
 		clutter_box_pack(CLUTTER_BOX(controls_), stop_button, NULL, NULL);
 
@@ -171,9 +171,9 @@ namespace interface {
 		clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(seek_handle_), &black);
 		clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(seek_handle_), 1);
 		clutter_actor_set_size(seek_handle_, 10.0f, 8.0f);
-		g_signal_connect(seek_hidden_, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+		g_signal_connect(seek_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
 				seek_handle_);
-		g_signal_connect(seek_hidden_, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+		g_signal_connect(seek_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
 				seek_handle_);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
@@ -299,6 +299,7 @@ namespace interface {
 	Called whenever the stop button is clicked
 */
 	void Player::stop_clicked() {
+		clutter_media_set_playing(media_, FALSE);
 		p->browse();
 	}
 
@@ -315,10 +316,8 @@ namespace interface {
 	Called whenever the stage's width changes
 */
 	void Player::width_changed() {
-		clutter_actor_set_width(seek_line_,
-				clutter_actor_get_width(CLUTTER_ACTOR(clutter_stage_get_default())) * 0.75f);
-		clutter_actor_set_width(seek_hidden_,
-				clutter_actor_get_width(CLUTTER_ACTOR(clutter_stage_get_default())) * 0.75f);
+		clutter_actor_set_width(seek_line_, clutter_actor_get_width(clutter_stage_get_default()) * 0.75f);
+		clutter_actor_set_width(seek_hidden_, clutter_actor_get_width(clutter_stage_get_default()) * 0.75f);
 	}
 
 /*

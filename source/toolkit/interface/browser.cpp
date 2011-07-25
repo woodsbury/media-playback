@@ -21,6 +21,13 @@
 namespace interface {
 	Browser::Browser(toolkit::InterfacePrivate * interface_private)
 		: p(interface_private) {
-		actor_ = clutter_text_new();
+		ClutterLayoutManager * main_layout = clutter_box_layout_new();
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 30u);
+		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(main_layout), TRUE);
+		actor_ = clutter_box_new(main_layout);
+		clutter_actor_add_constraint(actor_,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		clutter_actor_add_constraint(actor_,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 	}
 }
