@@ -48,6 +48,9 @@ namespace toolkit {
 		interface::WindowPanel panel;
 
 	public:
+		static gboolean actor_highlight_off_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean actor_highlight_on_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+
 		InterfacePrivate();
 
 		void browse();

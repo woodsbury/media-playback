@@ -115,6 +115,10 @@ namespace interface {
 		draw_play_button();
 		clutter_actor_set_reactive(play_button_, TRUE);
 		g_signal_connect(play_button_, "button-press-event", G_CALLBACK(play_clicked_cb), this);
+		g_signal_connect(play_button_, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+				play_button_);
+		g_signal_connect(play_button_, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+				play_button_);
 		clutter_box_pack(CLUTTER_BOX(controls_), play_button_, NULL, NULL);
 
 		ClutterActor * stop_button = clutter_cairo_texture_new(20, 20);
@@ -132,6 +136,10 @@ namespace interface {
 
 		clutter_actor_set_reactive(stop_button, TRUE);
 		g_signal_connect(stop_button, "button-press-event", G_CALLBACK(stop_clicked_cb), this);
+		g_signal_connect(stop_button, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+				stop_button);
+		g_signal_connect(stop_button, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+				stop_button);
 		clutter_box_pack(CLUTTER_BOX(controls_), stop_button, NULL, NULL);
 
 		ClutterActor * spacing = clutter_rectangle_new();
@@ -163,6 +171,10 @@ namespace interface {
 		clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(seek_handle_), &black);
 		clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(seek_handle_), 1);
 		clutter_actor_set_size(seek_handle_, 10.0f, 8.0f);
+		g_signal_connect(seek_hidden_, "enter-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_on_cb),
+				seek_handle_);
+		g_signal_connect(seek_hidden_, "leave-event", G_CALLBACK(toolkit::InterfacePrivate::actor_highlight_off_cb),
+				seek_handle_);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(controls_), seek, NULL, NULL);
