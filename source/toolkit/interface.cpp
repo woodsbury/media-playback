@@ -58,6 +58,7 @@ namespace toolkit {
 	void InterfacePrivate::browse() {
 		clutter_actor_show_all(browser.actor());
 		clutter_actor_hide_all(player.actor());
+		clutter_actor_grab_key_focus(browser.actor());
 		panel.setAutoHide(false);
 	}
 
@@ -67,6 +68,7 @@ namespace toolkit {
 	void InterfacePrivate::play(char const * uri) {
 		clutter_actor_show_all(player.actor());
 		clutter_actor_hide_all(browser.actor());
+		clutter_actor_grab_key_focus(player.actor());
 		panel.setAutoHide(true);
 
 		player.play(uri);

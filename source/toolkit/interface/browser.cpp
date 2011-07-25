@@ -29,5 +29,12 @@ namespace interface {
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 		clutter_actor_add_constraint(actor_,
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
+
+		ClutterLayoutManager * flow_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
+		clutter_flow_layout_set_homogeneous(CLUTTER_FLOW_LAYOUT(flow_layout), TRUE);
+		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(flow_layout), 10.0f);
+		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(flow_layout), 10.0f);
+		ClutterActor * flow = clutter_box_new(flow_layout);
+		clutter_box_pack(CLUTTER_BOX(actor_), flow, NULL, NULL);
 	}
 }

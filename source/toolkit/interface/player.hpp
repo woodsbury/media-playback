@@ -32,6 +32,7 @@ namespace interface {
 	class Player
 		: public Actor {
 		static gboolean hide_controls_cb(gpointer data);
+		static gboolean key_pressed_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void media_eos_cb(ClutterMedia * media, gpointer data);
 		static gboolean play_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean seek_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
@@ -57,6 +58,7 @@ namespace interface {
 		void draw_play_button();
 
 		void hide_controls();
+		void key_pressed(guint key, ClutterModifierType modifiers);
 		void media_eos();
 		void play_clicked();
 		void seek_dragged(float x);

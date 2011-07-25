@@ -29,6 +29,12 @@ namespace interface {
 		return FALSE;
 	}
 
+	gboolean Player::key_pressed_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		reinterpret_cast< Player * >(data)->key_pressed(clutter_event_get_key_symbol(event),
+				clutter_event_get_state(event));
+		return TRUE;
+	}
+
 	void Player::media_eos_cb(ClutterMedia *, gpointer data) {
 		reinterpret_cast< Player * >(data)->media_eos();
 	}
@@ -181,6 +187,8 @@ namespace interface {
 
 		clutter_box_pack(CLUTTER_BOX(actor_), controls_, NULL, NULL);
 
+		g_signal_connect(actor_, "key-press-event", G_CALLBACK(key_pressed_cb), this);
+
 		g_signal_connect(clutter_stage_get_default(), "notify::width", G_CALLBACK(width_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_controls_cb), this);
 		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
@@ -244,6 +252,24 @@ namespace interface {
 	}
 
 /*
+	Called whenever a key is pressed
+*/
+	void Player::key_pressed(guint key, ClutterModifierType modifiers) {
+		switch (modifiers) {
+		default:
+			switch (key) {
+			case CLUTTER_KEY_space:
+				// Emulate play click
+				play_clicked();
+				break;
+			default:
+				;
+			}
+			break;
+		}
+	}
+
+/*
 	Called when the media playing back ends
 */
 	void Player::media_eos() {
@@ -260,6 +286,7 @@ namespace interface {
 		if (uri != NULL) {
 			clutter_media_set_playing(media_, !clutter_media_get_playing(media_));
 			draw_play_button();
+			g_free(uri);
 		}
 	}
 
