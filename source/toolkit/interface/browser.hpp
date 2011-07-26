@@ -18,6 +18,8 @@
 #ifndef _INTERFACE_BROWSER_HPP
 #define _INTERFACE_BROWSER_HPP
 
+#include <toolkit/library.hpp>
+
 extern "C" {
 #include <clutter/clutter.h>
 }
@@ -32,6 +34,13 @@ namespace interface {
 	class Browser
 		: public Actor {
 		toolkit::InterfacePrivate * p;
+
+		toolkit::Library library_;
+
+		ClutterActor * media_list_;
+
+		void clear_media_list();
+		void update_media_list();
 
 	public:
 		Browser(toolkit::InterfacePrivate * interface_private);

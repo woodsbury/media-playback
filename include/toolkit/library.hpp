@@ -18,13 +18,25 @@
 #ifndef _TOOLKIT_LIBRARY_HPP
 #define _TOOLKIT_LIBRARY_HPP
 
+#include <vector>
 #include <core/database.hpp>
 
 namespace toolkit {
+	class MediaItem {
+	};
+
 	class Library
 		: private core::Database {
 	public:
+		enum class Type {
+			All,
+			Music,
+			Movies
+		};
+
 		Library();
+
+		std::vector< MediaItem > list(Type type);
 	};
 }
 

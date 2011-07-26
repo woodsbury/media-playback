@@ -21,4 +21,8 @@
 namespace toolkit {
 	Library::Library()
 		: core::Database(core::Path::data() + "/library.db") {}
+
+	std::vector< MediaItem > Library::list(Library::Type type) {
+		return std::vector< MediaItem >();
+	}
 }

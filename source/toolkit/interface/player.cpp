@@ -255,17 +255,13 @@ namespace interface {
 	Called whenever a key is pressed
 */
 	void Player::key_pressed(guint key, ClutterModifierType modifiers) {
-		switch (modifiers) {
-		default:
-			switch (key) {
-			case CLUTTER_KEY_space:
-				// Emulate play click
-				play_clicked();
-				break;
-			default:
-				;
-			}
+		switch (key) {
+		case CLUTTER_KEY_space:
+			// Emulate play click
+			play_clicked();
 			break;
+		default:
+			;
 		}
 	}
 
