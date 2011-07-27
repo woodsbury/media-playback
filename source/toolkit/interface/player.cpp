@@ -24,6 +24,9 @@ extern "C" {
 #include "player.hpp"
 
 namespace interface {
+	unsigned int const Player::title_width(300);
+	unsigned int const Player::title_height(30);
+
 	gboolean Player::hide_controls_cb(gpointer data) {
 		reinterpret_cast< Player * >(data)->hide_controls();
 		return FALSE;
@@ -109,13 +112,21 @@ namespace interface {
 		g_signal_connect(media_, "eos", G_CALLBACK(media_eos_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
 
+		ClutterLayoutManager * hud_layout = clutter_box_layout_new();
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(hud_layout), 7u);
+		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(hud_layout), TRUE);
+		hud_ = clutter_box_new(hud_layout);
+		clutter_actor_add_constraint(hud_,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		clutter_actor_add_constraint(hud_,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.93f));
+
+		title_ = clutter_cairo_texture_new(title_width, title_height);
+		clutter_box_pack(CLUTTER_BOX(hud_), title_, NULL, NULL);
+
 		ClutterLayoutManager * controls_layout = clutter_box_layout_new();
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 8u);
-		controls_ = clutter_box_new(controls_layout);
-		clutter_actor_add_constraint(controls_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
-		clutter_actor_add_constraint(controls_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.93f));
+		ClutterActor * controls = clutter_box_new(controls_layout);
 
 		play_button_ = clutter_cairo_texture_new(20, 20);
 		draw_play_button();
@@ -125,7 +136,7 @@ namespace interface {
 				play_button_);
 		g_signal_connect(play_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
 				play_button_);
-		clutter_box_pack(CLUTTER_BOX(controls_), play_button_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), play_button_, NULL, NULL);
 
 		ClutterActor * stop_button = clutter_cairo_texture_new(20, 20);
 
@@ -146,12 +157,12 @@ namespace interface {
 				stop_button);
 		g_signal_connect(stop_button, "leave-event", G_CALLBACK(actor_highlight_off_cb),
 				stop_button);
-		clutter_box_pack(CLUTTER_BOX(controls_), stop_button, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), stop_button, NULL, NULL);
 
 		ClutterActor * spacing = clutter_rectangle_new();
 		clutter_actor_set_width(spacing, 2.0f);
 		clutter_actor_set_opacity(spacing, 0);
-		clutter_box_pack(CLUTTER_BOX(controls_), spacing, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), spacing, NULL, NULL);
 
 		ClutterLayoutManager * seek_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -183,9 +194,11 @@ namespace interface {
 				seek_handle_);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
-		clutter_box_pack(CLUTTER_BOX(controls_), seek, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), seek, NULL, NULL);
 
-		clutter_box_pack(CLUTTER_BOX(actor_), controls_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(hud_), controls, NULL, NULL);
+
+		clutter_box_pack(CLUTTER_BOX(actor_), hud_, NULL, NULL);
 
 		g_signal_connect(actor_, "key-press-event", G_CALLBACK(key_pressed_cb), this);
 
@@ -241,11 +254,11 @@ namespace interface {
 	Hides the buttons and seek bar
 */
 	void Player::hide_controls() {
-		if (clutter_actor_get_animation(controls_) != NULL) {
-			clutter_actor_detach_animation(controls_);
+		if (clutter_actor_get_animation(hud_) != NULL) {
+			clutter_actor_detach_animation(hud_);
 		}
 
-		clutter_actor_animate(controls_, CLUTTER_LINEAR, 500, "opacity", 0, NULL);
+		clutter_actor_animate(hud_, CLUTTER_LINEAR, 500, "opacity", 0, NULL);
 		hide_controls_timeout_id_ = 0;
 
 		clutter_stage_hide_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
@@ -304,11 +317,11 @@ namespace interface {
 	Shows the buttons and seek bar
 */
 	void Player::show_controls() {
-		if (clutter_actor_get_animation(controls_) != NULL) {
+		if (clutter_actor_get_animation(hud_) != NULL) {
 			return;
 		}
 
-		clutter_actor_animate(controls_, CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+		clutter_actor_animate(hud_, CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
 		if (hide_controls_timeout_id_ != 0) {
 			g_source_remove(hide_controls_timeout_id_);
@@ -346,7 +359,27 @@ namespace interface {
 /*
 	Plays the given URI in the media widget
 */
-	void Player::play(char const * uri) {
+	void Player::play(char const * uri, char const * title) {
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(title_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(title_));
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 18.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, title, &extents);
+		cairo_move_to(context, (title_width / 2.0) - ((extents.width / 2.0) + extents.x_bearing),
+				(title_height / 2.0) - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, title);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
 		clutter_media_set_uri(media_, uri);
 		clutter_media_set_playing(media_, TRUE);
 		draw_play_button();

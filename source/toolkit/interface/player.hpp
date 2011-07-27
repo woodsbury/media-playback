@@ -31,6 +31,9 @@ namespace toolkit {
 namespace interface {
 	class Player
 		: public Actor {
+		static unsigned int const title_width;
+		static unsigned int const title_height;
+
 		static gboolean hide_controls_cb(gpointer data);
 		static gboolean key_pressed_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void media_eos_cb(ClutterMedia * media, gpointer data);
@@ -45,7 +48,9 @@ namespace interface {
 
 		ClutterMedia * media_;
 
-		ClutterActor * controls_;
+		ClutterActor * hud_;
+
+		ClutterActor * title_;
 
 		ClutterActor * play_button_;
 		ClutterActor * seek_line_;
@@ -70,7 +75,7 @@ namespace interface {
 	public:
 		Player(toolkit::InterfacePrivate * interface_private);
 
-		void play(char const * uri);
+		void play(char const * uri, char const * title);
 	};
 }
 

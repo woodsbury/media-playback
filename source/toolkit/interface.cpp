@@ -65,13 +65,13 @@ namespace toolkit {
 /*
 	Plays the URI
 */
-	void InterfacePrivate::play(char const * uri) {
+	void InterfacePrivate::play(char const * uri, char const * title) {
 		clutter_actor_show_all(player.actor());
 		clutter_actor_hide_all(browser.actor());
 		clutter_actor_grab_key_focus(player.actor());
 		panel.setAutoHide(true);
 
-		player.play(uri);
+		player.play(uri, title);
 	}
 
 /*
@@ -93,8 +93,13 @@ namespace toolkit {
 		p->browse();
 	}
 
-	void Interface::play(std::string uri) const {
-		p->play(uri.c_str());
+	void Interface::play(std::string uri, std::string title) const {
+		if (title.length() > 30) {
+			title.erase(27);
+			title.append("...");
+		}
+
+		p->play(uri.c_str(), title.empty() ? NULL : title.c_str());
 	}
 
 	void Interface::start() const {

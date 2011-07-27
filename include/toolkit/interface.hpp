@@ -33,7 +33,7 @@ namespace toolkit {
 		~Interface();
 
 		void browse() const;
-		void play(std::string uri) const;
+		void play(std::string uri, std::string title = std::string()) const;
 
 		void start() const;
 	};
