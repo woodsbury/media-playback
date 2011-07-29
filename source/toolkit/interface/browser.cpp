@@ -15,10 +15,37 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <utility>
+
 #include "browser.hpp"
 #include "interface_private.hpp"
 
 namespace interface {
+	BrowserItem::BrowserItem(toolkit::MediaItem media_item)
+		: item_(std::move(media_item)), actor_(nullptr), list_(nullptr) {}
+
+	BrowserItem::~BrowserItem() {
+		removeFromList();
+	}
+
+/*
+	Add an actor representing this item to the given container
+*/
+	void BrowserItem::addToList(ClutterContainer * list) {
+		;
+	}
+
+/*
+	Remove the actor represented by this item from its container
+*/
+	void BrowserItem::removeFromList() {
+		if ((list_ != nullptr) && (actor_ != nullptr)) {
+			clutter_container_remove_actor(list_, actor_);
+			list_ = nullptr;
+			actor_ = nullptr;
+		}
+	}
+
 	Browser::Browser(toolkit::InterfacePrivate * interface_private)
 		: p(interface_private) {
 		ClutterLayoutManager * main_layout = clutter_box_layout_new();
@@ -40,20 +67,23 @@ namespace interface {
 		update_media_list();
 	}
 
+/*
+	Clear the list of media items
+*/
 	void Browser::clear_media_list() {
-		GList * item = clutter_container_get_children(CLUTTER_CONTAINER(media_list_));
-
-		while (item != NULL) {
-			clutter_container_remove_actor(CLUTTER_CONTAINER(media_list_), CLUTTER_ACTOR(item));
-			item = g_list_next(item);
-		}
-
-		g_list_free(g_list_first(item));
+		item_list_.clear();
 	}
 
+/*
+	Update the displayed list of media items
+*/
 	void Browser::update_media_list() {
 		clear_media_list();
 
 		std::vector< toolkit::MediaItem > list(library_.list(toolkit::Library::Type::All));
+
+		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
+			item_list_.emplace_back(*i);
+		}
 	}
 }

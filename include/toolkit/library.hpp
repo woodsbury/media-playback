@@ -18,11 +18,22 @@
 #ifndef _TOOLKIT_LIBRARY_HPP
 #define _TOOLKIT_LIBRARY_HPP
 
+#include <string>
 #include <vector>
 #include <core/database.hpp>
 
 namespace toolkit {
 	class MediaItem {
+		std::string title_;
+		std::string uri_;
+
+	public:
+		MediaItem(std::string title, std::string uri);
+		MediaItem(MediaItem const & media_item);
+		MediaItem(MediaItem && media_item);
+
+		std::string title() const;
+		std::string uri() const;
 	};
 
 	class Library

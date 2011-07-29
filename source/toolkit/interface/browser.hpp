@@ -18,6 +18,7 @@
 #ifndef _INTERFACE_BROWSER_HPP
 #define _INTERFACE_BROWSER_HPP
 
+#include <list>
 #include <toolkit/library.hpp>
 
 extern "C" {
@@ -31,11 +32,29 @@ namespace toolkit {
 }
 
 namespace interface {
+	class BrowserItem {
+		toolkit::MediaItem item_;
+
+		ClutterActor * actor_;
+		ClutterContainer * list_;
+
+	public:
+		BrowserItem(toolkit::MediaItem media_item);
+		~BrowserItem();
+
+		ClutterActor * actor() const;
+
+		void addToList(ClutterContainer * list);
+		void removeFromList();
+	};
+
 	class Browser
 		: public Actor {
 		toolkit::InterfacePrivate * p;
 
 		toolkit::Library library_;
+
+		std::list< BrowserItem > item_list_;
 
 		ClutterActor * media_list_;
 

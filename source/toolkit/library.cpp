@@ -20,6 +20,31 @@
 #include <toolkit/library.hpp>
 
 namespace toolkit {
+	MediaItem::MediaItem(std::string title, std::string uri)
+		: title_(title), uri_(uri) {}
+
+	MediaItem::MediaItem(MediaItem const & media_item)
+		: title_(media_item.title_), uri_(media_item.uri_) {}
+
+	MediaItem::MediaItem(MediaItem && media_item) {
+		swap(title_, media_item.title_);
+		swap(uri_, media_item.uri_);
+	}
+
+/*
+	Returns the title of the media item
+*/
+	std::string MediaItem::title() const {
+		return title_;
+	}
+
+/*
+	Returns the URI pointing to the location of the media item
+*/
+	std::string MediaItem::uri() const {
+		return uri_;
+	}
+
 	Library::Library()
 		: core::Database(core::Path::data() + "/library.db") {
 		if (opened() && (tables().size() == 0u)) {
