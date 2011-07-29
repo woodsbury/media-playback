@@ -15,9 +15,17 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <core/filesystem.hpp>
 #include <toolkit/interface.hpp>
 
 int main(int argc, char ** argv) {
+	{
+		core::Path data_path(core::Path::data());
+		if (!data_path.exists()) {
+			data_path.create();
+		}
+	}
+
 	toolkit::Interface interface;
 
 	if (argc > 1) {

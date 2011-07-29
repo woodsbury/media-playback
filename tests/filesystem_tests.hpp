@@ -87,6 +87,18 @@ namespace test { namespace filesystem {
 		equal(relative_parent.toString(), ::core::Path::current().substr(0, relative_parent.toString().length()));
 	}
 
+/*
+	Test for creating directories from paths
+*/
+	void makeDir() {
+		::core::Path path("tests/aaaaaaaaaaaaa");
+		isFalse(path.exists());
+		isTrue(path.create());
+		isTrue(path.exists());
+		isTrue(::core::Path::remove(path.toString()));
+		isFalse(path.exists());
+	}
+
 	void timeFs() {
 		::core::Path path("..");
 		path.makeAbsolute();
@@ -110,6 +122,7 @@ namespace test { namespace filesystem {
 		createPaths();
 		checkPaths();
 		absolutePaths();
+		makeDir();
 
 		time(timeFs, 1000);
 	}

@@ -21,6 +21,7 @@
 extern "C" {
 #include <pwd.h>
 #include <unistd.h>
+#include <sys/stat.h>
 }
 
 namespace {
@@ -30,6 +31,10 @@ namespace {
 }
 
 namespace core {
+	unsigned long const Read(4ul);
+	unsigned long const Write(2ul);
+	unsigned long const Execute(1ul);
+
 	Path::Path(std::string const path) {
 		set(path);
 	}
@@ -97,6 +102,46 @@ namespace core {
 		}
 
 		set(current() + "/" + toString());
+		return true;
+	}
+
+/*
+	Create the path as a series of directories
+*/
+	bool Path::create() {
+		if (path_.size() == 0) {
+			return true;
+		}
+
+		std::string path;
+		if (!absolute_) {
+			path = current();
+		}
+
+		struct stat status;
+		bool new_directory = false;
+
+		for (std::vector< std::string >::const_iterator i = path_.begin(); i != path_.end(); ++i) {
+			path.push_back(separator);
+			path.append(*i);
+
+			if (new_directory) {
+				// A directory has already needed to be created, can assume the children don't exist
+				mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+				continue;
+			}
+
+			errno = 0;
+			if (stat(path.c_str(), &status) != 0) {
+				if (errno == ENOENT) {
+					new_directory = true;
+					mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+				} else {
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
@@ -187,5 +232,12 @@ namespace core {
 */
 	bool Path::exists(std::string const path) {
 		return access(path.c_str(), F_OK) == 0;
+	}
+
+/*
+	Removes a directory
+*/
+	bool Path::remove(std::string const path) {
+		return rmdir(path.c_str()) == 0;
 	}
 }

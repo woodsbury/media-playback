@@ -27,6 +27,10 @@ namespace core {
 		bool absolute_;
 
 	public:
+		static unsigned long const Read;
+		static unsigned long const Write;
+		static unsigned long const Execute;
+
 		Path(std::string const path = std::string());
 
 		void set(std::string const path = std::string());
@@ -36,6 +40,8 @@ namespace core {
 
 		bool makeAbsolute();
 
+		bool create();
+
 		std::string toString() const;
 
 		static std::string current();
@@ -43,6 +49,7 @@ namespace core {
 		static std::string home();
 
 		static bool exists(std::string const path);
+		static bool remove(std::string const path);
 	};
 }
 
