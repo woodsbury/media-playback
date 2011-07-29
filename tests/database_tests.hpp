@@ -172,6 +172,32 @@ namespace test { namespace database {
 		equal(stmt.toText(0u), "abc");
 	}
 
+/*
+	Test for checking database tables
+*/
+	void checkTables() {
+		::core::Database db;
+		::core::Statement stmt(db, "CREATE TABLE test (col1 PRIMARY KEY)");
+		isTrue(stmt.execute());
+		std::vector< std::string > tables = db.tables();
+		equal(tables.size(), 1u);
+		equal(tables.at(0), "test");
+
+		::core::Statement stmt2(db, "CREATE TABLE test2 (col1 PRIMARY KEY)");
+		isTrue(stmt2.execute());
+		tables = db.tables();
+		equal(tables.size(), 2u);
+		isTrue((tables.at(0) == "test") || (tables.at(0) == "test2"));
+		isTrue((tables.at(1) == "test") || (tables.at(1) == "test2"));
+		notEqual(tables.at(0), tables.at(1));
+
+		::core::Statement stmt3(db, "DROP TABLE test");
+		isTrue(stmt3.execute());
+		tables = db.tables();
+		equal(tables.size(), 1u);
+		equal(tables.at(0), "test2");
+	}
+
 	void timeDb() {
 		::core::Database db;
 		if (!db.opened()) {
@@ -224,6 +250,7 @@ namespace test { namespace database {
 		stmtHasData();
 		insertData();
 		bindValues();
+		checkTables();
 
 		time(timeDb, 50);
 	}

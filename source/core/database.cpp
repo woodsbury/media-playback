@@ -174,6 +174,27 @@ namespace core {
 		return p->opened();
 	}
 
+/*
+	Returns a list of tables in the database
+*/
+	std::vector< std::string > Database::tables() {
+		Statement statement(*this, "SELECT name FROM sqlite_master WHERE type = 'table'");
+		if (!statement.valid()) {
+			return std::vector< std::string >();
+		}
+
+		if (!(statement.execute() && statement.hasData())) {
+			return std::vector< std::string >();
+		}
+
+		std::vector< std::string > tables;
+		do {
+			tables.push_back(statement.toText(0u));
+		} while (statement.nextRow());
+
+		return tables;
+	}
+
 // Prepared statement
 	StatementPrivate::StatementPrivate(Database & db, char const * statement)
 		: has_data_(false), db_(db.p) {

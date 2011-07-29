@@ -45,6 +45,8 @@ namespace core {
 		~Database();
 
 		bool opened() const;
+
+		std::vector< std::string > tables();
 	};
 
 /*
