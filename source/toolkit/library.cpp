@@ -15,12 +15,21 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <debug.hpp>
 #include <core/filesystem.hpp>
 #include <toolkit/library.hpp>
 
 namespace toolkit {
 	Library::Library()
-		: core::Database(core::Path::data() + "/library.db") {}
+		: core::Database(core::Path::data() + "/library.db") {
+		if (opened() && (tables().size() == 0u)) {
+			// Library database hasn't been initialised yet
+			dprint("Creating library");
+			core::Statement create_item_table(*this,
+					"CREATE TABLE items (key INTEGER PRIMARY KEY, name TEXT, uri TEXT, type TEXT)");
+			assert(create_item_table.execute());
+		}
+	}
 
 	std::vector< MediaItem > Library::list(Library::Type type) {
 		return std::vector< MediaItem >();
