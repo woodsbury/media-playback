@@ -184,10 +184,19 @@ namespace interface {
 		clutter_actor_set_height(seek_line_, 4.0f);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_line_, NULL, NULL);
 
-		seek_handle_ = clutter_rectangle_new_with_color(&white);
-		clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(seek_handle_), &black);
-		clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(seek_handle_), 1);
-		clutter_actor_set_size(seek_handle_, 10.0f, 8.0f);
+		seek_handle_ = clutter_cairo_texture_new(12, 10);
+
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(seek_handle_));
+
+		cairo_rectangle(context, 1.0, 1.0, 10.0, 8.0);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
 		g_signal_connect(seek_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
 				seek_handle_);
 		g_signal_connect(seek_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
