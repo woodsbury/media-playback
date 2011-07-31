@@ -33,13 +33,19 @@ namespace toolkit {
 
 namespace interface {
 	class BrowserItem {
+		static gboolean item_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+
+		toolkit::InterfacePrivate * p;
+
 		toolkit::MediaItem item_;
 
 		ClutterActor * actor_;
 		ClutterContainer * list_;
 
+		void item_clicked();
+
 	public:
-		BrowserItem(toolkit::MediaItem media_item);
+		BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private);
 		~BrowserItem();
 
 		ClutterActor * actor() const;

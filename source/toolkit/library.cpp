@@ -57,6 +57,8 @@ namespace toolkit {
 	}
 
 	std::vector< MediaItem > Library::list(Library::Type type) {
-		return std::vector< MediaItem >();
+		std::vector< MediaItem > items;
+
+		return items;
 	}
 }

@@ -16,23 +16,51 @@
 */
 
 #include <utility>
+#include <debug.hpp>
 
 #include "browser.hpp"
 #include "interface_private.hpp"
 
 namespace interface {
-	BrowserItem::BrowserItem(toolkit::MediaItem media_item)
-		: item_(std::move(media_item)), actor_(nullptr), list_(nullptr) {}
+	gboolean BrowserItem::item_clicked_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+		reinterpret_cast< BrowserItem * >(data)->item_clicked();
+		return TRUE;
+	}
+
+	BrowserItem::BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private)
+		: p(interface_private), item_(std::move(media_item)), actor_(nullptr), list_(nullptr) {}
 
 	BrowserItem::~BrowserItem() {
 		removeFromList();
+	}
+
+	void BrowserItem::item_clicked() {
+		p->play(item_.uri().c_str(), item_.title().c_str());
 	}
 
 /*
 	Add an actor representing this item to the given container
 */
 	void BrowserItem::addToList(ClutterContainer * list) {
-		;
+		removeFromList();
+		assert(actor_ == nullptr);
+		assert(list_ == nullptr);
+
+		dprint("Adding");
+		ClutterLayoutManager * item_layout = clutter_box_layout_new();
+		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(item_layout), TRUE);
+		actor_ = clutter_box_new(item_layout);
+		clutter_actor_set_reactive(actor_, TRUE);
+		g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
+
+		ClutterColor white = {255, 255, 255, 255};
+		ClutterActor * title = clutter_text_new_full("Sans", item_.title().c_str(), &white);
+		g_signal_connect(title, "button-press-event", G_CALLBACK(item_clicked_cb), this);
+		clutter_container_add_actor(CLUTTER_CONTAINER(actor_), title);
+
+		clutter_container_add_actor(list, actor_);
+
+		list_ = list;
 	}
 
 /*
@@ -53,15 +81,19 @@ namespace interface {
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(main_layout), TRUE);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
-		clutter_actor_add_constraint(actor_,
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
+		clutter_actor_add_constraint(actor_,
+				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -20.0f));
 
 		ClutterLayoutManager * media_list_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
 		clutter_flow_layout_set_homogeneous(CLUTTER_FLOW_LAYOUT(media_list_layout), TRUE);
 		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
 		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
 		media_list_ = clutter_box_new(media_list_layout);
+		clutter_actor_add_constraint(media_list_,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		clutter_actor_add_constraint(media_list_,
+				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_HEIGHT, -20.0f));
 		clutter_box_pack(CLUTTER_BOX(actor_), media_list_, NULL, NULL);
 
 		update_media_list();
@@ -83,7 +115,8 @@ namespace interface {
 		std::vector< toolkit::MediaItem > list(library_.list(toolkit::Library::Type::All));
 
 		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
-			item_list_.emplace_back(*i);
+			item_list_.emplace_back(*i, p);
+			item_list_.back().addToList(CLUTTER_CONTAINER(media_list_));
 		}
 	}
 }
