@@ -104,6 +104,38 @@ namespace interface {
 		}
 	}
 
+	gboolean Browser::scroll_dragged_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		bool dragged = false;
+
+		switch (clutter_event_type(event)) {
+		case CLUTTER_BUTTON_PRESS:
+			if (clutter_event_get_button(event) == 1) {
+				dragged = true;
+			}
+			break;
+		case CLUTTER_MOTION:
+			if ((clutter_event_get_state(event) & CLUTTER_BUTTON1_MASK) != 0) {
+				dragged = true;
+			}
+			break;
+		default:
+			;
+		}
+
+		if (dragged) {
+			gfloat x_click;
+			clutter_event_get_coords(event, &x_click, NULL);
+
+			reinterpret_cast< Browser * >(data)->scroll_dragged(x_click);
+		}
+
+		return TRUE;
+	}
+
+	void Browser::height_changed_cb(GObject *, GParamSpec *, gpointer data) {
+		reinterpret_cast< Browser * >(data)->height_changed();
+	}
+
 	Browser::Browser(toolkit::InterfacePrivate * interface_private)
 		: p(interface_private) {
 		ClutterLayoutManager * main_layout = clutter_box_layout_new();
@@ -113,7 +145,13 @@ namespace interface {
 		clutter_actor_add_constraint(actor_,
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 		clutter_actor_add_constraint(actor_,
-				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -20.0f));
+				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -80.0f));
+
+		ClutterLayoutManager * media_browser_layout = clutter_box_layout_new();
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(media_browser_layout), 20u);
+		ClutterActor * media_browser = clutter_box_new(media_browser_layout);
+		clutter_actor_add_constraint(media_browser,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 
 		ClutterLayoutManager * media_list_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
 		clutter_flow_layout_set_homogeneous(CLUTTER_FLOW_LAYOUT(media_list_layout), TRUE);
@@ -121,10 +159,53 @@ namespace interface {
 		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
 		media_list_ = clutter_box_new(media_list_layout);
 		clutter_actor_add_constraint(media_list_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
-		clutter_actor_add_constraint(media_list_,
 				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_HEIGHT, -20.0f));
-		clutter_box_pack(CLUTTER_BOX(actor_), media_list_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
+
+		ClutterLayoutManager * scroll_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_CENTER,
+				CLUTTER_BIN_ALIGNMENT_FIXED);
+		ClutterActor * scroll = clutter_box_new(scroll_layout);
+
+		scroll_hidden_ = clutter_rectangle_new();
+		clutter_actor_set_width(scroll_hidden_, 10.0f);
+		clutter_actor_set_opacity(scroll_hidden_, 0);
+		clutter_actor_set_reactive(scroll_hidden_, TRUE);
+		g_signal_connect(scroll_hidden_, "button-press-event", G_CALLBACK(scroll_dragged_cb), this);
+		g_signal_connect(scroll_hidden_, "motion-event", G_CALLBACK(scroll_dragged_cb), this);
+		clutter_box_pack(CLUTTER_BOX(scroll), scroll_hidden_, NULL, NULL);
+
+		ClutterColor black = {0, 0, 0, 255};
+		ClutterColor white = {255, 255, 255, 255};
+		scroll_line_ = clutter_rectangle_new_with_color(&white);
+		clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(scroll_line_), &black);
+		clutter_rectangle_set_border_width(CLUTTER_RECTANGLE(scroll_line_), 1);
+		clutter_actor_set_width(scroll_line_, 4.0f);
+		clutter_box_pack(CLUTTER_BOX(scroll), scroll_line_, NULL, NULL);
+
+		scroll_handle_ = clutter_cairo_texture_new(10, 12);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(scroll_handle_));
+
+		cairo_rectangle(context, 1.0, 1.0, 8.0, 10.0);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		g_signal_connect(scroll_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				scroll_handle_);
+		g_signal_connect(scroll_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				scroll_handle_);
+		clutter_box_pack(CLUTTER_BOX(scroll), scroll_handle_, NULL, NULL);
+
+		clutter_box_pack(CLUTTER_BOX(media_browser), scroll, NULL, NULL);
+
+		clutter_box_pack(CLUTTER_BOX(actor_), media_browser, NULL, NULL);
+
+		g_signal_connect(clutter_stage_get_default(), "notify::height", G_CALLBACK(height_changed_cb), this);
 
 		update_media_list();
 	}
@@ -134,6 +215,17 @@ namespace interface {
 */
 	void Browser::clear_media_list() {
 		item_list_.clear();
+	}
+
+/*
+	Called whenever the scroll handle is dragged
+*/
+	void Browser::scroll_dragged(float x) {
+		gfloat x_line;
+		clutter_actor_get_transformed_position(scroll_line_, &x_line, NULL);
+		gfloat line_width = clutter_actor_get_width(scroll_line_);
+
+		gfloat progress = (x - x_line) / line_width;
 	}
 
 /*
@@ -148,5 +240,13 @@ namespace interface {
 			item_list_.emplace_back(*i, p);
 			item_list_.back().addToList(CLUTTER_CONTAINER(media_list_));
 		}
+	}
+
+/*
+	Called whenever the stage's height changes
+*/
+	void Browser::height_changed() {
+		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
 	}
 }

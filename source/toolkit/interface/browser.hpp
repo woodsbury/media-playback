@@ -56,6 +56,9 @@ namespace interface {
 
 	class Browser
 		: public Actor {
+		static gboolean scroll_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static void height_changed_cb(GObject * object, GParamSpec * param, gpointer data);
+
 		toolkit::InterfacePrivate * p;
 
 		toolkit::Library library_;
@@ -64,8 +67,15 @@ namespace interface {
 
 		ClutterActor * media_list_;
 
+		ClutterActor * scroll_hidden_;
+		ClutterActor * scroll_line_;
+		ClutterActor * scroll_handle_;
+
 		void clear_media_list();
 		void update_media_list();
+
+		void scroll_dragged(float x);
+		void height_changed();
 
 	public:
 		Browser(toolkit::InterfacePrivate * interface_private);
