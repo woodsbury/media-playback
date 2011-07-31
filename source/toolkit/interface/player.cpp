@@ -389,6 +389,12 @@ namespace interface {
 
 		cairo_destroy(context);
 
+		// Clear the image in the video texture
+		unsigned char blank_data[3] = {0, 0, 0};
+		CoglHandle blank = cogl_texture_new_from_data(1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_RGB_888, COGL_PIXEL_FORMAT_ANY, 0, blank_data);
+		clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(media_), blank);
+		cogl_handle_unref(blank);
+
 		clutter_media_set_uri(media_, uri);
 		clutter_media_set_playing(media_, TRUE);
 		draw_play_button();
