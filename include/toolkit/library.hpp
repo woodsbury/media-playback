@@ -38,6 +38,8 @@ namespace toolkit {
 
 	class Library
 		: private core::Database {
+		core::Statement * list_stmt_;
+
 	public:
 		enum class Type {
 			All,
@@ -46,6 +48,7 @@ namespace toolkit {
 		};
 
 		Library();
+		~Library();
 
 		std::vector< MediaItem > list(Type type);
 	};

@@ -46,19 +46,52 @@ namespace toolkit {
 	}
 
 	Library::Library()
-		: core::Database(core::Path::data() + "/library.db") {
+		: core::Database(core::Path::data() + "/library.db"), list_stmt_(nullptr) {
 		if (opened() && (tables().size() == 0u)) {
 			// Library database hasn't been initialised yet
 			dprint("Creating library");
 			core::Statement create_item_table(*this,
-					"CREATE TABLE items (key INTEGER PRIMARY KEY, name TEXT, uri TEXT, type TEXT)");
-			assert(create_item_table.execute());
+					"CREATE TABLE items (key INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, uri TEXT, type TEXT)");
+			assert(create_item_table.valid());
+			create_item_table.execute();
 		}
 	}
 
-	std::vector< MediaItem > Library::list(Library::Type type) {
-		std::vector< MediaItem > items;
+	Library::~Library() {
+		delete list_stmt_;
+	}
 
-		return items;
+	std::vector< MediaItem > Library::list(Library::Type type) {
+		if (list_stmt_ == nullptr) {
+			list_stmt_ = new core::Statement(*this, "SELECT name, uri FROM items WHERE type LIKE ?");
+		}
+
+		switch (type) {
+		case Type::All:
+			list_stmt_->bind(1u, "%");
+			break;
+		case Type::Music:
+			list_stmt_->bind(1u, "music");
+			break;
+		case Type::Movies:
+			list_stmt_->bind(1u, "movie");
+			break;
+		}
+
+		assert(list_stmt_->valid());
+		list_stmt_->execute();
+
+		if (list_stmt_->hasData()) {
+			std::vector< MediaItem > items;
+
+			do {
+				items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u));
+			} while (list_stmt_->nextRow());
+
+			return items;
+		}
+
+		dprint("Library empty");
+		return std::vector< MediaItem >();
 	}
 }

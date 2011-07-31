@@ -46,7 +46,6 @@ namespace interface {
 		assert(actor_ == nullptr);
 		assert(list_ == nullptr);
 
-		dprint("Adding");
 		ClutterLayoutManager * item_layout = clutter_box_layout_new();
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(item_layout), TRUE);
 		actor_ = clutter_box_new(item_layout);
