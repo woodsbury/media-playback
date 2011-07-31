@@ -20,15 +20,16 @@
 #include <toolkit/library.hpp>
 
 namespace toolkit {
-	MediaItem::MediaItem(std::string title, std::string uri)
-		: title_(title), uri_(uri) {}
+	MediaItem::MediaItem(std::string title, std::string uri, std::string thumbnail_file)
+		: title_(title), uri_(uri), thumbnail_(thumbnail_file) {}
 
 	MediaItem::MediaItem(MediaItem const & media_item)
-		: title_(media_item.title_), uri_(media_item.uri_) {}
+		: title_(media_item.title_), uri_(media_item.uri_), thumbnail_(media_item.thumbnail_file()) {}
 
 	MediaItem::MediaItem(MediaItem && media_item) {
 		swap(title_, media_item.title_);
 		swap(uri_, media_item.uri_);
+		swap(thumbnail_, media_item.thumbnail_);
 	}
 
 /*
@@ -45,13 +46,21 @@ namespace toolkit {
 		return uri_;
 	}
 
+/*
+	Returns the file with a thumbnail of the media item
+*/
+	std::string MediaItem::thumbnail_file() const {
+		return thumbnail_;
+	}
+
 	Library::Library()
 		: core::Database(core::Path::data() + "/library.db"), list_stmt_(nullptr) {
 		if (opened() && (tables().size() == 0u)) {
 			// Library database hasn't been initialised yet
 			dprint("Creating library");
 			core::Statement create_item_table(*this,
-					"CREATE TABLE items (key INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, uri TEXT, type TEXT)");
+					"CREATE TABLE items "
+					"(key INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, uri TEXT, thumbnail TEXT, type TEXT)");
 			assert(create_item_table.valid());
 			create_item_table.execute();
 		}
@@ -63,7 +72,7 @@ namespace toolkit {
 
 	std::vector< MediaItem > Library::list(Library::Type type) {
 		if (list_stmt_ == nullptr) {
-			list_stmt_ = new core::Statement(*this, "SELECT name, uri FROM items WHERE type LIKE ?");
+			list_stmt_ = new core::Statement(*this, "SELECT name, uri, thumbnail FROM items WHERE type LIKE ?");
 		}
 
 		switch (type) {
@@ -85,7 +94,11 @@ namespace toolkit {
 			std::vector< MediaItem > items;
 
 			do {
-				items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u));
+				if (list_stmt_->dataType(2u) == core::Statement::Type::Null) {
+					items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u));
+				} else {
+					items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u), list_stmt_->toText(2u));
+				}
 			} while (list_stmt_->nextRow());
 
 			return items;

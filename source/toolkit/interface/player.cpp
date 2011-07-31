@@ -227,6 +227,7 @@ namespace interface {
 			// Playing, draw pause button
 			cairo_rectangle(context, 4.0, 2.0, 5.0, 16.0);
 			cairo_rectangle(context, 12.0, 2.0, 5.0, 16.0);
+
 			cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
 			cairo_fill_preserve(context);
 			cairo_set_line_width(context, 1.0);

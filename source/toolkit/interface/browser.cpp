@@ -15,8 +15,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <utility>
+#include <algorithm>
 #include <debug.hpp>
+#include <core/filesystem.hpp>
 
 #include "browser.hpp"
 #include "interface_private.hpp"
@@ -34,6 +35,9 @@ namespace interface {
 		removeFromList();
 	}
 
+/*
+	Called whenever the item is clicked
+*/
 	void BrowserItem::item_clicked() {
 		p->play(item_.uri().c_str(), item_.title().c_str());
 	}
@@ -52,10 +56,37 @@ namespace interface {
 		clutter_actor_set_reactive(actor_, TRUE);
 		g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
 
+		ClutterActor * thumbnail = clutter_cairo_texture_new(176, 99);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(thumbnail));
+
+		if (!item_.thumbnail_file().empty() && core::Path::exists(item_.thumbnail_file())) {
+			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnail_file().c_str());
+
+			double scale_factor = std::min(176.0/cairo_image_surface_get_width(image),
+					99.0/cairo_image_surface_get_height(image));
+			cairo_translate(context, 88.0 - ((cairo_image_surface_get_width(image) * scale_factor) / 2.0), 0.0);
+			cairo_scale(context, scale_factor, scale_factor);
+
+			cairo_set_source_surface(context, image, 0.0, 0.0);
+			cairo_paint(context);
+
+			cairo_surface_destroy(image);
+		} else {
+			// Draw generic thumbnail
+			cairo_rectangle(context, 1.0, 1.0, 174.0, 97.0);
+
+			cairo_set_source_rgb(context, 0.3, 0.3, 0.4);
+			cairo_fill(context);
+		}
+
+		cairo_destroy(context);
+
+		clutter_box_pack(CLUTTER_BOX(actor_), thumbnail, NULL, NULL);
+
 		ClutterColor white = {255, 255, 255, 255};
 		ClutterActor * title = clutter_text_new_full("Sans", item_.title().c_str(), &white);
-		g_signal_connect(title, "button-press-event", G_CALLBACK(item_clicked_cb), this);
-		clutter_container_add_actor(CLUTTER_CONTAINER(actor_), title);
+		clutter_box_pack(CLUTTER_BOX(actor_), title, NULL, NULL);
 
 		clutter_container_add_actor(list, actor_);
 

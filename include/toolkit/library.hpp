@@ -26,14 +26,16 @@ namespace toolkit {
 	class MediaItem {
 		std::string title_;
 		std::string uri_;
+		std::string thumbnail_;
 
 	public:
-		MediaItem(std::string title, std::string uri);
+		MediaItem(std::string title, std::string uri, std::string thumbnail_file = std::string());
 		MediaItem(MediaItem const & media_item);
 		MediaItem(MediaItem && media_item);
 
 		std::string title() const;
 		std::string uri() const;
+		std::string thumbnail_file() const;
 	};
 
 	class Library
