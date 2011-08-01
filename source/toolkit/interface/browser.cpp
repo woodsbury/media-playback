@@ -86,6 +86,10 @@ namespace interface {
 
 		ClutterColor white = {255, 255, 255, 255};
 		ClutterActor * title = clutter_text_new_full("Sans", item_.title().c_str(), &white);
+		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_highlight_on_cb),
+				title);
+		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_highlight_off_cb),
+				title);
 		clutter_box_pack(CLUTTER_BOX(actor_), title, NULL, NULL);
 
 		clutter_container_add_actor(list, actor_);
@@ -158,8 +162,6 @@ namespace interface {
 		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
 		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
 		media_list_ = clutter_box_new(media_list_layout);
-		clutter_actor_add_constraint(media_list_,
-				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_HEIGHT, -20.0f));
 		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
 
 		ClutterLayoutManager * scroll_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_CENTER,
