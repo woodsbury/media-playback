@@ -40,6 +40,7 @@ namespace toolkit {
 
 	class Library
 		: private core::Database {
+		core::Statement * count_stmt_;
 		core::Statement * list_stmt_;
 
 	public:
@@ -52,7 +53,9 @@ namespace toolkit {
 		Library();
 		~Library();
 
-		std::vector< MediaItem > list(Type type);
+		unsigned long long count(Type type);
+		std::vector< MediaItem > list(Type type, unsigned long long size = 0);
+		std::vector< MediaItem > listNext(unsigned long long size = 0);
 	};
 }
 

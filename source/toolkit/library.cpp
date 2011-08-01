@@ -19,6 +19,54 @@
 #include <core/filesystem.hpp>
 #include <toolkit/library.hpp>
 
+namespace {
+/*
+	Binds the type to the specified index in the statement
+*/
+	void bind_type(core::Statement * stmt, toolkit::Library::Type type, unsigned int index) {
+		assert(stmt != nullptr);
+
+		switch (type) {
+		case toolkit::Library::Type::All:
+			stmt->bind(index, "%");
+			break;
+		case toolkit::Library::Type::Music:
+			stmt->bind(index, "music");
+			break;
+		case toolkit::Library::Type::Movies:
+			stmt->bind(index, "movie");
+			break;
+		}
+	}
+
+/*
+	Fetches the next specified number of items
+*/
+	std::vector< toolkit::MediaItem > fetch(core::Statement * stmt, unsigned long long size) {
+		if ((stmt == nullptr) || (!stmt->hasData())) {
+			return std::vector< toolkit::MediaItem >();
+		}
+
+		std::vector< toolkit::MediaItem > items;
+		unsigned long long i = 0;
+
+		if (size == 0) {
+			size = items.max_size();
+		}
+
+		do {
+			if (stmt->dataType(2u) == core::Statement::Type::Null) {
+				items.emplace_back(stmt->toText(0u), stmt->toText(1u));
+			} else {
+				items.emplace_back(stmt->toText(0u), stmt->toText(1u), stmt->toText(2u));
+			}
+			++i;
+		} while (stmt->nextRow() && (i < size));
+
+		return items;
+	}
+}
+
 namespace toolkit {
 	MediaItem::MediaItem(std::string title, std::string uri, std::string thumbnail_file)
 		: title_(title), uri_(uri), thumbnail_(thumbnail_file) {}
@@ -54,13 +102,14 @@ namespace toolkit {
 	}
 
 	Library::Library()
-		: core::Database(core::Path::data() + "/library.db"), list_stmt_(nullptr) {
+		: core::Database(core::Path::data() + "/library.db"), count_stmt_(nullptr), list_stmt_(nullptr) {
 		if (opened() && (tables().size() == 0u)) {
 			// Library database hasn't been initialised yet
 			dprint("Creating library");
 			core::Statement create_item_table(*this,
 					"CREATE TABLE items "
-					"(key INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, uri TEXT, thumbnail TEXT, type TEXT)");
+					"(key INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
+					"uri TEXT NOT NULL, thumbnail TEXT, type TEXT)");
 			assert(create_item_table.valid());
 			create_item_table.execute();
 		}
@@ -70,41 +119,45 @@ namespace toolkit {
 		delete list_stmt_;
 	}
 
-	std::vector< MediaItem > Library::list(Library::Type type) {
-		if (list_stmt_ == nullptr) {
-			list_stmt_ = new core::Statement(*this, "SELECT name, uri, thumbnail FROM items WHERE type LIKE ?");
+/*
+	Count the number of items in the media library of a given type
+*/
+	unsigned long long Library::count(Library::Type type) {
+		if (count_stmt_ == nullptr) {
+			count_stmt_ = new core::Statement(*this, "SELECT COUNT(key) FROM items WHERE type LIKE ?");
 		}
 
-		switch (type) {
-		case Type::All:
-			list_stmt_->bind(1u, "%");
-			break;
-		case Type::Music:
-			list_stmt_->bind(1u, "music");
-			break;
-		case Type::Movies:
-			list_stmt_->bind(1u, "movie");
-			break;
+		bind_type(count_stmt_, type, 1u);
+
+		assert(count_stmt_->valid());
+		count_stmt_->execute();
+		assert(count_stmt_->hasData());
+
+		return count_stmt_->toInteger(0u);
+	}
+
+/*
+	Return the specified number of items of the given type from the media library
+*/
+	std::vector< MediaItem > Library::list(Library::Type type, unsigned long long size) {
+		if (list_stmt_ == nullptr) {
+			list_stmt_ = new core::Statement(*this, "SELECT name, uri, thumbnail FROM items WHERE type LIKE ?");
+		} else {
+			list_stmt_->reset();
 		}
+
+		bind_type(list_stmt_, type, 1u);
 
 		assert(list_stmt_->valid());
 		list_stmt_->execute();
 
-		if (list_stmt_->hasData()) {
-			std::vector< MediaItem > items;
+		return fetch(list_stmt_, size);
+	}
 
-			do {
-				if (list_stmt_->dataType(2u) == core::Statement::Type::Null) {
-					items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u));
-				} else {
-					items.emplace_back(list_stmt_->toText(0u), list_stmt_->toText(1u), list_stmt_->toText(2u));
-				}
-			} while (list_stmt_->nextRow());
-
-			return items;
-		}
-
-		dprint("Library empty");
-		return std::vector< MediaItem >();
+/*
+	Fetch the next specified number of items in the list
+*/
+	std::vector< MediaItem > Library::listNext(unsigned long long size) {
+		return fetch(list_stmt_, size);
 	}
 }
