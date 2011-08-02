@@ -52,8 +52,6 @@ namespace toolkit {
 
 		void browse();
 		void play(char const * uri, char const * title);
-
-		inline void start() const;
 	};
 }
 

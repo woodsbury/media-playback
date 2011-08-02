@@ -49,6 +49,7 @@ namespace toolkit {
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel.actor());
 
+		clutter_actor_hide_all(player.actor());
 		browse();
 	}
 
@@ -56,6 +57,7 @@ namespace toolkit {
 	Browse the media library
 */
 	void InterfacePrivate::browse() {
+		clutter_actor_detach_animation(browser.actor());
 		clutter_actor_animate(player.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
 				"signal::completed", interface::Actor::hide_after_cb, player.actor(), NULL);
 		clutter_actor_show_all(browser.actor());
@@ -69,6 +71,7 @@ namespace toolkit {
 	Plays the URI
 */
 	void InterfacePrivate::play(char const * uri, char const * title) {
+		clutter_actor_detach_animation(player.actor());
 		clutter_actor_animate(browser.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
 				"signal::completed", interface::Actor::hide_after_cb, browser.actor(), NULL);
 		clutter_actor_show_all(player.actor());
@@ -78,14 +81,6 @@ namespace toolkit {
 		panel.setAutoHide(true);
 
 		player.play(uri, title);
-	}
-
-/*
-	Show the stage and start the main loop
-*/
-	void InterfacePrivate::start() const {
-		clutter_actor_show(clutter_stage_get_default());
-		clutter_main();
 	}
 
 	Interface::Interface()
@@ -108,7 +103,11 @@ namespace toolkit {
 		p->play(uri.c_str(), title.empty() ? NULL : title.c_str());
 	}
 
+/*
+	Show the stage and start the main loop
+*/
 	void Interface::start() const {
-		p->start();
+		clutter_actor_show(clutter_stage_get_default());
+		clutter_main();
 	}
 }
