@@ -20,8 +20,8 @@
 
 int main(int argc, char ** argv) {
 	{
-		core::Path data_path(core::Path::data());
-		if (!data_path.exists()) {
+		if (!core::Path::exists(core::Path::data())) {
+			core::Path data_path(core::Path::data());
 			data_path.create();
 		}
 	}

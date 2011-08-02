@@ -29,27 +29,7 @@ namespace interface {
 	}
 
 	BrowserItem::BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private)
-		: p(interface_private), item_(std::move(media_item)), actor_(nullptr), list_(nullptr) {}
-
-	BrowserItem::~BrowserItem() {
-		removeFromList();
-	}
-
-/*
-	Called whenever the item is clicked
-*/
-	void BrowserItem::item_clicked() {
-		p->play(item_.uri().c_str(), item_.title().c_str());
-	}
-
-/*
-	Add an actor representing this item to the given container
-*/
-	void BrowserItem::addToList(ClutterContainer * list) {
-		removeFromList();
-		assert(actor_ == nullptr);
-		assert(list_ == nullptr);
-
+		: p(interface_private), item_(std::move(media_item)) {
 		ClutterLayoutManager * item_layout = clutter_box_layout_new();
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(item_layout), TRUE);
 		actor_ = clutter_box_new(item_layout);
@@ -92,20 +72,18 @@ namespace interface {
 				title);
 		clutter_box_pack(CLUTTER_BOX(actor_), title, NULL, NULL);
 
-		clutter_container_add_actor(list, actor_);
+		g_object_ref_sink(actor_);
+	}
 
-		list_ = list;
+	BrowserItem::~BrowserItem() {
+		g_object_unref(actor_);
 	}
 
 /*
-	Remove the actor represented by this item from its container
+	Called whenever the item is clicked
 */
-	void BrowserItem::removeFromList() {
-		if ((list_ != nullptr) && (actor_ != nullptr)) {
-			clutter_container_remove_actor(list_, actor_);
-			list_ = nullptr;
-			actor_ = nullptr;
-		}
+	void BrowserItem::item_clicked() {
+		p->play(item_.uri().c_str(), item_.title().c_str());
 	}
 
 	gboolean Browser::scroll_dragged_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
@@ -240,7 +218,7 @@ namespace interface {
 
 		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
 			item_list_.emplace_back(*i, p);
-			item_list_.back().addToList(CLUTTER_CONTAINER(media_list_));
+			clutter_box_pack(CLUTTER_BOX(media_list_), item_list_.back().actor(), NULL, NULL);
 		}
 	}
 

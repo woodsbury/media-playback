@@ -29,24 +29,31 @@ namespace interface {
 
 	public:
 /*
-	Removes a highlight from the actor
+		Removes a highlight from the actor
 */
-	static gboolean actor_highlight_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
-		clutter_actor_clear_effects(reinterpret_cast< ClutterActor * >(data));
-		return TRUE;
-	}
-
-/*
-	Highlights the actor
-*/
-	static gboolean actor_highlight_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
-		if (clutter_feature_available(CLUTTER_FEATURE_SHADERS_GLSL)) {
-			ClutterColor highlight = {0, 230, 100, 255};
-			clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
+		static gboolean actor_highlight_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+			clutter_actor_clear_effects(reinterpret_cast< ClutterActor * >(data));
+			return TRUE;
 		}
 
-		return TRUE;
-	}
+/*
+		Highlights the actor
+*/
+		static gboolean actor_highlight_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+			if (clutter_feature_available(CLUTTER_FEATURE_SHADERS_GLSL)) {
+				ClutterColor highlight = {0, 230, 100, 255};
+				clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
+			}
+
+			return TRUE;
+		}
+
+/*
+		Hides the actor after an animation
+*/
+		static void hide_after_cb(ClutterAnimation *, ClutterActor * actor) {
+			clutter_actor_hide_all(actor);
+		}
 
 		ClutterActor * actor() {
 			return actor_;

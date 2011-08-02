@@ -56,8 +56,11 @@ namespace toolkit {
 	Browse the media library
 */
 	void InterfacePrivate::browse() {
+		clutter_actor_animate(player.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
+				"signal::completed", interface::Actor::hide_after_cb, player.actor(), NULL);
 		clutter_actor_show_all(browser.actor());
-		clutter_actor_hide_all(player.actor());
+		clutter_actor_animate(browser.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+
 		clutter_actor_grab_key_focus(browser.actor());
 		panel.setAutoHide(false);
 	}
@@ -66,8 +69,11 @@ namespace toolkit {
 	Plays the URI
 */
 	void InterfacePrivate::play(char const * uri, char const * title) {
+		clutter_actor_animate(browser.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
+				"signal::completed", interface::Actor::hide_after_cb, browser.actor(), NULL);
 		clutter_actor_show_all(player.actor());
-		clutter_actor_hide_all(browser.actor());
+		clutter_actor_animate(player.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+
 		clutter_actor_grab_key_focus(player.actor());
 		panel.setAutoHide(true);
 

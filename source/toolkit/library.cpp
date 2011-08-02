@@ -102,7 +102,8 @@ namespace toolkit {
 	}
 
 	Library::Library()
-		: core::Database(core::Path::data() + "/library.db"), count_stmt_(nullptr), list_stmt_(nullptr) {
+		: core::Database(core::Path::data() + "/library.db"), add_stmt_(nullptr), count_stmt_(nullptr),
+		  list_stmt_(nullptr) {
 		if (opened() && (tables().size() == 0u)) {
 			// Library database hasn't been initialised yet
 			dprint("Creating library");
@@ -116,7 +117,34 @@ namespace toolkit {
 	}
 
 	Library::~Library() {
+		delete add_stmt_;
+		delete count_stmt_;
 		delete list_stmt_;
+	}
+
+/*
+	Adds a new entry to the library
+*/
+	void Library::add(std::string title, std::string uri, Library::Type type, std::string thumbnail_file) {
+		if (add_stmt_ == nullptr) {
+			add_stmt_ = new core::Statement(*this,
+					"INSERT INTO items (name, uri, type, thumbnail) VALUES (?, ?, ?, ?)");
+		} else {
+			add_stmt_->reset();
+		}
+
+		add_stmt_->bind(1u, title);
+		add_stmt_->bind(2u, uri);
+		bind_type(add_stmt_, type, 3u);
+
+		if (thumbnail_file.empty()) {
+			add_stmt_->bind(4u);
+		} else {
+			add_stmt_->bind(4u, thumbnail_file);
+		}
+
+		assert(add_stmt_->valid());
+		add_stmt_->execute();
 	}
 
 /*
@@ -125,6 +153,8 @@ namespace toolkit {
 	unsigned long long Library::count(Library::Type type) {
 		if (count_stmt_ == nullptr) {
 			count_stmt_ = new core::Statement(*this, "SELECT COUNT(key) FROM items WHERE type LIKE ?");
+		} else {
+			count_stmt_->reset();
 		}
 
 		bind_type(count_stmt_, type, 1u);
