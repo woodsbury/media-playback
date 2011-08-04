@@ -33,7 +33,7 @@ namespace interface {
 */
 		static gboolean actor_highlight_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 			clutter_actor_clear_effects(reinterpret_cast< ClutterActor * >(data));
-			return TRUE;
+			return FALSE;
 		}
 
 /*
@@ -45,7 +45,23 @@ namespace interface {
 				clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
 			}
 
-			return TRUE;
+			return FALSE;
+		}
+
+/*
+		Scales the actor
+*/
+		static gboolean actor_scale_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+			clutter_actor_set_scale_with_gravity(CLUTTER_ACTOR(data), 1.1, 1.1, CLUTTER_GRAVITY_CENTER);
+			return FALSE;
+		}
+
+/*
+		Removes scaling from an actor
+*/
+		static gboolean actor_scale_off_cb(ClutterActor *, ClutterEvent *, gpointer data) {
+			clutter_actor_set_scale(CLUTTER_ACTOR(data), 1.0, 1.0);
+			return FALSE;
 		}
 
 /*

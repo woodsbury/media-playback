@@ -40,6 +40,10 @@ namespace interface {
 
 		toolkit::MediaItem item_;
 
+		ClutterActor * thumbnail_;
+
+		void draw_thumbnail();
+
 		void item_clicked();
 
 	public:
@@ -67,7 +71,7 @@ namespace interface {
 		void clear_media_list();
 		void update_media_list();
 
-		void scroll_dragged(float x);
+		void scroll_dragged(float y);
 		void height_changed();
 
 	public:

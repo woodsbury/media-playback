@@ -36,33 +36,13 @@ namespace interface {
 		clutter_actor_set_reactive(actor_, TRUE);
 		g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
 
-		ClutterActor * thumbnail = clutter_cairo_texture_new(176, 99);
-
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(thumbnail));
-
-		if (!item_.thumbnail_file().empty() && core::Path::exists(item_.thumbnail_file())) {
-			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnail_file().c_str());
-
-			double scale_factor = std::min(176.0/cairo_image_surface_get_width(image),
-					99.0/cairo_image_surface_get_height(image));
-			cairo_translate(context, 88.0 - ((cairo_image_surface_get_width(image) * scale_factor) / 2.0), 0.0);
-			cairo_scale(context, scale_factor, scale_factor);
-
-			cairo_set_source_surface(context, image, 0.0, 0.0);
-			cairo_paint(context);
-
-			cairo_surface_destroy(image);
-		} else {
-			// Draw generic thumbnail
-			cairo_rectangle(context, 1.0, 1.0, 174.0, 97.0);
-
-			cairo_set_source_rgb(context, 0.3, 0.3, 0.4);
-			cairo_fill(context);
-		}
-
-		cairo_destroy(context);
-
-		clutter_box_pack(CLUTTER_BOX(actor_), thumbnail, NULL, NULL);
+		thumbnail_ = clutter_cairo_texture_new(180, 180);
+		draw_thumbnail();
+		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_scale_on_cb),
+				thumbnail_);
+		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_scale_off_cb),
+				thumbnail_);
+		clutter_box_pack(CLUTTER_BOX(actor_), thumbnail_, NULL, NULL);
 
 		ClutterColor white = {255, 255, 255, 255};
 		ClutterActor * title = clutter_text_new_full("Sans", item_.title().c_str(), &white);
@@ -77,6 +57,36 @@ namespace interface {
 
 	BrowserItem::~BrowserItem() {
 		g_object_unref(actor_);
+	}
+
+/*
+	Renders the thumnail for the item
+*/
+	void BrowserItem::draw_thumbnail() {
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(thumbnail_));
+
+		if (!item_.thumbnail_file().empty() && core::Path::exists(item_.thumbnail_file())) {
+			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnail_file().c_str());
+
+			double scale_factor = std::min(176.0 / cairo_image_surface_get_width(image),
+					99.0 / cairo_image_surface_get_height(image));
+			cairo_translate(context, 90.0 - ((cairo_image_surface_get_width(image) * scale_factor) / 2.0),
+					90.0 - ((cairo_image_surface_get_height(image) * scale_factor) / 2.0));
+			cairo_scale(context, scale_factor, scale_factor);
+
+			cairo_set_source_surface(context, image, 0.0, 0.0);
+			cairo_paint(context);
+
+			cairo_surface_destroy(image);
+		} else {
+			// Draw generic thumbnail
+			cairo_rectangle(context, 1.0, 1.0, 178.0, 178.0);
+
+			cairo_set_source_rgba(context, 0.3, 0.3, 0.4, 0.4);
+			cairo_fill(context);
+		}
+
+		cairo_destroy(context);
 	}
 
 /*
@@ -105,10 +115,10 @@ namespace interface {
 		}
 
 		if (dragged) {
-			gfloat x_click;
-			clutter_event_get_coords(event, &x_click, NULL);
+			gfloat y_click;
+			clutter_event_get_coords(event, NULL, &y_click);
 
-			reinterpret_cast< Browser * >(data)->scroll_dragged(x_click);
+			reinterpret_cast< Browser * >(data)->scroll_dragged(y_click);
 		}
 
 		return TRUE;
@@ -125,8 +135,6 @@ namespace interface {
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(main_layout), TRUE);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
-		clutter_actor_add_constraint(actor_,
 				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -80.0f));
 
 		ClutterLayoutManager * media_browser_layout = clutter_box_layout_new();
@@ -136,15 +144,18 @@ namespace interface {
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 
 		ClutterLayoutManager * media_list_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
-		clutter_flow_layout_set_homogeneous(CLUTTER_FLOW_LAYOUT(media_list_layout), TRUE);
-		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
-		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 10.0f);
+		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
+		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
 		media_list_ = clutter_box_new(media_list_layout);
+		clutter_actor_add_constraint(media_list_,
+				clutter_snap_constraint_new(actor_, CLUTTER_SNAP_EDGE_TOP, CLUTTER_SNAP_EDGE_TOP, 70.0f));
 		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
 
 		ClutterLayoutManager * scroll_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_CENTER,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
 		ClutterActor * scroll = clutter_box_new(scroll_layout);
+		clutter_actor_add_constraint(scroll,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 
 		scroll_hidden_ = clutter_rectangle_new();
 		clutter_actor_set_width(scroll_hidden_, 10.0f);
@@ -200,12 +211,12 @@ namespace interface {
 /*
 	Called whenever the scroll handle is dragged
 */
-	void Browser::scroll_dragged(float x) {
-		gfloat x_line;
-		clutter_actor_get_transformed_position(scroll_line_, &x_line, NULL);
-		gfloat line_width = clutter_actor_get_width(scroll_line_);
+	void Browser::scroll_dragged(float y) {
+		gfloat y_line;
+		clutter_actor_get_transformed_position(scroll_line_, NULL, &y_line);
+		gfloat line_height = clutter_actor_get_height(scroll_line_);
 
-		gfloat progress = (x - x_line) / line_width;
+		gfloat progress = (y - y_line) / line_height;
 	}
 
 /*
