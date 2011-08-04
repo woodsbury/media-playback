@@ -147,9 +147,10 @@ namespace interface {
 		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
 		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
 		media_list_ = clutter_box_new(media_list_layout);
+		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
+
 		clutter_actor_add_constraint(media_list_,
 				clutter_snap_constraint_new(actor_, CLUTTER_SNAP_EDGE_TOP, CLUTTER_SNAP_EDGE_TOP, 70.0f));
-		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
 
 		ClutterLayoutManager * scroll_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_CENTER,
 				CLUTTER_BIN_ALIGNMENT_FIXED);
@@ -212,11 +213,20 @@ namespace interface {
 	Called whenever the scroll handle is dragged
 */
 	void Browser::scroll_dragged(float y) {
+		gfloat height = clutter_actor_get_height(media_list_);
+		if (height < clutter_actor_get_height(clutter_stage_get_default())) {
+			// List is completely visible
+			return;
+		}
+
 		gfloat y_line;
 		clutter_actor_get_transformed_position(scroll_line_, NULL, &y_line);
 		gfloat line_height = clutter_actor_get_height(scroll_line_);
 
-		gfloat progress = (y - y_line) / line_height;
+		gfloat offset = (((y - y_line) * height) / line_height);
+
+		clutter_actor_move_anchor_point(media_list_, 0.0f, offset);
+		clutter_actor_set_y(scroll_handle_, y - y_line);
 	}
 
 /*
