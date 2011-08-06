@@ -215,10 +215,15 @@ namespace interface {
 	Called whenever the scroll handle is dragged
 */
 	void Browser::scroll_dragged(float y) {
-		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
-		gfloat height = (item_list_.size() / columns) * 210.0f;
+		if (item_list_.size() == 0) {
+			return;
+		}
 
-		if (height < clutter_actor_get_height(clutter_stage_get_default())) {
+		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
+		gfloat height = std::ceil(item_list_.size() / columns) *
+				clutter_actor_get_height(item_list_.front().actor());
+
+		if (height < (clutter_actor_get_height(clutter_stage_get_default()) - 100.0f)) {
 			// List is completely visible
 			return;
 		}
