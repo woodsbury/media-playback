@@ -16,6 +16,7 @@
 */
 
 #include <algorithm>
+#include <cmath>
 #include <debug.hpp>
 #include <core/filesystem.hpp>
 
@@ -145,6 +146,7 @@ namespace interface {
 
 		ClutterLayoutManager * media_list_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
 		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
+		clutter_flow_layout_set_homogeneous(CLUTTER_FLOW_LAYOUT(media_list_layout), TRUE);
 		clutter_flow_layout_set_row_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
 		media_list_ = clutter_box_new(media_list_layout);
 		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
@@ -159,7 +161,7 @@ namespace interface {
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 
 		scroll_hidden_ = clutter_rectangle_new();
-		clutter_actor_set_width(scroll_hidden_, 10.0f);
+		clutter_actor_set_width(scroll_hidden_, 18.0f);
 		clutter_actor_set_opacity(scroll_hidden_, 0);
 		clutter_actor_set_reactive(scroll_hidden_, TRUE);
 		g_signal_connect(scroll_hidden_, "button-press-event", G_CALLBACK(scroll_dragged_cb), this);
@@ -213,11 +215,14 @@ namespace interface {
 	Called whenever the scroll handle is dragged
 */
 	void Browser::scroll_dragged(float y) {
-		gfloat height = clutter_actor_get_height(media_list_);
+		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
+		gfloat height = (item_list_.size() / columns) * 210.0f;
+
 		if (height < clutter_actor_get_height(clutter_stage_get_default())) {
 			// List is completely visible
 			return;
 		}
+
 
 		gfloat y_line;
 		clutter_actor_get_transformed_position(scroll_line_, NULL, &y_line);
@@ -226,7 +231,9 @@ namespace interface {
 		gfloat offset = (((y - y_line) * height) / line_height);
 
 		clutter_actor_move_anchor_point(media_list_, 0.0f, offset);
-		clutter_actor_set_y(scroll_handle_, y - y_line);
+
+		gfloat handle_y = y - y_line - clutter_actor_get_height(scroll_handle_) + 2.0f;
+		clutter_actor_set_y(scroll_handle_, handle_y > 0 ? handle_y : 0.0f);
 	}
 
 /*
