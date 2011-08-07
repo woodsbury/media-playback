@@ -109,6 +109,14 @@ namespace interface {
 		p->play(item_.uri().c_str(), item_.title().c_str());
 	}
 
+	gboolean Browser::add_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Browser * >(data)->add_clicked();
+		}
+
+		return TRUE;
+	}
+
 	gboolean Browser::all_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		if (clutter_event_get_button(event) == 1) {
 			reinterpret_cast< Browser * >(data)->all_clicked();
@@ -201,31 +209,69 @@ namespace interface {
 		draw_all_button();
 		clutter_actor_set_reactive(all_, TRUE);
 		g_signal_connect(all_, "button-press-event", G_CALLBACK(all_clicked_cb), this);
-		g_signal_connect(all_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				all_);
-		g_signal_connect(all_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				all_);
+		g_signal_connect(all_, "enter-event", G_CALLBACK(actor_highlight_on_cb), all_);
+		g_signal_connect(all_, "leave-event", G_CALLBACK(actor_highlight_off_cb), all_);
 		clutter_box_pack(CLUTTER_BOX(buttons), all_, NULL, NULL);
 
 		music_ = clutter_cairo_texture_new(80, 20);
 		draw_music_button();
 		clutter_actor_set_reactive(music_, TRUE);
 		g_signal_connect(music_, "button-press-event", G_CALLBACK(music_clicked_cb), this);
-		g_signal_connect(music_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				music_);
-		g_signal_connect(music_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				music_);
+		g_signal_connect(music_, "enter-event", G_CALLBACK(actor_highlight_on_cb), music_);
+		g_signal_connect(music_, "leave-event", G_CALLBACK(actor_highlight_off_cb), music_);
 		clutter_box_pack(CLUTTER_BOX(buttons), music_, NULL, NULL);
 
 		movies_ = clutter_cairo_texture_new(80, 20);
 		draw_movies_button();
 		clutter_actor_set_reactive(movies_, TRUE);
 		g_signal_connect(movies_, "button-press-event", G_CALLBACK(movies_clicked_cb), this);
-		g_signal_connect(movies_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				movies_);
-		g_signal_connect(movies_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				movies_);
+		g_signal_connect(movies_, "enter-event", G_CALLBACK(actor_highlight_on_cb), movies_);
+		g_signal_connect(movies_, "leave-event", G_CALLBACK(actor_highlight_off_cb), movies_);
 		clutter_box_pack(CLUTTER_BOX(buttons), movies_, NULL, NULL);
+
+		ClutterActor * spacing = clutter_rectangle_new();
+		clutter_actor_set_width(spacing, 100.0f);
+		clutter_actor_set_opacity(spacing, 0);
+		clutter_box_pack(CLUTTER_BOX(buttons), spacing, NULL, NULL);
+
+		add_ = clutter_cairo_texture_new(80, 20);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(add_));
+
+		cairo_move_to(context, 5.0, 0.0);
+		cairo_line_to(context, 75.0, 0.0);
+		cairo_curve_to(context, 79.0, 0.0, 80.0, 1.0, 80.0, 5.0);
+		cairo_line_to(context, 80.0, 15.0);
+		cairo_curve_to(context, 80.0, 19.0, 79.0, 20.0, 75.0, 20.0);
+		cairo_line_to(context, 5.0, 20.0);
+		cairo_curve_to(context, 1.0, 20.0, 0.0, 19.0, 0.0, 15.0);
+		cairo_line_to(context, 0.0, 5.0);
+		cairo_curve_to(context, 0.0, 1.0, 1.0, 0.0, 5.0, 0.0);
+		cairo_set_source_rgb(context, 0.8, 0.8, 0.8);
+		cairo_fill_preserve(context);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 12.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, "Add", &extents);
+		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
+				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, "Add");
+
+		cairo_set_source_rgb(context, 0.3, 0.3, 0.3);
+		cairo_fill(context);
+
+		cairo_destroy(context);
+
+		clutter_actor_set_reactive(add_, TRUE);
+		g_signal_connect(add_, "button-press-event", G_CALLBACK(add_clicked_cb), this);
+		g_signal_connect(add_, "enter-event", G_CALLBACK(actor_highlight_on_cb), add_);
+		g_signal_connect(add_, "leave-event", G_CALLBACK(actor_highlight_off_cb), add_);
+		clutter_box_pack(CLUTTER_BOX(buttons), add_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(actor_), buttons, NULL, NULL);
 
@@ -273,7 +319,7 @@ namespace interface {
 
 		scroll_handle_ = clutter_cairo_texture_new(10, 12);
 
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(scroll_handle_));
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(scroll_handle_));
 
 		cairo_rectangle(context, 1.0, 1.0, 8.0, 10.0);
 		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
@@ -284,10 +330,8 @@ namespace interface {
 
 		cairo_destroy(context);
 
-		g_signal_connect(scroll_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				scroll_handle_);
-		g_signal_connect(scroll_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				scroll_handle_);
+		g_signal_connect(scroll_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb), scroll_handle_);
+		g_signal_connect(scroll_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb), scroll_handle_);
 		clutter_box_pack(CLUTTER_BOX(scroll), scroll_handle_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(media_browser), scroll, NULL, NULL);
@@ -297,6 +341,13 @@ namespace interface {
 		g_signal_connect(clutter_stage_get_default(), "notify::height", G_CALLBACK(height_changed_cb), this);
 
 		update_media_list();
+	}
+
+/*
+	Called whenever the add button is clicked
+*/
+	void Browser::add_clicked() {
+		;
 	}
 
 /*
