@@ -55,6 +55,7 @@ namespace interface {
 		: public Actor {
 		static gboolean scroll_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void height_changed_cb(GObject * object, GParamSpec * param, gpointer data);
+		static gboolean wheel_scrolled_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 
 		toolkit::InterfacePrivate * p;
 
@@ -73,6 +74,7 @@ namespace interface {
 
 		void scroll_dragged(float y);
 		void height_changed();
+		void wheel_scrolled(bool up);
 
 	public:
 		Browser(toolkit::InterfacePrivate * interface_private);

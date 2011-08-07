@@ -129,6 +129,22 @@ namespace interface {
 		reinterpret_cast< Browser * >(data)->height_changed();
 	}
 
+	gboolean Browser::wheel_scrolled_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+
+		switch (clutter_event_get_scroll_direction(event)) {
+		case CLUTTER_SCROLL_UP:
+			reinterpret_cast< Browser * >(data)->wheel_scrolled(true);
+			break;
+		case CLUTTER_SCROLL_DOWN:
+			reinterpret_cast< Browser * >(data)->wheel_scrolled(false);
+			break;
+		default:
+			;
+		}
+
+		return TRUE;
+	}
+
 	Browser::Browser(toolkit::InterfacePrivate * interface_private)
 		: p(interface_private) {
 		ClutterLayoutManager * main_layout = clutter_box_layout_new();
@@ -141,6 +157,8 @@ namespace interface {
 		ClutterLayoutManager * media_browser_layout = clutter_box_layout_new();
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(media_browser_layout), 20u);
 		ClutterActor * media_browser = clutter_box_new(media_browser_layout);
+		clutter_actor_set_reactive(media_browser, TRUE);
+		g_signal_connect(media_browser, "scroll-event", G_CALLBACK(wheel_scrolled_cb), this);
 		clutter_actor_add_constraint(media_browser,
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 
@@ -212,6 +230,14 @@ namespace interface {
 	}
 
 /*
+	Called whenever the stage's height changes
+*/
+	void Browser::height_changed() {
+		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+	}
+
+/*
 	Called whenever the scroll handle is dragged
 */
 	void Browser::scroll_dragged(float y) {
@@ -227,7 +253,6 @@ namespace interface {
 			// List is completely visible
 			return;
 		}
-
 
 		gfloat y_line;
 		clutter_actor_get_transformed_position(scroll_line_, NULL, &y_line);
@@ -256,10 +281,41 @@ namespace interface {
 	}
 
 /*
-	Called whenever the stage's height changes
+	Called whenever the mouse wheel is scrolled
 */
-	void Browser::height_changed() {
-		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
-		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+	void Browser::wheel_scrolled(bool up) {
+		if (item_list_.size() == 0) {
+			return;
+		}
+
+		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
+		gfloat height = std::ceil(item_list_.size() / columns) *
+				clutter_actor_get_height(item_list_.front().actor());
+
+		if (height < (clutter_actor_get_height(clutter_stage_get_default()) - 100.0f)) {
+			// List is completely visible
+			return;
+		}
+
+		gfloat offset;
+		clutter_actor_get_anchor_point(media_list_, NULL, &offset);
+
+		if (up) {
+			offset -= 10.0f;
+		} else {
+			offset += 10.0f;
+		}
+
+		if (offset < 0.0f) {
+			offset = 0.0f;
+		} else if (offset > height) {
+			offset = height;
+		}
+
+		clutter_actor_set_anchor_point(media_list_, 0.0f, offset);
+
+		gfloat handle_y = ((offset / height) * clutter_actor_get_height(scroll_line_)) -
+				clutter_actor_get_height(scroll_handle_);
+		clutter_actor_set_y(scroll_handle_, handle_y);
 	}
 }
