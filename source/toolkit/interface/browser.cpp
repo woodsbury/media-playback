@@ -549,6 +549,10 @@ namespace interface {
 			item_list_.emplace_back(*i, p);
 			clutter_box_pack(CLUTTER_BOX(media_list_), item_list_.back().actor(), NULL, NULL);
 		}
+
+		// Scroll to top of list
+		clutter_actor_move_anchor_point(media_list_, 0.0f, 0.0f);
+		clutter_actor_set_y(scroll_handle_, 0.0f);
 	}
 
 /*
