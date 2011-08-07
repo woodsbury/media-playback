@@ -63,6 +63,10 @@ namespace interface {
 
 		std::list< BrowserItem > item_list_;
 
+		ClutterActor * all_;
+		ClutterActor * music_;
+		ClutterActor * movies_;
+
 		ClutterActor * media_list_;
 
 		ClutterActor * scroll_hidden_;

@@ -154,9 +154,32 @@ namespace interface {
 		clutter_actor_add_constraint(actor_,
 				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -80.0f));
 
+		ClutterLayoutManager * buttons_layout = clutter_box_layout_new();
+		ClutterActor * buttons = clutter_box_new(buttons_layout);
+		clutter_actor_add_constraint(buttons,
+				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		clutter_actor_add_constraint(buttons,
+				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_Y, 40.0f));
+
+		ClutterActor * all_ = clutter_rectangle_new();
+		clutter_actor_set_size(all_, 10, 10);
+		clutter_box_pack(CLUTTER_BOX(buttons), all_, NULL, NULL);
+
+		ClutterActor * music_ = clutter_rectangle_new();
+		clutter_actor_set_size(music_, 10, 10);
+		clutter_box_pack(CLUTTER_BOX(buttons), music_, NULL, NULL);
+
+		ClutterActor * movies_ = clutter_rectangle_new();
+		clutter_actor_set_size(movies_, 10, 10);
+		clutter_box_pack(CLUTTER_BOX(buttons), movies_, NULL, NULL);
+
+		clutter_box_pack(CLUTTER_BOX(actor_), buttons, NULL, NULL);
+
 		ClutterLayoutManager * media_browser_layout = clutter_box_layout_new();
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(media_browser_layout), 20u);
 		ClutterActor * media_browser = clutter_box_new(media_browser_layout);
+		// Clip the list at the top, Clutter fails to render anything when the sizes are bigger
+		clutter_actor_set_clip(media_browser, 0.0f, 60.0f, 1e9f, 1e9f);
 		clutter_actor_set_reactive(media_browser, TRUE);
 		g_signal_connect(media_browser, "scroll-event", G_CALLBACK(wheel_scrolled_cb), this);
 		clutter_actor_add_constraint(media_browser,
@@ -263,7 +286,7 @@ namespace interface {
 		clutter_actor_move_anchor_point(media_list_, 0.0f, offset);
 
 		gfloat handle_y = y - y_line - clutter_actor_get_height(scroll_handle_) + 2.0f;
-		clutter_actor_set_y(scroll_handle_, handle_y > 0 ? handle_y : 0.0f);
+		clutter_actor_set_y(scroll_handle_, handle_y > 0.0f ? handle_y : 0.0f);
 	}
 
 /*
@@ -316,6 +339,6 @@ namespace interface {
 
 		gfloat handle_y = ((offset / height) * clutter_actor_get_height(scroll_line_)) -
 				clutter_actor_get_height(scroll_handle_);
-		clutter_actor_set_y(scroll_handle_, handle_y);
+		clutter_actor_set_y(scroll_handle_, handle_y > 0.0f ? handle_y : 0.0f);
 	}
 }
