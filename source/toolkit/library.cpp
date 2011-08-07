@@ -23,7 +23,7 @@ namespace {
 /*
 	Binds the type to the specified index in the statement
 */
-	void bind_type(core::Statement * stmt, toolkit::Library::Type type, unsigned int index) {
+	inline void bind_type(core::Statement * stmt, toolkit::Library::Type type, unsigned int index) {
 		assert(stmt != nullptr);
 
 		switch (type) {
@@ -42,17 +42,12 @@ namespace {
 /*
 	Fetches the next specified number of items
 */
-	std::vector< toolkit::MediaItem > fetch(core::Statement * stmt, unsigned long long size) {
+	inline std::vector< toolkit::MediaItem > fetch(core::Statement * stmt) {
 		if ((stmt == nullptr) || (!stmt->hasData())) {
 			return std::vector< toolkit::MediaItem >();
 		}
 
 		std::vector< toolkit::MediaItem > items;
-		unsigned long long i = 0;
-
-		if (size == 0) {
-			size = items.max_size();
-		}
 
 		do {
 			if (stmt->dataType(2u) == core::Statement::Type::Null) {
@@ -60,8 +55,7 @@ namespace {
 			} else {
 				items.emplace_back(stmt->toText(0u), stmt->toText(1u), stmt->toText(2u));
 			}
-			++i;
-		} while (stmt->nextRow() && (i < size));
+		} while (stmt->nextRow());
 
 		return items;
 	}
@@ -72,7 +66,7 @@ namespace toolkit {
 		: title_(title), uri_(uri), thumbnail_(thumbnail_file) {}
 
 	MediaItem::MediaItem(MediaItem const & media_item)
-		: title_(media_item.title_), uri_(media_item.uri_), thumbnail_(media_item.thumbnail_file()) {}
+		: title_(media_item.title_), uri_(media_item.uri_), thumbnail_(media_item.thumbnail_) {}
 
 	MediaItem::MediaItem(MediaItem && media_item) {
 		swap(title_, media_item.title_);
@@ -97,7 +91,7 @@ namespace toolkit {
 /*
 	Returns the file with a thumbnail of the media item
 */
-	std::string MediaItem::thumbnail_file() const {
+	std::string MediaItem::thumbnailFile() const {
 		return thumbnail_;
 	}
 
@@ -167,9 +161,9 @@ namespace toolkit {
 	}
 
 /*
-	Return the specified number of items of the given type from the media library
+	Return the items of the given type from the media library
 */
-	std::vector< MediaItem > Library::list(Library::Type type, unsigned long long size) {
+	std::vector< MediaItem > Library::list(Library::Type type) {
 		if (list_stmt_ == nullptr) {
 			list_stmt_ = new core::Statement(*this, "SELECT name, uri, thumbnail FROM items WHERE type LIKE ?");
 		} else {
@@ -181,13 +175,6 @@ namespace toolkit {
 		assert(list_stmt_->valid());
 		list_stmt_->execute();
 
-		return fetch(list_stmt_, size);
-	}
-
-/*
-	Fetch the next specified number of items in the list
-*/
-	std::vector< MediaItem > Library::listNext(unsigned long long size) {
-		return fetch(list_stmt_, size);
+		return fetch(list_stmt_);
 	}
 }

@@ -48,6 +48,8 @@ namespace interface {
 
 	public:
 		BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private);
+		BrowserItem(BrowserItem const & browser_item);
+		BrowserItem(BrowserItem && browser_item);
 		~BrowserItem();
 	};
 
@@ -64,7 +66,7 @@ namespace interface {
 
 		toolkit::Library library_;
 
-		std::list< BrowserItem > item_list_;
+		std::vector< BrowserItem > item_list_;
 
 		toolkit::Library::Type type_;
 

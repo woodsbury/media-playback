@@ -56,6 +56,18 @@ namespace interface {
 		g_object_ref_sink(actor_);
 	}
 
+	BrowserItem::BrowserItem(BrowserItem const & browser_item)
+		: p(browser_item.p), item_(browser_item.item_), thumbnail_(browser_item.thumbnail_) {
+		g_object_ref(browser_item.actor_);
+		actor_ = browser_item.actor_;
+	}
+
+	BrowserItem::BrowserItem(BrowserItem && browser_item)
+		: p(browser_item.p), item_(std::move(browser_item.item_)), thumbnail_(browser_item.thumbnail_) {
+		g_object_ref(browser_item.actor_);
+		actor_ = browser_item.actor_;
+	}
+
 	BrowserItem::~BrowserItem() {
 		g_object_unref(actor_);
 	}
@@ -66,8 +78,8 @@ namespace interface {
 	void BrowserItem::draw_thumbnail() {
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(thumbnail_));
 
-		if (!item_.thumbnail_file().empty() && core::Path::exists(item_.thumbnail_file())) {
-			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnail_file().c_str());
+		if (!item_.thumbnailFile().empty() && core::Path::exists(item_.thumbnailFile())) {
+			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnailFile().c_str());
 
 			double scale_factor = std::min(176.0 / cairo_image_surface_get_width(image),
 					99.0 / cairo_image_surface_get_height(image));

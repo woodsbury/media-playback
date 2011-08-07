@@ -35,7 +35,7 @@ namespace toolkit {
 
 		std::string title() const;
 		std::string uri() const;
-		std::string thumbnail_file() const;
+		std::string thumbnailFile() const;
 	};
 
 	class Library
@@ -57,8 +57,7 @@ namespace toolkit {
 		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string());
 
 		unsigned long long count(Type type);
-		std::vector< MediaItem > list(Type type, unsigned long long size = 0);
-		std::vector< MediaItem > listNext(unsigned long long size = 0);
+		std::vector< MediaItem > list(Type type);
 	};
 }
 
