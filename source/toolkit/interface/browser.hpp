@@ -53,6 +53,9 @@ namespace interface {
 
 	class Browser
 		: public Actor {
+		static gboolean all_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean movies_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static gboolean music_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean scroll_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void height_changed_cb(GObject * object, GParamSpec * param, gpointer data);
 		static gboolean wheel_scrolled_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
@@ -62,6 +65,8 @@ namespace interface {
 		toolkit::Library library_;
 
 		std::list< BrowserItem > item_list_;
+
+		toolkit::Library::Type type_;
 
 		ClutterActor * all_;
 		ClutterActor * music_;
@@ -73,9 +78,16 @@ namespace interface {
 		ClutterActor * scroll_line_;
 		ClutterActor * scroll_handle_;
 
+		void draw_all_button();
+		void draw_music_button();
+		void draw_movies_button();
+
 		void clear_media_list();
 		void update_media_list();
 
+		void all_clicked();
+		void movies_clicked();
+		void music_clicked();
 		void scroll_dragged(float y);
 		void height_changed();
 		void wheel_scrolled(bool up);

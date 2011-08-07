@@ -97,6 +97,30 @@ namespace interface {
 		p->play(item_.uri().c_str(), item_.title().c_str());
 	}
 
+	gboolean Browser::all_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Browser * >(data)->all_clicked();
+		}
+
+		return TRUE;
+	}
+
+	gboolean Browser::movies_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Browser * >(data)->movies_clicked();
+		}
+
+		return TRUE;
+	}
+
+	gboolean Browser::music_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Browser * >(data)->music_clicked();
+		}
+
+		return TRUE;
+	}
+
 	gboolean Browser::scroll_dragged_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		bool dragged = false;
 
@@ -146,7 +170,7 @@ namespace interface {
 	}
 
 	Browser::Browser(toolkit::InterfacePrivate * interface_private)
-		: p(interface_private) {
+		: p(interface_private), type_(toolkit::Library::Type::All) {
 		ClutterLayoutManager * main_layout = clutter_box_layout_new();
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 30u);
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(main_layout), TRUE);
@@ -161,16 +185,34 @@ namespace interface {
 		clutter_actor_add_constraint(buttons,
 				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_Y, 40.0f));
 
-		ClutterActor * all_ = clutter_rectangle_new();
-		clutter_actor_set_size(all_, 10, 10);
+		all_ = clutter_cairo_texture_new(80, 20);
+		draw_all_button();
+		clutter_actor_set_reactive(all_, TRUE);
+		g_signal_connect(all_, "button-press-event", G_CALLBACK(all_clicked_cb), this);
+		g_signal_connect(all_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				all_);
+		g_signal_connect(all_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				all_);
 		clutter_box_pack(CLUTTER_BOX(buttons), all_, NULL, NULL);
 
-		ClutterActor * music_ = clutter_rectangle_new();
-		clutter_actor_set_size(music_, 10, 10);
+		music_ = clutter_cairo_texture_new(80, 20);
+		draw_music_button();
+		clutter_actor_set_reactive(music_, TRUE);
+		g_signal_connect(music_, "button-press-event", G_CALLBACK(music_clicked_cb), this);
+		g_signal_connect(music_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				music_);
+		g_signal_connect(music_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				music_);
 		clutter_box_pack(CLUTTER_BOX(buttons), music_, NULL, NULL);
 
-		ClutterActor * movies_ = clutter_rectangle_new();
-		clutter_actor_set_size(movies_, 10, 10);
+		movies_ = clutter_cairo_texture_new(80, 20);
+		draw_movies_button();
+		clutter_actor_set_reactive(movies_, TRUE);
+		g_signal_connect(movies_, "button-press-event", G_CALLBACK(movies_clicked_cb), this);
+		g_signal_connect(movies_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				movies_);
+		g_signal_connect(movies_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				movies_);
 		clutter_box_pack(CLUTTER_BOX(buttons), movies_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(actor_), buttons, NULL, NULL);
@@ -246,10 +288,168 @@ namespace interface {
 	}
 
 /*
+	Called whenever the display all media button is clicked
+*/
+	void Browser::all_clicked() {
+		switch (type_) {
+		case toolkit::Library::Type::Movies:
+			type_ = toolkit::Library::Type::All;
+			draw_movies_button();
+			draw_all_button();
+			update_media_list();
+			break;
+		case toolkit::Library::Type::Music:
+			type_ = toolkit::Library::Type::All;
+			draw_music_button();
+			draw_all_button();
+			update_media_list();
+			break;
+		default:
+			;
+		}
+
+	}
+
+/*
 	Clear the list of media items
 */
 	void Browser::clear_media_list() {
+		GList * children = clutter_container_get_children(CLUTTER_CONTAINER(media_list_));
+		while (children) {
+			ClutterActor * child = static_cast< ClutterActor * >(children->data);
+			children = g_list_next(children);
+
+			clutter_container_remove_actor(CLUTTER_CONTAINER(media_list_), child);
+		}
+
 		item_list_.clear();
+	}
+
+/*
+	Draws the display all media button
+*/
+	void Browser::draw_all_button() {
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(all_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(all_));
+
+		cairo_move_to(context, 80.0, 0.0);
+		cairo_line_to(context, 5.0, 0.0);
+		cairo_curve_to(context, 1.0, 0.0, 0.0, 1.0, 0.0, 5.0);
+		cairo_line_to(context, 0.0, 15.0);
+		cairo_curve_to(context, 0.0, 19.0, 1.0, 20.0, 5.0, 20.0);
+		cairo_line_to(context, 80.0, 20.0);
+
+		if (type_ == toolkit::Library::Type::All) {
+			cairo_set_source_rgb(context, 0.2, 0.2, 0.2);
+		} else {
+			cairo_set_source_rgb(context, 0.8, 0.8, 0.8);
+		}
+		cairo_fill_preserve(context);
+
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 12.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, "All", &extents);
+		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
+				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, "All");
+
+		if (type_ == toolkit::Library::Type::All) {
+			cairo_set_source_rgb(context, 0.9, 0.9, 0.9);
+		} else {
+			cairo_set_source_rgb(context, 0.3, 0.3, 0.3);
+		}
+		cairo_fill(context);
+
+		cairo_destroy(context);
+	}
+
+/*
+	Draws the display movies button
+*/
+	void Browser::draw_movies_button() {
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(movies_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(movies_));
+
+		cairo_move_to(context, 0.0, 0.0);
+		cairo_line_to(context, 75.0, 0.0);
+		cairo_curve_to(context, 79.0, 0.0, 80.0, 1.0, 80.0, 5.0);
+		cairo_line_to(context, 80.0, 15.0);
+		cairo_curve_to(context, 80.0, 19.0, 79.0, 20.0, 75.0, 20.0);
+		cairo_line_to(context, 0.0, 20.0);
+
+		if (type_ == toolkit::Library::Type::Movies) {
+			cairo_set_source_rgb(context, 0.2, 0.2, 0.2);
+		} else {
+			cairo_set_source_rgb(context, 0.8, 0.8, 0.8);
+		}
+		cairo_fill_preserve(context);
+
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 12.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, "Movies", &extents);
+		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
+				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, "Movies");
+
+		if (type_ == toolkit::Library::Type::Movies) {
+			cairo_set_source_rgb(context, 0.9, 0.9, 0.9);
+		} else {
+			cairo_set_source_rgb(context, 0.3, 0.3, 0.3);
+		}
+		cairo_fill(context);
+
+		cairo_destroy(context);
+	}
+
+/*
+	Draws the display music button
+*/
+	void Browser::draw_music_button() {
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(music_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(music_));
+
+		cairo_rectangle(context, 0.0, 0.0, 80.0, 20.0);
+
+		if (type_ == toolkit::Library::Type::Music) {
+			cairo_set_source_rgb(context, 0.2, 0.2, 0.2);
+		} else {
+			cairo_set_source_rgb(context, 0.8, 0.8, 0.8);
+		}
+		cairo_fill_preserve(context);
+
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 12.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, "Music", &extents);
+		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
+				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, "Music");
+
+		if (type_ == toolkit::Library::Type::Music) {
+			cairo_set_source_rgb(context, 0.9, 0.9, 0.9);
+		} else {
+			cairo_set_source_rgb(context, 0.3, 0.3, 0.3);
+		}
+		cairo_fill(context);
+
+		cairo_destroy(context);
 	}
 
 /*
@@ -258,6 +458,54 @@ namespace interface {
 	void Browser::height_changed() {
 		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
 		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+	}
+
+/*
+	Called whenever the display movies button is clicked
+*/
+	void Browser::movies_clicked() {
+		switch (type_) {
+		case toolkit::Library::Type::All:
+			type_ = toolkit::Library::Type::Movies;
+			draw_all_button();
+			draw_movies_button();
+			update_media_list();
+			break;
+		case toolkit::Library::Type::Music:
+			type_ = toolkit::Library::Type::Movies;
+			draw_music_button();
+			draw_movies_button();
+			update_media_list();
+			break;
+		default:
+			;
+		}
+
+		update_media_list();
+	}
+
+/*
+	Called whenever the display music button is clicked
+*/
+	void Browser::music_clicked() {
+		switch (type_) {
+		case toolkit::Library::Type::All:
+			type_ = toolkit::Library::Type::Music;
+			draw_all_button();
+			draw_music_button();
+			update_media_list();
+			break;
+		case toolkit::Library::Type::Movies:
+			type_ = toolkit::Library::Type::Music;
+			draw_movies_button();
+			draw_music_button();
+			update_media_list();
+			break;
+		default:
+			;
+		}
+
+		update_media_list();
 	}
 
 /*
@@ -295,7 +543,7 @@ namespace interface {
 	void Browser::update_media_list() {
 		clear_media_list();
 
-		std::vector< toolkit::MediaItem > list(library_.list(toolkit::Library::Type::All));
+		std::vector< toolkit::MediaItem > list(library_.list(type_));
 
 		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
 			item_list_.emplace_back(*i, p);
