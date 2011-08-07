@@ -15,50 +15,26 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _INTERFACE_PRIVATE_HPP
-#define _INTERFACE_PRIVATE_HPP
-
-#include <debug.hpp>
+#ifndef _INTERFACE_ADD_DIALOGUE_HPP
+#define _INTERFACE_ADD_DIALOGUE_HPP
 
 extern "C" {
-#include <clutter-gst/clutter-gst.h>
+#include <clutter/clutter.h>
 }
 
-#include "add_dialogue.hpp"
-#include "browser.hpp"
-#include "player.hpp"
-#include "window_panel.hpp"
-
-namespace clutter {
-/*
-	Inheriting from this class will automatically initialise Clutter and GStreamer
-*/
-	class Initialiser {
-		static bool initialised_;
-
-	public:
-		Initialiser();
-	};
-}
+#include "actor.hpp"
 
 namespace toolkit {
-	class InterfacePrivate
-		: clutter::Initialiser {
-		interface::Browser browser_;
-		interface::Player player_;
-		interface::WindowPanel panel_;
+	class InterfacePrivate;
+}
 
-		interface::AddDialogue add_;
+namespace interface {
+	class AddDialogue
+		: public Actor {
+		toolkit::InterfacePrivate * p;
 
 	public:
-		InterfacePrivate();
-
-		void browse();
-		void play(char const * uri, char const * title);
-
-		void add();
-
-		void libraryUpdated();
+		AddDialogue(toolkit::InterfacePrivate * interface_private);
 	};
 }
 

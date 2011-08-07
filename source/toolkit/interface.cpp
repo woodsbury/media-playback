@@ -37,7 +37,7 @@ namespace clutter {
 
 namespace toolkit {
 	InterfacePrivate::InterfacePrivate()
-		: browser(this), player(this) {
+		: browser_(this), player_(this), add_(this) {
 		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), DISPLAY_NAME);
 		clutter_stage_set_throttle_motion_events(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
 		clutter_stage_set_user_resizable(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
@@ -45,42 +45,58 @@ namespace toolkit {
 		ClutterColor black = {0, 0, 0, 255};
 		clutter_stage_set_color(CLUTTER_STAGE(clutter_stage_get_default()), &black);
 
-		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), browser.actor());
-		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player.actor());
-		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel.actor());
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), browser_.actor());
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player_.actor());
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel_.actor());
+		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), add_.actor());
 
-		clutter_actor_hide_all(player.actor());
+		clutter_actor_hide_all(player_.actor());
+		clutter_actor_hide_all(add_.actor());
 		browse();
+	}
+
+/*
+	Show the add file dialogue
+*/
+	void InterfacePrivate::add() {
+		clutter_actor_show_all(add_.actor());
 	}
 
 /*
 	Browse the media library
 */
 	void InterfacePrivate::browse() {
-		clutter_actor_detach_animation(browser.actor());
-		clutter_actor_animate(player.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
-				"signal::completed", interface::Actor::hide_after_cb, player.actor(), NULL);
-		clutter_actor_show_all(browser.actor());
-		clutter_actor_animate(browser.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+		clutter_actor_detach_animation(browser_.actor());
+		clutter_actor_animate(player_.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
+				"signal::completed", interface::Actor::hide_after_cb, player_.actor(), NULL);
+		clutter_actor_show_all(browser_.actor());
+		clutter_actor_animate(browser_.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
-		clutter_actor_grab_key_focus(browser.actor());
-		panel.setAutoHide(false);
+		clutter_actor_grab_key_focus(browser_.actor());
+		panel_.setAutoHide(false);
+	}
+
+/*
+	Informs the other widgets that the library has been updated
+*/
+	void InterfacePrivate::libraryUpdated() {
+		browser_.update();
 	}
 
 /*
 	Plays the URI
 */
 	void InterfacePrivate::play(char const * uri, char const * title) {
-		clutter_actor_detach_animation(player.actor());
-		clutter_actor_animate(browser.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
-				"signal::completed", interface::Actor::hide_after_cb, browser.actor(), NULL);
-		clutter_actor_show_all(player.actor());
-		clutter_actor_animate(player.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
+		clutter_actor_detach_animation(player_.actor());
+		clutter_actor_animate(browser_.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
+				"signal::completed", interface::Actor::hide_after_cb, browser_.actor(), NULL);
+		clutter_actor_show_all(player_.actor());
+		clutter_actor_animate(player_.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
-		clutter_actor_grab_key_focus(player.actor());
-		panel.setAutoHide(true);
+		clutter_actor_grab_key_focus(player_.actor());
+		panel_.setAutoHide(true);
 
-		player.play(uri, title);
+		player_.play(uri, title);
 	}
 
 	Interface::Interface()

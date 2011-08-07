@@ -347,7 +347,7 @@ namespace interface {
 	Called whenever the add button is clicked
 */
 	void Browser::add_clicked() {
-		;
+		p->add();
 	}
 
 /*
@@ -655,5 +655,12 @@ namespace interface {
 		gfloat handle_y = ((offset / height) * clutter_actor_get_height(scroll_line_)) -
 				clutter_actor_get_height(scroll_handle_);
 		clutter_actor_set_y(scroll_handle_, handle_y > 0.0f ? handle_y : 0.0f);
+	}
+
+/*
+	List of media items needs updating
+*/
+	void Browser::update() {
+		update_media_list();
 	}
 }
