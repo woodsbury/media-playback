@@ -35,7 +35,7 @@ namespace interface {
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(item_layout), TRUE);
 		actor_ = clutter_box_new(item_layout);
 		clutter_actor_set_reactive(actor_, TRUE);
-		g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
+		clicked_handler_ = g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
 
 		thumbnail_ = clutter_cairo_texture_new(180, 180);
 		draw_thumbnail();
@@ -60,12 +60,16 @@ namespace interface {
 		: p(browser_item.p), item_(browser_item.item_), thumbnail_(browser_item.thumbnail_) {
 		g_object_ref(browser_item.actor_);
 		actor_ = browser_item.actor_;
+		g_signal_handler_disconnect(actor_, browser_item.clicked_handler_);
+		clicked_handler_ = g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
 	}
 
 	BrowserItem::BrowserItem(BrowserItem && browser_item)
 		: p(browser_item.p), item_(std::move(browser_item.item_)), thumbnail_(browser_item.thumbnail_) {
 		g_object_ref(browser_item.actor_);
 		actor_ = browser_item.actor_;
+		g_signal_handler_disconnect(actor_, browser_item.clicked_handler_);
+		clicked_handler_ = g_signal_connect(actor_, "button-press-event", G_CALLBACK(item_clicked_cb), this);
 	}
 
 	BrowserItem::~BrowserItem() {
@@ -607,6 +611,7 @@ namespace interface {
 		clear_media_list();
 
 		std::vector< toolkit::MediaItem > list(library_.list(type_));
+		item_list_.reserve(list.size());
 
 		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
 			item_list_.emplace_back(*i, p);

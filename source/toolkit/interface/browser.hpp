@@ -42,6 +42,8 @@ namespace interface {
 
 		ClutterActor * thumbnail_;
 
+		gulong clicked_handler_;
+
 		void draw_thumbnail();
 
 		void item_clicked();

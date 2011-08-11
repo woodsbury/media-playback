@@ -18,11 +18,7 @@
 #ifndef _INTERFACE_ADD_DIALOGUE_HPP
 #define _INTERFACE_ADD_DIALOGUE_HPP
 
-extern "C" {
-#include <clutter/clutter.h>
-}
-
-#include "actor.hpp"
+#include "dialogue.hpp"
 
 namespace toolkit {
 	class InterfacePrivate;
@@ -30,7 +26,7 @@ namespace toolkit {
 
 namespace interface {
 	class AddDialogue
-		: public Actor {
+		: public Dialogue {
 		toolkit::InterfacePrivate * p;
 
 	public:
