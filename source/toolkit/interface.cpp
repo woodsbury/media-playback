@@ -37,7 +37,7 @@ namespace clutter {
 
 namespace toolkit {
 	InterfacePrivate::InterfacePrivate()
-		: browser_(this), player_(this), add_(this) {
+		: browser_(this), player_(this) {
 		clutter_stage_set_title(CLUTTER_STAGE(clutter_stage_get_default()), DISPLAY_NAME);
 		clutter_stage_set_throttle_motion_events(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
 		clutter_stage_set_user_resizable(CLUTTER_STAGE(clutter_stage_get_default()), TRUE);
@@ -48,19 +48,15 @@ namespace toolkit {
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), browser_.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), player_.actor());
 		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), panel_.actor());
-		clutter_container_add_actor(CLUTTER_CONTAINER(clutter_stage_get_default()), add_.actor());
 
 		clutter_actor_hide_all(player_.actor());
-		clutter_actor_hide_all(add_.actor());
 		browse();
 	}
 
 /*
 	Show the add file dialogue
 */
-	void InterfacePrivate::add() {
-		clutter_actor_show_all(add_.actor());
-	}
+	void InterfacePrivate::add() {}
 
 /*
 	Browse the media library

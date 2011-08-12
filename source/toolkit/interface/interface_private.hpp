@@ -24,7 +24,6 @@ extern "C" {
 #include <clutter-gst/clutter-gst.h>
 }
 
-#include "add_dialogue.hpp"
 #include "browser.hpp"
 #include "player.hpp"
 #include "window_panel.hpp"
@@ -47,8 +46,6 @@ namespace toolkit {
 		interface::Browser browser_;
 		interface::Player player_;
 		interface::WindowPanel panel_;
-
-		interface::AddDialogue add_;
 
 	public:
 		InterfacePrivate();

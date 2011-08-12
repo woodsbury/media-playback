@@ -4,12 +4,12 @@ VERSION = 0
 
 DEFINES = DEBUG OPTIMISE
 INCLUDES = include
-SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/glib-2.0 \
-	/usr/include/gstreamer-0.10 /usr/include/json-glib-1.0 /usr/include/pango-1.0 /usr/include/libxml2 \
-	/usr/lib/glib-2.0/include
+SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/gdk-pixbuf-2.0 \
+	/usr/include/glib-2.0 /usr/include/gstreamer-0.10 /usr/include/gtk-3.0 /usr/include/json-glib-1.0 \
+	/usr/include/pango-1.0 /usr/include/libxml2 /usr/lib/glib-2.0/include
 DIRECTORIES = source source/core source/toolkit source/toolkit/interface
 TEST_DIRECTORIES = tests
-LIBRARIES = clutter-glx-1.0 clutter-gst-1.0 sqlite3
+LIBRARIES = clutter-glx-1.0 clutter-gst-1.0 gtk-3 sqlite3
 
 CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUDE)) \
 	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE)) \
