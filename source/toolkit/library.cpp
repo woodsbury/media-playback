@@ -97,7 +97,7 @@ namespace toolkit {
 
 	Library::Library()
 		: core::Database(core::Path::data() + "/library.db"), add_stmt_(nullptr), count_stmt_(nullptr),
-		  list_stmt_(nullptr) {
+		  list_stmt_(nullptr), search_stmt_(nullptr) {
 		if (opened() && (tables().size() == 0u)) {
 			// Library database hasn't been initialised yet
 			dprint("Creating library");
@@ -176,5 +176,25 @@ namespace toolkit {
 		list_stmt_->execute();
 
 		return fetch(list_stmt_);
+	}
+
+/*
+	Return the items of the given type from the media library that contain the search term
+*/
+	std::vector< MediaItem > Library::search(Library::Type type, std::string term) {
+		if (search_stmt_ == nullptr) {
+			search_stmt_ = new core::Statement(*this,
+					"SELECT name, uri, thumbnail FROM items WHERE type LIKE ? AND (name LIKE ?2)");
+		} else {
+			search_stmt_->reset();
+		}
+
+		bind_type(search_stmt_, type, 1u);
+		search_stmt_->bind(2u, "%" + term + "%");
+
+		assert(search_stmt_->valid());
+		search_stmt_->execute();
+
+		return fetch(search_stmt_);
 	}
 }

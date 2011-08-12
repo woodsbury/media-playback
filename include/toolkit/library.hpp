@@ -43,6 +43,7 @@ namespace toolkit {
 		core::Statement * add_stmt_;
 		core::Statement * count_stmt_;
 		core::Statement * list_stmt_;
+		core::Statement * search_stmt_;
 
 	public:
 		enum class Type {
@@ -58,6 +59,7 @@ namespace toolkit {
 
 		unsigned long long count(Type type);
 		std::vector< MediaItem > list(Type type);
+		std::vector< MediaItem > search(Type type, std::string term);
 	};
 }
 

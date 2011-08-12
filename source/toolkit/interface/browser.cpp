@@ -676,6 +676,7 @@ namespace interface {
 			list = library_.list(type_);
 		} else {
 			// Search text exists
+			list = library_.search(type_, clutter_text_get_text(CLUTTER_TEXT(search_text_)));
 		}
 		item_list_.reserve(list.size());
 
