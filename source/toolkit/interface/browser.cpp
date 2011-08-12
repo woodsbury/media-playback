@@ -23,6 +23,21 @@
 #include "browser.hpp"
 #include "interface_private.hpp"
 
+namespace {
+	void cairo_set_source_gradient(cairo_t * context, bool inset) {
+		cairo_pattern_t * gradient = cairo_pattern_create_linear(0.0, 0.0, 00.0, 20.0);
+		if (inset) {
+			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.2, 0.2, 0.2);
+			cairo_pattern_add_color_stop_rgb(gradient, 0.75, 0.2, 0.2, 0.2);
+			cairo_pattern_add_color_stop_rgb(gradient, 1.0, 0.25, 0.25, 0.25);
+		} else {
+			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.6, 0.6, 0.6);
+			cairo_pattern_add_color_stop_rgb(gradient, 0.35, 0.8, 0.8, 0.8);
+		}
+		cairo_set_source(context, gradient);
+	}
+}
+
 namespace interface {
 	gboolean BrowserItem::item_clicked_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 		reinterpret_cast< BrowserItem * >(data)->item_clicked();
@@ -311,10 +326,7 @@ namespace interface {
 		cairo_curve_to(context, 1.0, 20.0, 0.0, 19.0, 0.0, 15.0);
 		cairo_line_to(context, 0.0, 5.0);
 		cairo_curve_to(context, 0.0, 1.0, 1.0, 0.0, 5.0, 0.0);
-		cairo_pattern_t * gradient = cairo_pattern_create_linear(0.0, 0.0, 00.0, 20.0);
-		cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.6, 0.6, 0.6);
-		cairo_pattern_add_color_stop_rgb(gradient, 0.35, 0.8, 0.8, 0.8);
-		cairo_set_source(context, gradient);
+		cairo_set_source_gradient(context, false);
 		cairo_fill_preserve(context);
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_stroke(context);
@@ -437,7 +449,6 @@ namespace interface {
 		default:
 			;
 		}
-
 	}
 
 /*
@@ -469,16 +480,7 @@ namespace interface {
 		cairo_curve_to(context, 0.0, 19.0, 1.0, 20.0, 5.0, 20.0);
 		cairo_line_to(context, 80.0, 20.0);
 
-		cairo_pattern_t * gradient = cairo_pattern_create_linear(0.0, 0.0, 00.0, 20.0);
-		if (type_ == toolkit::Library::Type::All) {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.75, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 1.0, 0.25, 0.25, 0.25);
-		} else {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.6, 0.6, 0.6);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.35, 0.8, 0.8, 0.8);
-		}
-		cairo_set_source(context, gradient);
+		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::All);
 		cairo_fill_preserve(context);
 
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
@@ -518,16 +520,7 @@ namespace interface {
 		cairo_curve_to(context, 80.0, 19.0, 79.0, 20.0, 75.0, 20.0);
 		cairo_line_to(context, 0.0, 20.0);
 
-		cairo_pattern_t * gradient = cairo_pattern_create_linear(0.0, 0.0, 00.0, 20.0);
-		if (type_ == toolkit::Library::Type::Movies) {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.75, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 1.0, 0.25, 0.25, 0.25);
-		} else {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.6, 0.6, 0.6);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.35, 0.8, 0.8, 0.8);
-		}
-		cairo_set_source(context, gradient);
+		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::Movies);
 		cairo_fill_preserve(context);
 
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
@@ -562,16 +555,7 @@ namespace interface {
 
 		cairo_rectangle(context, 0.0, 0.0, 80.0, 20.0);
 
-		cairo_pattern_t * gradient = cairo_pattern_create_linear(0.0, 0.0, 00.0, 20.0);
-		if (type_ == toolkit::Library::Type::Music) {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.75, 0.2, 0.2, 0.2);
-			cairo_pattern_add_color_stop_rgb(gradient, 1.0, 0.25, 0.25, 0.25);
-		} else {
-			cairo_pattern_add_color_stop_rgb(gradient, 0.0, 0.6, 0.6, 0.6);
-			cairo_pattern_add_color_stop_rgb(gradient, 0.35, 0.8, 0.8, 0.8);
-		}
-		cairo_set_source(context, gradient);
+		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::Music);
 		cairo_fill_preserve(context);
 
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
