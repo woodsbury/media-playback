@@ -63,6 +63,7 @@ namespace interface {
 		static gboolean music_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void height_changed_cb(GObject * object, GParamSpec * param, gpointer data);
 		static gboolean scroll_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
+		static void search_activated_cb(ClutterText * text, gpointer data);
 		static gboolean wheel_scrolled_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 
 		toolkit::InterfacePrivate * p;
@@ -76,6 +77,8 @@ namespace interface {
 		ClutterActor * all_;
 		ClutterActor * music_;
 		ClutterActor * movies_;
+
+		ClutterActor * search_text_;
 
 		ClutterActor * add_;
 

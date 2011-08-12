@@ -1,8 +1,8 @@
 NAME = mp
-DISPLAY_NAME = Media-Playback
+DISPLAY_NAME = Media Player
 VERSION = 0
 
-DEFINES = DEBUG OPTIMISE NAME='"$(NAME)"' DISPLAY_NAME='"$(DISPLAY_NAME)"' VERSION='"$(VERSION)"'
+DEFINES = DEBUG OPTIMISE
 INCLUDES = include
 SYSTEM_INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/glib-2.0 \
 	/usr/include/gstreamer-0.10 /usr/include/json-glib-1.0 /usr/include/pango-1.0 /usr/include/libxml2 \
@@ -12,7 +12,8 @@ TEST_DIRECTORIES = tests
 LIBRARIES = clutter-glx-1.0 clutter-gst-1.0 sqlite3
 
 CPPFLAGS = $(foreach SYSTEM_INCLUDE, $(SYSTEM_INCLUDES), -isystem$(SYSTEM_INCLUDE)) \
-	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE))
+	$(foreach INCLUDE, $(INCLUDES), -I$(INCLUDE)) $(foreach DEFINE, $(DEFINES), -D$(DEFINE)) \
+	-DNAME='"$(NAME)"' -DDISPLAY_NAME='"$(DISPLAY_NAME)"' -DVERSION='"$(VERSION)"'
 CXXFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x -O3
 LOADLIBES = $(foreach LIBRARY, $(LIBRARIES), -l$(LIBRARY))
 

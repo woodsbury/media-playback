@@ -39,18 +39,14 @@ namespace interface {
 
 		thumbnail_ = clutter_cairo_texture_new(180, 180);
 		draw_thumbnail();
-		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_scale_on_cb),
-				thumbnail_);
-		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_scale_off_cb),
-				thumbnail_);
+		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_scale_on_cb), thumbnail_);
+		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_scale_off_cb), thumbnail_);
 		clutter_box_pack(CLUTTER_BOX(actor_), thumbnail_, NULL, NULL);
 
 		ClutterColor white = {255, 255, 255, 255};
 		ClutterActor * title = clutter_text_new_full("Sans", item_.title().c_str(), &white);
-		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_highlight_on_cb),
-				title);
-		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_highlight_off_cb),
-				title);
+		g_signal_connect(actor_, "enter-event", G_CALLBACK(Actor::actor_highlight_on_cb), title);
+		g_signal_connect(actor_, "leave-event", G_CALLBACK(Actor::actor_highlight_off_cb), title);
 		clutter_box_pack(CLUTTER_BOX(actor_), title, NULL, NULL);
 
 		g_object_ref_sink(actor_);
@@ -173,6 +169,10 @@ namespace interface {
 		return TRUE;
 	}
 
+	void Browser::search_activated_cb(ClutterText *, gpointer data) {
+		reinterpret_cast< Browser * >(data)->update_media_list();
+	}
+
 	void Browser::height_changed_cb(GObject *, GParamSpec *, gpointer data) {
 		reinterpret_cast< Browser * >(data)->height_changed();
 	}
@@ -233,14 +233,74 @@ namespace interface {
 		g_signal_connect(movies_, "leave-event", G_CALLBACK(actor_highlight_off_cb), movies_);
 		clutter_box_pack(CLUTTER_BOX(buttons), movies_, NULL, NULL);
 
-		ClutterActor * spacing = clutter_rectangle_new();
-		clutter_actor_set_width(spacing, 100.0f);
-		clutter_actor_set_opacity(spacing, 0);
-		clutter_box_pack(CLUTTER_BOX(buttons), spacing, NULL, NULL);
+		ClutterActor * spacing_1 = clutter_rectangle_new();
+		clutter_actor_set_width(spacing_1, 40.0f);
+		clutter_actor_set_opacity(spacing_1, 0);
+		clutter_box_pack(CLUTTER_BOX(buttons), spacing_1, NULL, NULL);
+
+		ClutterLayoutManager * search_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
+				CLUTTER_BIN_ALIGNMENT_CENTER);
+		ClutterActor * search = clutter_box_new(search_layout);
+		clutter_actor_set_width(search, 300.0f);
+
+		ClutterActor * search_bg = clutter_cairo_texture_new(300, 20);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(search_bg));
+
+		cairo_move_to(context, 5.0, 0.0);
+		cairo_line_to(context, 295.0, 0.0);
+		cairo_curve_to(context, 299.0, 0.0, 300.0, 1.0, 300.0, 5.0);
+		cairo_line_to(context, 300.0, 15.0);
+		cairo_curve_to(context, 300.0, 19.0, 299.0, 20.0, 295.0, 20.0);
+		cairo_line_to(context, 5.0, 20.0);
+		cairo_curve_to(context, 1.0, 20.0, 0.0, 19.0, 0.0, 15.0);
+		cairo_line_to(context, 0.0, 5.0);
+		cairo_curve_to(context, 0.0, 1.0, 1.0, 0.0, 5.0, 0.0);
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_box_pack(CLUTTER_BOX(search), search_bg, NULL, NULL);
+
+		ClutterActor * search_icon = clutter_cairo_texture_new(18, 18);
+
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(search_icon));
+
+		cairo_arc(context, 10.0, 8.0, 4.0, 0.0, 2.0 * M_PI);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_move_to(context, 3.0, 15.0);
+		cairo_line_to(context, 7.0, 11.0);
+		cairo_set_line_width(context, 3.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_box_pack(CLUTTER_BOX(search), search_icon, NULL, NULL);
+
+		search_text_ = clutter_text_new();
+		clutter_text_set_font_name(CLUTTER_TEXT(search_text_), "Sans 12px");
+		clutter_text_set_editable(CLUTTER_TEXT(search_text_), TRUE);
+		clutter_text_set_selectable(CLUTTER_TEXT(search_text_), TRUE);
+		clutter_text_set_single_line_mode(CLUTTER_TEXT(search_text_), TRUE);
+		clutter_actor_set_x(search_text_, 19.0f);
+		clutter_actor_set_width(search_text_, 280.0f);
+		clutter_actor_set_reactive(search_text_, TRUE);
+		g_signal_connect(search_text_, "activate", G_CALLBACK(search_activated_cb), this);
+		clutter_box_pack(CLUTTER_BOX(search), search_text_, NULL, NULL);
+
+		clutter_box_pack(CLUTTER_BOX(buttons), search, NULL, NULL);
+
+		ClutterActor * spacing_2 = clutter_rectangle_new();
+		clutter_actor_set_width(spacing_2, 40.0f);
+		clutter_actor_set_opacity(spacing_2, 0);
+		clutter_box_pack(CLUTTER_BOX(buttons), spacing_2, NULL, NULL);
 
 		add_ = clutter_cairo_texture_new(80, 20);
 
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(add_));
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(add_));
 
 		cairo_move_to(context, 5.0, 0.0);
 		cairo_line_to(context, 75.0, 0.0);
@@ -610,7 +670,13 @@ namespace interface {
 	void Browser::update_media_list() {
 		clear_media_list();
 
-		std::vector< toolkit::MediaItem > list(library_.list(type_));
+		std::vector< toolkit::MediaItem > list;
+		if (*(clutter_text_get_text(CLUTTER_TEXT(search_text_))) == '\0') {
+			// Search box is empty
+			list = library_.list(type_);
+		} else {
+			// Search text exists
+		}
 		item_list_.reserve(list.size());
 
 		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {

@@ -23,6 +23,14 @@
 namespace interface {
 	class Dialogue
 		: public Actor {
+		static gboolean close_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+			if (clutter_event_get_button(event) == 1) {
+				clutter_actor_hide_all(CLUTTER_ACTOR(data));
+			}
+
+			return TRUE;
+		}
+
 		ClutterActor * dialogue_;
 
 	protected:
@@ -39,6 +47,7 @@ namespace interface {
 			ClutterColor black = {0, 0, 0, 150};
 			ClutterActor * background  = clutter_rectangle_new();
 			clutter_rectangle_set_color(CLUTTER_RECTANGLE(background), &black);
+			clutter_actor_set_reactive(background, TRUE);
 			clutter_actor_add_constraint(background,
 					clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_HEIGHT, 0.0f));
 			clutter_actor_add_constraint(background,
@@ -82,11 +91,15 @@ namespace interface {
 			cairo_line_to(context, 1.0, 13.0);
 			cairo_line_to(context, 6.0, 8.0);
 			cairo_close_path(context);
-			cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+			cairo_set_source_rgb(context, 0.5, 0.2, 0.2);
 			cairo_fill(context);
 
 			cairo_destroy(context);
 
+			clutter_actor_set_reactive(close_button, TRUE);
+			g_signal_connect(close_button, "button-press-event", G_CALLBACK(close_clicked_cb), actor_);
+			g_signal_connect(close_button, "enter-event", G_CALLBACK(actor_highlight_on_cb), close_button);
+			g_signal_connect(close_button, "leave-event", G_CALLBACK(actor_highlight_off_cb), close_button);
 			clutter_box_pack(CLUTTER_BOX(dialogue_), close_button, NULL, NULL);
 
 			clutter_box_pack(CLUTTER_BOX(actor_), dialogue_, NULL, NULL);

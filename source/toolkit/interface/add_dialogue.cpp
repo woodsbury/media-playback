@@ -15,10 +15,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern "C" {
-#include <cairo.h>
-}
-
 #include "add_dialogue.hpp"
 #include "interface_private.hpp"
 
