@@ -62,8 +62,8 @@ namespace toolkit {
 
 		void initialise_db();
 
-		long long type_key(Type type);
-		long long album_key(std::string album);
+		long long type_id(Type type);
+		long long album_id(std::string album);
 
 	public:
 		Library();

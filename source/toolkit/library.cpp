@@ -143,11 +143,11 @@ namespace toolkit {
 /*
 	Find the foreign key relating to the given type
 */
-	long long Library::type_key(Type type) {
+	long long Library::type_id(Type type) {
 		assert(type != Type::All);
 
 		if (type_stmt_ == nullptr) {
-			type_stmt_ = new core::Statement(*this, "SELECT key FROM types WHERE type = ?");
+			type_stmt_ = new core::Statement(*this, "SELECT type_id FROM types WHERE type = ?");
 		} else {
 			type_stmt_->reset();
 		}
@@ -171,9 +171,9 @@ namespace toolkit {
 /*
 	Find the foreign key relating to the given album
 */
-	long long Library::album_key(std::string album) {
+	long long Library::album_id(std::string album) {
 		if (album_stmt_ == nullptr) {
-			album_stmt_ = new core::Statement(*this, "SELECT key FROM albums WHERE album = ?");
+			album_stmt_ = new core::Statement(*this, "SELECT album_id FROM albums WHERE album = ?");
 		} else {
 			album_stmt_->reset();
 		}
@@ -222,14 +222,14 @@ namespace toolkit {
 
 		if (add_stmt_ == nullptr) {
 			add_stmt_ = new core::Statement(*this,
-					"INSERT INTO items (name, uri, type, thumbnail, album) VALUES (?, ?, ?, ?, ?)");
+					"INSERT INTO items (name, uri, type_id, thumbnail, album_id) VALUES (?, ?, ?, ?, ?)");
 		} else {
 			add_stmt_->reset();
 		}
 
 		add_stmt_->bind(1u, title);
 		add_stmt_->bind(2u, uri);
-		add_stmt_->bind(3u, type_key(type));
+		add_stmt_->bind(3u, type_id(type));
 
 		if (thumbnail_file.empty()) {
 			add_stmt_->bind(4u);
@@ -240,7 +240,7 @@ namespace toolkit {
 		if (album.empty()) {
 			add_stmt_->bind(5u);
 		} else {
-			add_stmt_->bind(5u, album_key(album));
+			add_stmt_->bind(5u, album_id(album));
 		}
 
 		assert(add_stmt_->valid());
@@ -257,7 +257,7 @@ namespace toolkit {
 			count_stmt_->reset();
 		}
 
-		count_stmt_->bind(1u, type_key(type));
+		count_stmt_->bind(1u, type_id(type));
 
 		assert(count_stmt_->valid());
 		count_stmt_->execute();
