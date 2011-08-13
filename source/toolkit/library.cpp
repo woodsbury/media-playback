@@ -187,7 +187,7 @@ namespace toolkit {
 
 	Library::Library()
 		: core::Database(core::Path::data() + "/library.db"), add_stmt_(nullptr), count_stmt_(nullptr),
-		  list_stmt_(nullptr), search_stmt_(nullptr) {
+		  list_stmt_(nullptr), search_stmt_(nullptr), type_stmt_(nullptr), album_stmt_(nullptr) {
 		core::Statement check_version(*this, "SELECT version FROM version");
 		if (!check_version.valid()) {
 			// Database is likely empty
