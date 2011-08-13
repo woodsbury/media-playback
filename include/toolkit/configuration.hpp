@@ -15,11 +15,20 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#ifndef _TOOLKIT_CONFIGURATION_HPP
+#define _TOOLKIT_CONFIGURATION_HPP
 
-#include "toolkit/configuration.hpp"
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+#include <string>
+#include <vector>
+#include <core/database.hpp>
+
+namespace toolkit {
+	class Configuration
+		: private core::Database {
+	public:
+		Configuration();
+		~Configuration();
+	};
+}
 
 #endif

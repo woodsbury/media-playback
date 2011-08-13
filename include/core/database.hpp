@@ -46,6 +46,8 @@ namespace core {
 
 		bool opened() const;
 
+		void clear();
+
 		std::vector< std::string > tables();
 	};
 

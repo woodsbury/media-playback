@@ -175,6 +175,20 @@ namespace core {
 	}
 
 /*
+	Drops all the tables in the database
+*/
+	void Database::clear() {
+		Statement tables(*this, "SELECT name FROM sqlite_master WHERE type = 'table'");
+
+		Statement drop(*this, "DROP TABLE ?");
+		do {
+			drop.bind(1u, tables.toText(0u));
+			drop.execute();
+			drop.reset();
+		} while (tables.nextRow());
+	}
+
+/*
 	Returns a list of tables in the database
 */
 	std::vector< std::string > Database::tables() {

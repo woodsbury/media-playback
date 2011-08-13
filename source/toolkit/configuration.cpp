@@ -15,11 +15,18 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#include <debug.hpp>
+#include <core/filesystem.hpp>
+#include <toolkit/configuration.hpp>
 
-#include "toolkit/configuration.hpp"
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+namespace toolkit {
+	Configuration::Configuration()
+		: core::Database(core::Path::data() + "/configuration.db") {
+		if (opened() && (tables().size() == 0u)) {
+			// Configuration database hasn't been initialised yet
+			dprint("Creating configuration");
+		}
+	}
 
-#endif
+	Configuration::~Configuration() {}
+}

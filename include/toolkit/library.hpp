@@ -24,14 +24,18 @@
 
 namespace toolkit {
 	class MediaItem {
+		long long id_;
+
 		std::string title_;
 		std::string uri_;
 		std::string thumbnail_;
 
 	public:
-		MediaItem(std::string title, std::string uri, std::string thumbnail_file = std::string());
+		MediaItem(long long id, std::string title, std::string uri, std::string thumbnail_file = std::string());
 		MediaItem(MediaItem const & media_item);
 		MediaItem(MediaItem && media_item);
+
+		long long id() const;
 
 		std::string title() const;
 		std::string uri() const;
@@ -40,11 +44,6 @@ namespace toolkit {
 
 	class Library
 		: private core::Database {
-		core::Statement * add_stmt_;
-		core::Statement * count_stmt_;
-		core::Statement * list_stmt_;
-		core::Statement * search_stmt_;
-
 	public:
 		enum class Type {
 			All,
@@ -52,10 +51,25 @@ namespace toolkit {
 			Movies
 		};
 
+	private:
+		core::Statement * add_stmt_;
+		core::Statement * count_stmt_;
+		core::Statement * list_stmt_;
+		core::Statement * search_stmt_;
+
+		core::Statement * type_stmt_;
+		core::Statement * album_stmt_;
+
+		void initialise_db();
+
+		long long type_key(Type type);
+		long long album_key(std::string album);
+
+	public:
 		Library();
 		~Library();
 
-		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string());
+		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string(), std::string album = std::string());
 
 		unsigned long long count(Type type);
 		std::vector< MediaItem > list(Type type);
