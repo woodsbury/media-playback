@@ -62,6 +62,7 @@ namespace interface {
 		static gboolean movies_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean music_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void height_changed_cb(GObject * object, GParamSpec * param, gpointer data);
+		static gboolean key_pressed_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean scroll_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void search_activated_cb(ClutterText * text, gpointer data);
 		static gboolean wheel_scrolled_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
@@ -97,6 +98,7 @@ namespace interface {
 
 		void add_clicked();
 		void all_clicked();
+		void key_pressed(guint key, ClutterModifierType modifiers);
 		void movies_clicked();
 		void music_clicked();
 		void scroll_dragged(float y);

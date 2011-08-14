@@ -42,6 +42,11 @@ namespace interface {
 		reinterpret_cast< Player * >(data)->media_eos();
 	}
 
+	void Player::media_error_cb(ClutterMedia *, GError *, gpointer data) {
+		dprint("Error in media playback");
+		reinterpret_cast< Player * >(data)->media_eos();
+	}
+
 	gboolean Player::play_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		if (clutter_event_get_button(event) == 1) {
 			reinterpret_cast< Player * >(data)->play_clicked();
@@ -110,6 +115,7 @@ namespace interface {
 		clutter_actor_add_constraint(CLUTTER_ACTOR(media_),
 				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 		g_signal_connect(media_, "eos", G_CALLBACK(media_eos_cb), this);
+		g_signal_connect(media_, "error", G_CALLBACK(media_error_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
 
 		ClutterLayoutManager * hud_layout = clutter_box_layout_new();
@@ -279,6 +285,11 @@ namespace interface {
 */
 	void Player::key_pressed(guint key, ClutterModifierType modifiers) {
 		switch (key) {
+		case CLUTTER_KEY_F11:
+			// Toggle fullscreen on the stage
+			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
+					!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+			break;
 		case CLUTTER_KEY_space:
 			// Emulate play click
 			play_clicked();

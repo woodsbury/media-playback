@@ -192,6 +192,12 @@ namespace interface {
 		reinterpret_cast< Browser * >(data)->height_changed();
 	}
 
+	gboolean Browser::key_pressed_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		reinterpret_cast< Browser * >(data)->key_pressed(clutter_event_get_key_symbol(event),
+				clutter_event_get_state(event));
+		return TRUE;
+	}
+
 	gboolean Browser::wheel_scrolled_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 
 		switch (clutter_event_get_scroll_direction(event)) {
@@ -417,6 +423,8 @@ namespace interface {
 
 		clutter_box_pack(CLUTTER_BOX(actor_), media_browser, NULL, NULL);
 
+		g_signal_connect(actor_, "key-press-event", G_CALLBACK(key_pressed_cb), this);
+
 		g_signal_connect(clutter_stage_get_default(), "notify::height", G_CALLBACK(height_changed_cb), this);
 
 		update_media_list();
@@ -587,6 +595,21 @@ namespace interface {
 	void Browser::height_changed() {
 		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
 		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
+	}
+
+/*
+	Called whenever a key is pressed
+*/
+	void Browser::key_pressed(guint key, ClutterModifierType modifiers) {
+		switch (key) {
+		case CLUTTER_KEY_F11:
+			// Toggle fullscreen on the stage
+			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
+					!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+			break;
+		default:
+			;
+		}
 	}
 
 /*

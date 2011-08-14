@@ -37,6 +37,7 @@ namespace interface {
 		static gboolean hide_controls_cb(gpointer data);
 		static gboolean key_pressed_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void media_eos_cb(ClutterMedia * media, gpointer data);
+		static void media_error_cb(ClutterMedia * media, GError * error, gpointer data);
 		static gboolean play_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean seek_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean show_controls_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
