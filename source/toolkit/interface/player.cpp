@@ -51,9 +51,25 @@ namespace interface {
 		reinterpret_cast< Player * >(data)->media_message(message);
 	}
 
+	gboolean Player::next_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Player * >(data)->next_clicked();
+		}
+
+		return TRUE;
+	}
+
 	gboolean Player::play_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		if (clutter_event_get_button(event) == 1) {
 			reinterpret_cast< Player * >(data)->play_clicked();
+		}
+
+		return TRUE;
+	}
+
+	gboolean Player::previous_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
+		if (clutter_event_get_button(event) == 1) {
+			reinterpret_cast< Player * >(data)->previous_clicked();
 		}
 
 		return TRUE;
@@ -169,10 +185,10 @@ namespace interface {
 				stop_button);
 		clutter_box_pack(CLUTTER_BOX(controls), stop_button, NULL, NULL);
 
-		ClutterActor * spacing = clutter_rectangle_new();
-		clutter_actor_set_width(spacing, 2.0f);
-		clutter_actor_set_opacity(spacing, 0);
-		clutter_box_pack(CLUTTER_BOX(controls), spacing, NULL, NULL);
+		ClutterActor * spacing_1 = clutter_rectangle_new();
+		clutter_actor_set_width(spacing_1, 2.0f);
+		clutter_actor_set_opacity(spacing_1, 0);
+		clutter_box_pack(CLUTTER_BOX(controls), spacing_1, NULL, NULL);
 
 		ClutterLayoutManager * seek_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
 				CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -214,6 +230,71 @@ namespace interface {
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(controls), seek, NULL, NULL);
+
+		ClutterActor * spacing_2 = clutter_rectangle_new();
+		clutter_actor_set_width(spacing_2, 2.0f);
+		clutter_actor_set_opacity(spacing_2, 0);
+		clutter_box_pack(CLUTTER_BOX(controls), spacing_2, NULL, NULL);
+
+		previous_button_ = clutter_cairo_texture_new(20, 20);
+
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(previous_button_));
+
+		cairo_move_to(context, 10.0, 2.0);
+		cairo_line_to(context, 10.0, 18.0);
+		cairo_line_to(context, 2.0, 10.0);
+		cairo_close_path(context);
+
+		cairo_move_to(context, 18.0, 2.0);
+		cairo_line_to(context, 18.0, 18.0);
+		cairo_line_to(context, 10.0, 10.0);
+		cairo_close_path(context);
+
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_actor_set_reactive(previous_button_, TRUE);
+		g_signal_connect(previous_button_, "button-press-event", G_CALLBACK(previous_clicked_cb), this);
+		g_signal_connect(previous_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				previous_button_);
+		g_signal_connect(previous_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				previous_button_);
+		clutter_box_pack(CLUTTER_BOX(controls), previous_button_, NULL, NULL);
+
+		next_button_ = clutter_cairo_texture_new(20, 20);
+
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(next_button_));
+
+		cairo_move_to(context, 2.0, 2.0);
+		cairo_line_to(context, 2.0, 18.0);
+		cairo_line_to(context, 10.0, 10.0);
+		cairo_close_path(context);
+
+		cairo_move_to(context, 10.0, 2.0);
+		cairo_line_to(context, 10.0, 18.0);
+		cairo_line_to(context, 18.0, 10.0);
+		cairo_close_path(context);
+
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+
+		clutter_actor_set_reactive(next_button_, TRUE);
+		g_signal_connect(next_button_, "button-press-event", G_CALLBACK(next_clicked_cb), this);
+		g_signal_connect(next_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
+				next_button_);
+		g_signal_connect(next_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
+				next_button_);
+		clutter_box_pack(CLUTTER_BOX(controls), next_button_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(hud_), controls, NULL, NULL);
 
@@ -316,11 +397,7 @@ namespace interface {
 			draw_play_button();
 			p->browse();
 		} else {
-			gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
-			gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
-			gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
-					gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, current_track_);
-			clutter_media_set_playing(media_, TRUE);
+			next_clicked();
 		}
 	}
 
@@ -336,12 +413,28 @@ namespace interface {
 			gst_tag_list_get_uint(tags, GST_TAG_TRACK_NUMBER, &current_track_);
 			gst_tag_list_get_uint(tags, GST_TAG_TRACK_COUNT, &total_tracks_);
 
+			if (total_tracks_ > 1) {
+				clutter_actor_show(previous_button_);
+				clutter_actor_show(next_button_);
+			}
+
 			gst_tag_list_free(tags);
 
 			break;
 		default:
 			;
 		}
+	}
+
+/*
+	Called whenever the next track button is clicked
+*/
+	void Player::next_clicked() {
+		gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
+		gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
+		gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
+				gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, current_track_);
+		clutter_media_set_playing(media_, TRUE);
 	}
 
 /*
@@ -354,6 +447,20 @@ namespace interface {
 			clutter_media_set_playing(media_, !clutter_media_get_playing(media_));
 			draw_play_button();
 			g_free(uri);
+		}
+	}
+
+/*
+	Called whenever the previous track button is clicked
+*/
+	void Player::previous_clicked() {
+		int track = current_track_ - 2;
+		if (track > 0) {
+			gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
+			gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
+			gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
+					gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, track);
+			clutter_media_set_playing(media_, TRUE);
 		}
 	}
 
@@ -410,8 +517,8 @@ namespace interface {
 	Called whenever the stage's width changes
 */
 	void Player::width_changed() {
-		clutter_actor_set_width(seek_line_, clutter_actor_get_width(clutter_stage_get_default()) * 0.75f);
-		clutter_actor_set_width(seek_hidden_, clutter_actor_get_width(clutter_stage_get_default()) * 0.75f);
+		clutter_actor_set_width(seek_line_, clutter_actor_get_width(clutter_stage_get_default()) * 0.7f);
+		clutter_actor_set_width(seek_hidden_, clutter_actor_get_width(clutter_stage_get_default()) * 0.7f);
 	}
 
 /*
@@ -446,6 +553,8 @@ namespace interface {
 
 		current_track_ = 1;
 		total_tracks_ = 1;
+		clutter_actor_hide(previous_button_);
+		clutter_actor_hide(next_button_);
 
 		clutter_media_set_uri(media_, uri);
 		clutter_media_set_playing(media_, TRUE);
