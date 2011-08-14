@@ -19,6 +19,7 @@
 
 extern "C" {
 #include <clutter/clutter.h>
+#include <gst/gst.h>
 }
 
 #include "interface/interface_private.hpp"
@@ -29,6 +30,11 @@ namespace clutter {
 			dprint("Initialising Clutter & GStreamer");
 			clutter_gst_init(NULL, NULL);
 			initialised_ = true;
+
+#if defined(DEBUG) && !defined(GST_DISABLE_GST_DEBUG)
+			gst_debug_set_active(TRUE);
+			gst_debug_set_default_threshold(GST_LEVEL_ERROR);
+#endif
 		}
 	}
 

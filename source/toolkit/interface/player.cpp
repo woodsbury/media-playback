@@ -47,6 +47,10 @@ namespace interface {
 		reinterpret_cast< Player * >(data)->media_eos();
 	}
 
+	void Player::media_message_cb(GstBus *, GstMessage * message, gpointer data) {
+		reinterpret_cast< Player * >(data)->media_message(message);
+	}
+
 	gboolean Player::play_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		if (clutter_event_get_button(event) == 1) {
 			reinterpret_cast< Player * >(data)->play_clicked();
@@ -220,6 +224,11 @@ namespace interface {
 		g_signal_connect(clutter_stage_get_default(), "notify::width", G_CALLBACK(width_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_controls_cb), this);
 		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
+
+		GstBus * bus = gst_pipeline_get_bus(GST_PIPELINE(
+				clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_))));
+		g_signal_connect(bus, "message::tag", G_CALLBACK(media_message_cb), this);
+		gst_object_unref(bus);
 	}
 
 /*
@@ -303,8 +312,36 @@ namespace interface {
 	Called when the media playing back ends
 */
 	void Player::media_eos() {
-		draw_play_button();
-		p->browse();
+		if (current_track_ == total_tracks_) {
+			draw_play_button();
+			p->browse();
+		} else {
+			gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
+			gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
+			gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
+					gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, current_track_);
+			clutter_media_set_playing(media_, TRUE);
+		}
+	}
+
+/*
+	Called whenever a message appears on the bus
+*/
+	void Player::media_message(GstMessage * message) {
+		switch (GST_MESSAGE_TYPE(message)) {
+		case GST_MESSAGE_TAG:
+			GstTagList * tags;
+			gst_message_parse_tag(message, &tags);
+
+			gst_tag_list_get_uint(tags, GST_TAG_TRACK_NUMBER, &current_track_);
+			gst_tag_list_get_uint(tags, GST_TAG_TRACK_COUNT, &total_tracks_);
+
+			gst_tag_list_free(tags);
+
+			break;
+		default:
+			;
+		}
 	}
 
 /*
@@ -406,6 +443,9 @@ namespace interface {
 		CoglHandle blank = cogl_texture_new_from_data(1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_RGB_888, COGL_PIXEL_FORMAT_ANY, 0, blank_data);
 		clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(media_), blank);
 		cogl_handle_unref(blank);
+
+		current_track_ = 1;
+		total_tracks_ = 1;
 
 		clutter_media_set_uri(media_, uri);
 		clutter_media_set_playing(media_, TRUE);

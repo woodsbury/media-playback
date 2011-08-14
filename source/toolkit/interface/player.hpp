@@ -20,6 +20,7 @@
 
 extern "C" {
 #include <clutter/clutter.h>
+#include <gst/gst.h>
 }
 
 #include "actor.hpp"
@@ -38,6 +39,7 @@ namespace interface {
 		static gboolean key_pressed_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void media_eos_cb(ClutterMedia * media, gpointer data);
 		static void media_error_cb(ClutterMedia * media, GError * error, gpointer data);
+		static void media_message_cb(GstBus * bus, GstMessage * message, gpointer data);
 		static gboolean play_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean seek_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean show_controls_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
@@ -58,6 +60,9 @@ namespace interface {
 		ClutterActor * seek_handle_;
 		ClutterActor * seek_hidden_;
 
+		unsigned int current_track_;
+		unsigned int total_tracks_;
+
 		guint update_seek_timeout_id_;
 		guint hide_controls_timeout_id_;
 
@@ -66,6 +71,7 @@ namespace interface {
 		void hide_controls();
 		void key_pressed(guint key, ClutterModifierType modifiers);
 		void media_eos();
+		void media_message(GstMessage * message);
 		void play_clicked();
 		void seek_dragged(float x);
 		void show_controls();
