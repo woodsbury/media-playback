@@ -51,7 +51,7 @@ namespace toolkit {
 		InterfacePrivate();
 
 		void browse();
-		void play(char const * uri, char const * title);
+		void play(std::string uri, std::string title);
 
 		void add();
 

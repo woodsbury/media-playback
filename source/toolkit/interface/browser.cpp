@@ -121,7 +121,7 @@ namespace interface {
 	Called whenever the item is clicked
 */
 	void BrowserItem::item_clicked() {
-		p->play(item_.uri().c_str(), item_.title().c_str());
+		p->play(item_.uri(), item_.title());
 	}
 
 	gboolean Browser::all_clicked_cb(ClutterActor *, ClutterEvent * event, gpointer data) {

@@ -88,7 +88,7 @@ namespace toolkit {
 /*
 	Plays the URI
 */
-	void InterfacePrivate::play(char const * uri, char const * title) {
+	void InterfacePrivate::play(std::string uri, std::string title) {
 		clutter_actor_detach_animation(player_.actor());
 		clutter_actor_animate(browser_.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
 				"signal::completed", interface::Actor::hide_after_cb, browser_.actor(), NULL);
@@ -98,7 +98,7 @@ namespace toolkit {
 		clutter_actor_grab_key_focus(player_.actor());
 		panel_.setAutoHide(true);
 
-		player_.play(uri, title);
+		player_.play(std::move(uri), std::move(title));
 	}
 
 	Interface::Interface()
@@ -113,12 +113,7 @@ namespace toolkit {
 	}
 
 	void Interface::play(std::string uri, std::string title) const {
-		if (title.length() > 30) {
-			title.erase(27);
-			title.append("...");
-		}
-
-		p->play(uri.c_str(), title.empty() ? NULL : title.c_str());
+		p->play(std::move(uri), std::move(title));
 	}
 
 /*

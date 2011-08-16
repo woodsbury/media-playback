@@ -416,6 +416,15 @@ namespace interface {
 			if (total_tracks_ > 1) {
 				clutter_actor_show(previous_button_);
 				clutter_actor_show(next_button_);
+			} else {
+				clutter_actor_hide(previous_button_);
+				clutter_actor_hide(next_button_);
+			}
+
+			char * title;
+			if (gst_tag_list_get_string(tags, GST_TAG_TITLE, &title)) {
+				set_title(title);
+				g_free(title);
 			}
 
 			gst_tag_list_free(tags);
@@ -479,6 +488,36 @@ namespace interface {
 	}
 
 /*
+	Sets the title displayed
+*/
+	void Player::set_title(std::string title) {
+		if (title.length() > 30) {
+			title.erase(27);
+			title.append("...");
+		}
+
+		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(title_));
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(title_));
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(context, 18.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, title.c_str(), &extents);
+		cairo_move_to(context, (title_width / 2.0) - ((extents.width / 2.0) + extents.x_bearing),
+				(title_height / 2.0) - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, title.c_str());
+		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_destroy(context);
+	}
+
+/*
 	Shows the buttons and seek bar
 */
 	void Player::show_controls() {
@@ -524,30 +563,13 @@ namespace interface {
 /*
 	Plays the given URI in the media widget
 */
-	void Player::play(char const * uri, char const * title) {
-		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(title_));
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(title_));
-
-		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-		cairo_set_font_size(context, 18.0);
-
-		cairo_text_extents_t extents;
-		cairo_text_extents(context, title, &extents);
-		cairo_move_to(context, (title_width / 2.0) - ((extents.width / 2.0) + extents.x_bearing),
-				(title_height / 2.0) - ((extents.height / 2.0) + extents.y_bearing));
-
-		cairo_text_path(context, title);
-		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
-		cairo_fill_preserve(context);
-		cairo_set_line_width(context, 1.0);
-		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
-		cairo_stroke(context);
-
-		cairo_destroy(context);
+	void Player::play(std::string uri, std::string title) {
+		set_title(std::move(title));
 
 		// Clear the image in the video texture
 		unsigned char blank_data[3] = {0, 0, 0};
-		CoglHandle blank = cogl_texture_new_from_data(1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_RGB_888, COGL_PIXEL_FORMAT_ANY, 0, blank_data);
+		CoglHandle blank = cogl_texture_new_from_data(1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_RGB_888,
+				COGL_PIXEL_FORMAT_ANY, 0, blank_data);
 		clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(media_), blank);
 		cogl_handle_unref(blank);
 
@@ -556,7 +578,7 @@ namespace interface {
 		clutter_actor_hide(previous_button_);
 		clutter_actor_hide(next_button_);
 
-		clutter_media_set_uri(media_, uri);
+		clutter_media_set_uri(media_, uri.c_str());
 		clutter_media_set_playing(media_, TRUE);
 		draw_play_button();
 	}

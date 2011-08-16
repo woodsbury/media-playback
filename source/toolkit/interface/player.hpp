@@ -70,6 +70,8 @@ namespace interface {
 		guint update_seek_timeout_id_;
 		guint hide_controls_timeout_id_;
 
+		void set_title(std::string title);
+
 		void draw_play_button();
 
 		void hide_controls();
@@ -88,7 +90,7 @@ namespace interface {
 	public:
 		Player(toolkit::InterfacePrivate * interface_private);
 
-		void play(char const * uri, char const * title);
+		void play(std::string uri, std::string title = std::string());
 	};
 }
 
