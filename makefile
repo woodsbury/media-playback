@@ -1,6 +1,6 @@
 NAME = mp
 DISPLAY_NAME = Media Player
-VERSION = 0
+VERSION = 0.1
 
 DEFINES = DEBUG OPTIMISE
 INCLUDES = include

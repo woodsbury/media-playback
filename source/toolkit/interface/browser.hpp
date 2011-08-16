@@ -57,7 +57,6 @@ namespace interface {
 
 	class Browser
 		: public Actor {
-		static gboolean add_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean all_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean movies_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean music_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
@@ -81,8 +80,6 @@ namespace interface {
 
 		ClutterActor * search_text_;
 
-		ClutterActor * add_;
-
 		ClutterActor * media_list_;
 
 		ClutterActor * scroll_hidden_;
@@ -96,7 +93,6 @@ namespace interface {
 		void clear_media_list();
 		void update_media_list();
 
-		void add_clicked();
 		void all_clicked();
 		void key_pressed(guint key, ClutterModifierType modifiers);
 		void movies_clicked();

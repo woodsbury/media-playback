@@ -41,7 +41,7 @@ namespace interface {
 */
 		static gboolean actor_highlight_on_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 			if (clutter_feature_available(CLUTTER_FEATURE_SHADERS_GLSL)) {
-				ClutterColor highlight = {0, 230, 100, 255};
+				ClutterColor highlight = {250, 125, 0, 200};
 				clutter_actor_add_effect(reinterpret_cast< ClutterActor * >(data), clutter_colorize_effect_new(&highlight));
 			}
 
