@@ -1,0 +1,14 @@
+style=java
+
+indent=tab
+indent-col1-comments
+indent-namespaces
+indent-preprocessor
+
+add-brackets
+
+align-pointer=middle
+
+lineend=linux
+suffix=none
+

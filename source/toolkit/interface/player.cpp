@@ -34,7 +34,7 @@ namespace interface {
 
 	gboolean Player::key_pressed_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		reinterpret_cast< Player * >(data)->key_pressed(clutter_event_get_key_symbol(event),
-				clutter_event_get_state(event));
+		        clutter_event_get_state(event));
 		return TRUE;
 	}
 
@@ -125,15 +125,15 @@ namespace interface {
 	Player::Player(toolkit::InterfacePrivate * interface_private)
 		: p(interface_private), update_seek_timeout_id_(0) {
 		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
-				CLUTTER_BIN_ALIGNMENT_FIXED);
+		                                     CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_, clutter_bind_constraint_new(clutter_stage_get_default(),
-				CLUTTER_BIND_SIZE, 0.0f));
+		                             CLUTTER_BIND_SIZE, 0.0f));
 
 		media_ = CLUTTER_MEDIA(clutter_gst_video_texture_new());
 		clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(media_), TRUE);
 		clutter_actor_add_constraint(CLUTTER_ACTOR(media_),
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 		g_signal_connect(media_, "eos", G_CALLBACK(media_eos_cb), this);
 		g_signal_connect(media_, "error", G_CALLBACK(media_error_cb), this);
 		clutter_box_pack(CLUTTER_BOX(actor_), CLUTTER_ACTOR(media_), NULL, NULL);
@@ -143,9 +143,9 @@ namespace interface {
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(hud_layout), TRUE);
 		hud_ = clutter_box_new(hud_layout);
 		clutter_actor_add_constraint(hud_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 		clutter_actor_add_constraint(hud_,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.93f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.93f));
 
 		title_ = clutter_cairo_texture_new(title_width, title_height);
 		clutter_box_pack(CLUTTER_BOX(hud_), title_, NULL, NULL);
@@ -159,9 +159,9 @@ namespace interface {
 		clutter_actor_set_reactive(play_button_, TRUE);
 		g_signal_connect(play_button_, "button-press-event", G_CALLBACK(play_clicked_cb), this);
 		g_signal_connect(play_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				play_button_);
+		                 play_button_);
 		g_signal_connect(play_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				play_button_);
+		                 play_button_);
 		clutter_box_pack(CLUTTER_BOX(controls), play_button_, NULL, NULL);
 
 		ClutterActor * stop_button = clutter_cairo_texture_new(20, 20);
@@ -180,9 +180,9 @@ namespace interface {
 		clutter_actor_set_reactive(stop_button, TRUE);
 		g_signal_connect(stop_button, "button-press-event", G_CALLBACK(stop_clicked_cb), this);
 		g_signal_connect(stop_button, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				stop_button);
+		                 stop_button);
 		g_signal_connect(stop_button, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				stop_button);
+		                 stop_button);
 		clutter_box_pack(CLUTTER_BOX(controls), stop_button, NULL, NULL);
 
 		ClutterActor * spacing_1 = clutter_rectangle_new();
@@ -191,7 +191,7 @@ namespace interface {
 		clutter_box_pack(CLUTTER_BOX(controls), spacing_1, NULL, NULL);
 
 		ClutterLayoutManager * seek_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
-				CLUTTER_BIN_ALIGNMENT_CENTER);
+		                                     CLUTTER_BIN_ALIGNMENT_CENTER);
 		ClutterActor * seek = clutter_box_new(seek_layout);
 
 		seek_hidden_ = clutter_rectangle_new();
@@ -224,9 +224,9 @@ namespace interface {
 		cairo_destroy(context);
 
 		g_signal_connect(seek_hidden_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				seek_handle_);
+		                 seek_handle_);
 		g_signal_connect(seek_hidden_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				seek_handle_);
+		                 seek_handle_);
 		clutter_box_pack(CLUTTER_BOX(seek), seek_handle_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(controls), seek, NULL, NULL);
@@ -261,9 +261,9 @@ namespace interface {
 		clutter_actor_set_reactive(previous_button_, TRUE);
 		g_signal_connect(previous_button_, "button-press-event", G_CALLBACK(previous_clicked_cb), this);
 		g_signal_connect(previous_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				previous_button_);
+		                 previous_button_);
 		g_signal_connect(previous_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				previous_button_);
+		                 previous_button_);
 		clutter_box_pack(CLUTTER_BOX(controls), previous_button_, NULL, NULL);
 
 		next_button_ = clutter_cairo_texture_new(20, 20);
@@ -291,9 +291,9 @@ namespace interface {
 		clutter_actor_set_reactive(next_button_, TRUE);
 		g_signal_connect(next_button_, "button-press-event", G_CALLBACK(next_clicked_cb), this);
 		g_signal_connect(next_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb),
-				next_button_);
+		                 next_button_);
 		g_signal_connect(next_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb),
-				next_button_);
+		                 next_button_);
 		clutter_box_pack(CLUTTER_BOX(controls), next_button_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(hud_), controls, NULL, NULL);
@@ -307,14 +307,14 @@ namespace interface {
 		hide_controls_timeout_id_ = g_timeout_add_seconds(3, hide_controls_cb, this);
 
 		GstBus * bus = gst_pipeline_get_bus(GST_PIPELINE(
-				clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_))));
+		                                        clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_))));
 		g_signal_connect(bus, "message::tag", G_CALLBACK(media_message_cb), this);
 		gst_object_unref(bus);
 	}
 
-/*
-	Updates the play button based on the state of the media widget
-*/
+	/*
+		Updates the play button based on the state of the media widget
+	*/
 	void Player::draw_play_button() {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(play_button_));
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(play_button_));
@@ -356,9 +356,9 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Hides the buttons and seek bar
-*/
+	/*
+		Hides the buttons and seek bar
+	*/
 	void Player::hide_controls() {
 		if (clutter_actor_get_animation(hud_) != NULL) {
 			clutter_actor_detach_animation(hud_);
@@ -370,15 +370,15 @@ namespace interface {
 		clutter_stage_hide_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
 	}
 
-/*
-	Called whenever a key is pressed
-*/
+	/*
+		Called whenever a key is pressed
+	*/
 	void Player::key_pressed(guint key, ClutterModifierType modifiers) {
 		switch (key) {
 		case CLUTTER_KEY_F11:
 			// Toggle fullscreen on the stage
 			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-					!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+			                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
 			break;
 		case CLUTTER_KEY_space:
 			// Emulate play click
@@ -389,9 +389,9 @@ namespace interface {
 		}
 	}
 
-/*
-	Called when the media playing back ends
-*/
+	/*
+		Called when the media playing back ends
+	*/
 	void Player::media_eos() {
 		if (current_track_ == total_tracks_) {
 			draw_play_button();
@@ -401,9 +401,9 @@ namespace interface {
 		}
 	}
 
-/*
-	Called whenever a message appears on the bus
-*/
+	/*
+		Called whenever a message appears on the bus
+	*/
 	void Player::media_message(GstMessage * message) {
 		switch (GST_MESSAGE_TYPE(message)) {
 		case GST_MESSAGE_TAG:
@@ -435,20 +435,20 @@ namespace interface {
 		}
 	}
 
-/*
-	Called whenever the next track button is clicked
-*/
+	/*
+		Called whenever the next track button is clicked
+	*/
 	void Player::next_clicked() {
 		gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
 		gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
 		gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
-				gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, current_track_);
+		                        gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, current_track_);
 		clutter_media_set_playing(media_, TRUE);
 	}
 
-/*
-	Called whenever the play button is clicked
-*/
+	/*
+		Called whenever the play button is clicked
+	*/
 	void Player::play_clicked() {
 		gchar * uri = clutter_media_get_uri(media_);
 
@@ -459,23 +459,23 @@ namespace interface {
 		}
 	}
 
-/*
-	Called whenever the previous track button is clicked
-*/
+	/*
+		Called whenever the previous track button is clicked
+	*/
 	void Player::previous_clicked() {
 		int track = current_track_ - 2;
 		if (track > 0) {
 			gst_element_set_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), GST_STATE_PAUSED);
 			gst_element_get_state(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)), NULL, NULL, GST_CLOCK_TIME_NONE);
 			gst_element_seek_simple(clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(media_)),
-					gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, track);
+			                        gst_format_get_by_nick("track"), GST_SEEK_FLAG_FLUSH, track);
 			clutter_media_set_playing(media_, TRUE);
 		}
 	}
 
-/*
-	Called whenever the seek handle is dragged
-*/
+	/*
+		Called whenever the seek handle is dragged
+	*/
 	void Player::seek_dragged(float x) {
 		gfloat x_line;
 		clutter_actor_get_transformed_position(seek_line_, &x_line, NULL);
@@ -487,9 +487,9 @@ namespace interface {
 		update_seek_handle();
 	}
 
-/*
-	Sets the title displayed
-*/
+	/*
+		Sets the title displayed
+	*/
 	void Player::set_title(std::string title) {
 		if (title.length() > 30) {
 			title.erase(27);
@@ -505,7 +505,7 @@ namespace interface {
 		cairo_text_extents_t extents;
 		cairo_text_extents(context, title.c_str(), &extents);
 		cairo_move_to(context, (title_width / 2.0) - ((extents.width / 2.0) + extents.x_bearing),
-				(title_height / 2.0) - ((extents.height / 2.0) + extents.y_bearing));
+		              (title_height / 2.0) - ((extents.height / 2.0) + extents.y_bearing));
 
 		cairo_text_path(context, title.c_str());
 		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
@@ -517,9 +517,9 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Shows the buttons and seek bar
-*/
+	/*
+		Shows the buttons and seek bar
+	*/
 	void Player::show_controls() {
 		if (clutter_actor_get_animation(hud_) != NULL) {
 			return;
@@ -535,41 +535,41 @@ namespace interface {
 		clutter_stage_show_cursor(CLUTTER_STAGE(clutter_stage_get_default()));
 	}
 
-/*
-	Called whenever the stop button is clicked
-*/
+	/*
+		Called whenever the stop button is clicked
+	*/
 	void Player::stop_clicked() {
 		clutter_media_set_playing(media_, FALSE);
 		p->browse();
 	}
 
-/*
-	Called when the seek handle needs to be moved
-*/
+	/*
+		Called when the seek handle needs to be moved
+	*/
 	void Player::update_seek_handle() {
 		clutter_actor_set_x(seek_handle_,
-				(clutter_actor_get_width(seek_line_) - clutter_actor_get_width(seek_handle_)) *
-				clutter_media_get_progress(media_));
+		                    (clutter_actor_get_width(seek_line_) - clutter_actor_get_width(seek_handle_)) *
+		                    clutter_media_get_progress(media_));
 	}
 
-/*
-	Called whenever the stage's width changes
-*/
+	/*
+		Called whenever the stage's width changes
+	*/
 	void Player::width_changed() {
 		clutter_actor_set_width(seek_line_, clutter_actor_get_width(clutter_stage_get_default()) * 0.7f);
 		clutter_actor_set_width(seek_hidden_, clutter_actor_get_width(clutter_stage_get_default()) * 0.7f);
 	}
 
-/*
-	Plays the given URI in the media widget
-*/
+	/*
+		Plays the given URI in the media widget
+	*/
 	void Player::play(std::string uri, std::string title) {
 		set_title(std::move(title));
 
 		// Clear the image in the video texture
 		unsigned char blank_data[3] = {0, 0, 0};
 		CoglHandle blank = cogl_texture_new_from_data(1, 1, COGL_TEXTURE_NONE, COGL_PIXEL_FORMAT_RGB_888,
-				COGL_PIXEL_FORMAT_ANY, 0, blank_data);
+		                   COGL_PIXEL_FORMAT_ANY, 0, blank_data);
 		clutter_texture_set_cogl_texture(CLUTTER_TEXTURE(media_), blank);
 		cogl_handle_unref(blank);
 

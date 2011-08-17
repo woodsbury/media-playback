@@ -22,9 +22,9 @@
 namespace {
 	long long const db_version(1);
 
-/*
-	Fetches the next specified number of items
-*/
+	/*
+		Fetches the next specified number of items
+	*/
 	inline std::vector< toolkit::LibraryItem > fetch(core::Statement * stmt) {
 		if ((stmt == nullptr) || (!stmt->hasData())) {
 			return std::vector< toolkit::LibraryItem >();
@@ -58,37 +58,37 @@ namespace toolkit {
 		swap(thumbnail_, library_item.thumbnail_);
 	}
 
-/*
-	Returns the database ID of the library item
-*/
+	/*
+		Returns the database ID of the library item
+	*/
 	long long LibraryItem::id() const {
 		return id_;
 	}
 
-/*
-	Returns the title of the library item
-*/
+	/*
+		Returns the title of the library item
+	*/
 	std::string LibraryItem::title() const {
 		return title_;
 	}
 
-/*
-	Returns the URI pointing to the location of the library item
-*/
+	/*
+		Returns the URI pointing to the location of the library item
+	*/
 	std::string LibraryItem::uri() const {
 		return uri_;
 	}
 
-/*
-	Returns the file with a thumbnail of the library item
-*/
+	/*
+		Returns the file with a thumbnail of the library item
+	*/
 	std::string LibraryItem::thumbnailFile() const {
 		return thumbnail_;
 	}
 
-/*
-	Initialises the library database
-*/
+	/*
+		Initialises the library database
+	*/
 	void Library::initialise_db() {
 		dprint("Creating library database");
 		clear();
@@ -108,7 +108,7 @@ namespace toolkit {
 
 		{
 			core::Statement type_table(*this, "CREATE TABLE types "
-					"(type_id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL)");
+			                           "(type_id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL)");
 			assert(type_table.valid());
 			type_table.execute();
 		}
@@ -125,24 +125,26 @@ namespace toolkit {
 
 		{
 			core::Statement albums_table(*this, "CREATE TABLE albums "
-					"(album_id INTEGER PRIMARY KEY AUTOINCREMENT, album TEXT NOT NULL, thumbnail TEXT DEFAULT NULL)");
+			                             "(album_id INTEGER PRIMARY KEY AUTOINCREMENT, album TEXT NOT NULL, "
+			                             "thumbnail TEXT DEFAULT NULL)");
 			assert(albums_table.valid());
 			albums_table.execute();
 		}
 
 		{
 			core::Statement items_table(*this, "CREATE TABLE items "
-					"(item_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
-					"uri TEXT NOT NULL, thumbnail TEXT DEFAULT NULL, "
-					"album_id REFERENCES albums (album_id) ON DELETE SET NULL, type_id REFERENCES types (type_id))");
+			                            "(item_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
+			                            "uri TEXT NOT NULL, thumbnail TEXT DEFAULT NULL, "
+			                            "album_id REFERENCES albums (album_id) ON DELETE SET NULL, "
+			                            "type_id REFERENCES types (type_id))");
 			assert(items_table.valid());
 			items_table.execute();
 		}
 	}
 
-/*
-	Find the foreign key relating to the given type
-*/
+	/*
+		Find the foreign key relating to the given type
+	*/
 	long long Library::type_id(Type type) {
 		assert(type != Type::All);
 
@@ -168,9 +170,9 @@ namespace toolkit {
 		return type_stmt_->toInteger(0u);
 	}
 
-/*
-	Find the foreign key relating to the given album
-*/
+	/*
+		Find the foreign key relating to the given album
+	*/
 	long long Library::album_id(std::string album) {
 		if (album_stmt_ == nullptr) {
 			album_stmt_ = new core::Statement(*this, "SELECT album_id FROM albums WHERE album = ?");
@@ -211,9 +213,9 @@ namespace toolkit {
 		delete album_stmt_;
 	}
 
-/*
-	Adds a new entry to the library
-*/
+	/*
+		Adds a new entry to the library
+	*/
 	void Library::add(std::string title, std::string uri, Library::Type type, std::string thumbnail_file, std::string album) {
 		if (type == Type::All) {
 			dprint("Trying to add media item with media type of 'All'");
@@ -222,7 +224,7 @@ namespace toolkit {
 
 		if (add_stmt_ == nullptr) {
 			add_stmt_ = new core::Statement(*this,
-					"INSERT INTO items (name, uri, type_id, thumbnail, album_id) VALUES (?, ?, ?, ?, ?)");
+			                                "INSERT INTO items (name, uri, type_id, thumbnail, album_id) VALUES (?, ?, ?, ?, ?)");
 		} else {
 			add_stmt_->reset();
 		}
@@ -247,9 +249,9 @@ namespace toolkit {
 		add_stmt_->execute();
 	}
 
-/*
-	Count the number of items in the media library of a given type
-*/
+	/*
+		Count the number of items in the media library of a given type
+	*/
 	unsigned long long Library::count(Library::Type type) {
 		if (count_stmt_ == nullptr) {
 			count_stmt_ = new core::Statement(*this, "SELECT COUNT(item_id) FROM items WHERE type LIKE ?");
@@ -266,14 +268,14 @@ namespace toolkit {
 		return count_stmt_->toInteger(0u);
 	}
 
-/*
-	Return the items of the given type from the media library
-*/
+	/*
+		Return the items of the given type from the media library
+	*/
 	std::vector< LibraryItem > Library::list(Library::Type type) {
 		if (list_stmt_ == nullptr) {
 			list_stmt_ = new core::Statement(*this,
-					"SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "
-					"WHERE type LIKE ? ORDER BY album, name");
+			                                 "SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "
+			                                 "WHERE type LIKE ? ORDER BY album, name");
 		} else {
 			list_stmt_->reset();
 		}
@@ -296,14 +298,14 @@ namespace toolkit {
 		return fetch(list_stmt_);
 	}
 
-/*
-	Return the items of the given type from the media library that contain the search term
-*/
+	/*
+		Return the items of the given type from the media library that contain the search term
+	*/
 	std::vector< LibraryItem > Library::search(Library::Type type, std::string term) {
 		if (search_stmt_ == nullptr) {
 			search_stmt_ = new core::Statement(*this,
-					"SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "
-					"WHERE type LIKE ? AND (name LIKE ?2 OR album LIKE ?2) ORDER BY album, name");
+			                                   "SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "
+			                                   "WHERE type LIKE ? AND (name LIKE ?2 OR album LIKE ?2) ORDER BY album, name");
 		} else {
 			search_stmt_->reset();
 		}

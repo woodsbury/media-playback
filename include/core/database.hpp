@@ -26,19 +26,19 @@ namespace core {
 	class DatabasePrivate;
 	class StatementPrivate;
 
-/*
-	Creates a connection to a database
-*/
+	/*
+		Creates a connection to a database
+	*/
 	class Database
-		: NonCopiable {
+			: NonCopiable {
 		friend class StatementPrivate;
 
 		DatabasePrivate * p;
 
 	public:
 		enum class OpenMode {
-			ReadOnly,
-			ReadWrite
+		    ReadOnly,
+		    ReadWrite
 		};
 
 		Database(std::string location = std::string(), OpenMode mode = OpenMode::ReadWrite);
@@ -51,20 +51,20 @@ namespace core {
 		std::vector< std::string > tables();
 	};
 
-/*
-	Represents a statement to execute on a database connection
-*/
+	/*
+		Represents a statement to execute on a database connection
+	*/
 	class Statement
-		: NonCopiable {
+			: NonCopiable {
 		StatementPrivate * p;
 
 	public:
 		enum class Type {
-			Null,
-			Binary,
-			Integer,
-			Real,
-			Text
+		    Null,
+		    Binary,
+		    Integer,
+		    Real,
+		    Text
 		};
 
 		Statement(Database & db, std::string statement);

@@ -24,35 +24,37 @@ extern "C" {
 #include <unistd.h>
 }
 
-namespace { namespace sqlite {
-/*
-	Inheriting from this class will automatically initialise and shut down SQLite
-*/
-	class Initialiser {
-		class private_initialiser {
-		public:
-			private_initialiser() {
-				dprint("Initialising SQLite");
-				sqlite3_initialize();
-			}
+namespace {
+	namespace sqlite {
+		/*
+			Inheriting from this class will automatically initialise and shut down SQLite
+		*/
+		class Initialiser {
+			class private_initialiser {
+			public:
+				private_initialiser() {
+					dprint("Initialising SQLite");
+					sqlite3_initialize();
+				}
 
-			~private_initialiser() {
-				dprint("Shutting down SQLite");
-				sqlite3_shutdown();
+				~private_initialiser() {
+					dprint("Shutting down SQLite");
+					sqlite3_shutdown();
+				}
+			};
+
+		public:
+			Initialiser() {
+				static private_initialiser initialiser;
 			}
 		};
-
-	public:
-		Initialiser() {
-			static private_initialiser initialiser;
-		}
-	};
-}}
+	}
+}
 
 namespace core {
-// Private class declarations
+	// Private class declarations
 	class DatabasePrivate
-		: sqlite::Initialiser {
+			: sqlite::Initialiser {
 		sqlite3 * db_;
 		bool opened_;
 
@@ -72,7 +74,7 @@ namespace core {
 	};
 
 	class StatementPrivate
-		: sqlite::Initialiser {
+			: sqlite::Initialiser {
 		friend class DatabasePrivate;
 
 		sqlite3_stmt * stmt_;
@@ -106,7 +108,7 @@ namespace core {
 		inline bool bind(unsigned int index, char const * text) const;
 	};
 
-// Database connection
+	// Database connection
 	DatabasePrivate::DatabasePrivate(char const * location, int flags) {
 		dprint("Opening %s", location);
 		opened_ = sqlite3_open_v2(location, &db_, flags, NULL) == SQLITE_OK;
@@ -122,35 +124,35 @@ namespace core {
 		sqlite3_close(db_);
 	}
 
-/*
-	Indicates whether the database was opened successfully
-*/
+	/*
+		Indicates whether the database was opened successfully
+	*/
 	bool DatabasePrivate::opened() const {
 		return opened_;
 	}
 
-/*
-	Returns the SQLite connection
-*/
+	/*
+		Returns the SQLite connection
+	*/
 	sqlite3 * DatabasePrivate::connection() {
 		return db_;
 	}
 
-/*
-	Called when a new statement has been created on this connection
-*/
+	/*
+		Called when a new statement has been created on this connection
+	*/
 	void DatabasePrivate::addStatement(StatementPrivate * const statement) {
 		statements_.insert(statement);
 	}
 
-/*
-	Called when a statement on this connection is destroyed
-*/
+	/*
+		Called when a statement on this connection is destroyed
+	*/
 	void DatabasePrivate::removeStatement(StatementPrivate * const statement) {
 		statements_.erase(statement);
 	}
 
-// Public class
+	// Public class
 	Database::Database(std::string location, OpenMode mode) {
 		int flags = 0;
 
@@ -174,9 +176,9 @@ namespace core {
 		return p->opened();
 	}
 
-/*
-	Drops all the tables in the database
-*/
+	/*
+		Drops all the tables in the database
+	*/
 	void Database::clear() {
 		Statement tables(*this, "SELECT name FROM sqlite_master WHERE type = 'table'");
 
@@ -188,9 +190,9 @@ namespace core {
 		} while (tables.nextRow());
 	}
 
-/*
-	Returns a list of tables in the database
-*/
+	/*
+		Returns a list of tables in the database
+	*/
 	std::vector< std::string > Database::tables() {
 		Statement statement(*this, "SELECT name FROM sqlite_master WHERE type = 'table'");
 		if (!statement.valid()) {
@@ -209,7 +211,7 @@ namespace core {
 		return tables;
 	}
 
-// Prepared statement
+	// Prepared statement
 	StatementPrivate::StatementPrivate(Database & db, char const * statement)
 		: has_data_(false), db_(db.p) {
 		valid_ = sqlite3_prepare_v2(db_->connection(), statement, -1, &stmt_, NULL) == SQLITE_OK;
@@ -226,16 +228,16 @@ namespace core {
 		}
 	}
 
-/*
-	Indicates whether the statement was prepared successfully
-*/
+	/*
+		Indicates whether the statement was prepared successfully
+	*/
 	bool StatementPrivate::valid() const {
 		return valid_;
 	}
 
-/*
-	Executes the prepared statement
-*/
+	/*
+		Executes the prepared statement
+	*/
 	bool StatementPrivate::execute() {
 		if (valid_) {
 			int loop_count = 5;
@@ -267,31 +269,31 @@ namespace core {
 		return false;
 	}
 
-/*
-	Indicates whether the statement has data available
-*/
+	/*
+		Indicates whether the statement has data available
+	*/
 	bool StatementPrivate::hasData() const {
 		return has_data_;
 	}
 
-/*
-	Resets the statement ignoring any remaining rows that could be returned
-*/
+	/*
+		Resets the statement ignoring any remaining rows that could be returned
+	*/
 	void StatementPrivate::reset() {
 		has_data_ = false;
 		sqlite3_reset(stmt_);
 	}
 
-/*
-	Returns the number of columns of any current result set
-*/
+	/*
+		Returns the number of columns of any current result set
+	*/
 	unsigned int StatementPrivate::columns() const {
 		return sqlite3_data_count(stmt_);
 	}
 
-/*
-	Return the data type of a column
-*/
+	/*
+		Return the data type of a column
+	*/
 	Statement::Type StatementPrivate::dataType(unsigned int column) const {
 		switch (sqlite3_column_type(stmt_, column)) {
 		case SQLITE_INTEGER:
@@ -309,9 +311,9 @@ namespace core {
 		};
 	}
 
-/*
-	Return the value as a binary array
-*/
+	/*
+		Return the value as a binary array
+	*/
 	std::vector< unsigned char > StatementPrivate::toBinary(unsigned int column) const {
 		unsigned char const * data = static_cast< unsigned char const * >(sqlite3_column_blob(stmt_, column));
 		int size = sqlite3_column_bytes(stmt_, column);
@@ -319,64 +321,64 @@ namespace core {
 		return std::vector< unsigned char >(data, data + size);
 	}
 
-/*
-	Return the value in column as an integer
-*/
+	/*
+		Return the value in column as an integer
+	*/
 	long long StatementPrivate::toInteger(unsigned int column) const {
 		return column < columns() ? sqlite3_column_int64(stmt_, column) : 0LL;
 	}
 
-/*
-	Return the value in column as floating point
-*/
+	/*
+		Return the value in column as floating point
+	*/
 	double StatementPrivate::toReal(unsigned int column) const {
 		return column < columns() ? sqlite3_column_double(stmt_, column) : 0.0;
 	}
 
-/*
-	Return the value in column as a string
-*/
+	/*
+		Return the value in column as a string
+	*/
 	char const * StatementPrivate::toText(unsigned int column) const {
 		return column < columns() ? reinterpret_cast< char const * >(sqlite3_column_text(stmt_, column)) : "";
 	}
 
-/*
-	Binds a null value to a parameter
-*/
+	/*
+		Binds a null value to a parameter
+	*/
 	bool StatementPrivate::bind(unsigned int index) const {
 		return sqlite3_bind_null(stmt_, index) == SQLITE_OK;
 	}
 
-/*
-	Binds a binary array to a parameter
-*/
+	/*
+		Binds a binary array to a parameter
+	*/
 	bool StatementPrivate::bind(unsigned int index, unsigned char const * binary, unsigned long long size) const {
 		return sqlite3_bind_blob(stmt_, index, static_cast< void const * >(binary), size,
-				SQLITE_TRANSIENT) == SQLITE_OK;
+		                         SQLITE_TRANSIENT) == SQLITE_OK;
 	}
 
-/*
-	Binds an integer to a parameter
-*/
+	/*
+		Binds an integer to a parameter
+	*/
 	bool StatementPrivate::bind(unsigned int index, long long integer) const {
 		return sqlite3_bind_int64(stmt_, index, integer) == SQLITE_OK;
 	}
 
-/*
-	Binds a floating point to a parameter
-*/
+	/*
+		Binds a floating point to a parameter
+	*/
 	bool StatementPrivate::bind(unsigned int index, double real) const {
 		return sqlite3_bind_double(stmt_, index, real) == SQLITE_OK;
 	}
 
-/*
-	Binds a string to a parameter
-*/
+	/*
+		Binds a string to a parameter
+	*/
 	bool StatementPrivate::bind(unsigned int index, char const * text) const {
 		return sqlite3_bind_text(stmt_, index, text, -1, SQLITE_TRANSIENT) == SQLITE_OK;
 	}
 
-// Public class
+	// Public class
 	Statement::Statement(Database & db, std::string statement)
 		: p(new StatementPrivate(db, statement.c_str())) {}
 

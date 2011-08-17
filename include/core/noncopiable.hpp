@@ -19,9 +19,9 @@
 #define _CORE_NONCOPIABLE_HPP
 
 namespace core {
-/*
-	Inheriting from this class will prevent copying
-*/
+	/*
+		Inheriting from this class will prevent copying
+	*/
 	class NonCopiable {
 		NonCopiable(NonCopiable const &) = delete;
 		NonCopiable const & operator=(NonCopiable const &) = delete;

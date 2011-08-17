@@ -27,24 +27,24 @@ namespace test {
 	unsigned int tests_passed;
 	unsigned int tests_total;
 
-/*
-	A test has passed
-*/
+	/*
+		A test has passed
+	*/
 	void pass() {
 		++tests_passed;
 		++tests_total;
 	}
 
-/*
-	A test has failed
-*/
+	/*
+		A test has failed
+	*/
 	void fail() {
 		++tests_total;
 	}
 
-/*
-	Test if the arguments are equal
-*/
+	/*
+		Test if the arguments are equal
+	*/
 	template<typename Tx, typename Ty>
 	bool equal(Tx x, Ty y) {
 		if (x == y) {
@@ -69,9 +69,9 @@ namespace test {
 		}
 	}
 
-/*
-	Test if the arguments are not equal
-*/
+	/*
+		Test if the arguments are not equal
+	*/
 	template<typename Tx, typename Ty>
 	bool notEqual(Tx x, Ty y) {
 		if (x != y) {
@@ -96,9 +96,9 @@ namespace test {
 		}
 	}
 
-/*
-	Test if the arguments are within an acceptable delta
-*/
+	/*
+		Test if the arguments are within an acceptable delta
+	*/
 	bool equal(double x, double y, double delta) {
 		if (std::abs(x - y) < delta) {
 			pass();
@@ -111,9 +111,9 @@ namespace test {
 		}
 	}
 
-/*
-	Test if the arguments are outside an acceptable delta
-*/
+	/*
+		Test if the arguments are outside an acceptable delta
+	*/
 	bool notEqual(double x, double y, double delta) {
 		if (std::abs(x - y) > delta) {
 			pass();
@@ -126,9 +126,9 @@ namespace test {
 		}
 	}
 
-/*
-	Test if the expression is true
-*/
+	/*
+		Test if the expression is true
+	*/
 	bool isTrue(bool x) {
 		if (x) {
 			pass();
@@ -140,9 +140,9 @@ namespace test {
 		}
 	}
 
-/*
-	Test if the expression is false
-*/
+	/*
+		Test if the expression is false
+	*/
 	bool isFalse(bool x) {
 		if (x) {
 			std::cout << "False test failed" << std::endl;
@@ -154,9 +154,9 @@ namespace test {
 		}
 	}
 
-/*
-	Time how long a function takes to return, averaging over N times
-*/
+	/*
+		Time how long a function takes to return, averaging over N times
+	*/
 	void time(void (* function)(), int N) {
 		// Disable debug output to prevent filling the screen
 		dprint_enable(false);
@@ -180,13 +180,13 @@ namespace test {
 
 		// Convert to a double representation
 		double user_loop_time = (loop_usage.ru_utime.tv_sec - start_usage.ru_utime.tv_sec)
-				+ (loop_usage.ru_utime.tv_usec - start_usage.ru_utime.tv_usec) / 1000000.0;
+		                        + (loop_usage.ru_utime.tv_usec - start_usage.ru_utime.tv_usec) / 1000000.0;
 		double user_spent_time = (end_usage.ru_utime.tv_sec - loop_usage.ru_utime.tv_sec)
-				+ (end_usage.ru_utime.tv_usec - loop_usage.ru_utime.tv_usec) / 1000000.0 - user_loop_time;
+		                         + (end_usage.ru_utime.tv_usec - loop_usage.ru_utime.tv_usec) / 1000000.0 - user_loop_time;
 		double system_loop_time = (loop_usage.ru_stime.tv_sec - start_usage.ru_stime.tv_sec)
-				+ (loop_usage.ru_stime.tv_usec - start_usage.ru_stime.tv_usec) / 1000000.0;
+		                          + (loop_usage.ru_stime.tv_usec - start_usage.ru_stime.tv_usec) / 1000000.0;
 		double system_spent_time = (end_usage.ru_stime.tv_sec - loop_usage.ru_stime.tv_sec)
-				+ (end_usage.ru_stime.tv_usec - loop_usage.ru_stime.tv_usec) / 1000000.0 - system_loop_time;
+		                           + (end_usage.ru_stime.tv_usec - loop_usage.ru_stime.tv_usec) / 1000000.0 - system_loop_time;
 
 		// Normalise
 		user_spent_time /= N;

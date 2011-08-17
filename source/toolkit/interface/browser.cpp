@@ -87,9 +87,9 @@ namespace interface {
 		g_object_unref(actor_);
 	}
 
-/*
-	Renders the thumnail for the item
-*/
+	/*
+		Renders the thumnail for the item
+	*/
 	void BrowserItem::draw_thumbnail() {
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(thumbnail_));
 
@@ -97,9 +97,9 @@ namespace interface {
 			cairo_surface_t * image = cairo_image_surface_create_from_png(item_.thumbnailFile().c_str());
 
 			double scale_factor = std::min(176.0 / cairo_image_surface_get_width(image),
-					99.0 / cairo_image_surface_get_height(image));
+			                               99.0 / cairo_image_surface_get_height(image));
 			cairo_translate(context, 90.0 - ((cairo_image_surface_get_width(image) * scale_factor) / 2.0),
-					90.0 - ((cairo_image_surface_get_height(image) * scale_factor) / 2.0));
+			                90.0 - ((cairo_image_surface_get_height(image) * scale_factor) / 2.0));
 			cairo_scale(context, scale_factor, scale_factor);
 
 			cairo_set_source_surface(context, image, 0.0, 0.0);
@@ -117,9 +117,9 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Called whenever the item is clicked
-*/
+	/*
+		Called whenever the item is clicked
+	*/
 	void BrowserItem::item_clicked() {
 		p->play(item_.uri(), item_.title());
 	}
@@ -186,7 +186,7 @@ namespace interface {
 
 	gboolean Browser::key_pressed_cb(ClutterActor *, ClutterEvent * event, gpointer data) {
 		reinterpret_cast< Browser * >(data)->key_pressed(clutter_event_get_key_symbol(event),
-				clutter_event_get_state(event));
+		        clutter_event_get_state(event));
 		return TRUE;
 	}
 
@@ -213,17 +213,17 @@ namespace interface {
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(main_layout), TRUE);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_,
-				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -80.0f));
+		                             clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_WIDTH, -80.0f));
 
 		ClutterLayoutManager * buttons_layout = clutter_box_layout_new();
 		ClutterActor * buttons = clutter_box_new(buttons_layout);
 		clutter_actor_add_constraint(buttons,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 		clutter_actor_add_constraint(buttons,
-				clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_Y, 40.0f));
+		                             clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_Y, 40.0f));
 
 		ClutterLayoutManager * search_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
-				CLUTTER_BIN_ALIGNMENT_CENTER);
+		                                       CLUTTER_BIN_ALIGNMENT_CENTER);
 		ClutterActor * search = clutter_box_new(search_layout);
 		clutter_actor_set_width(search, 300.0f);
 
@@ -321,7 +321,7 @@ namespace interface {
 		clutter_actor_set_reactive(media_browser, TRUE);
 		g_signal_connect(media_browser, "scroll-event", G_CALLBACK(wheel_scrolled_cb), this);
 		clutter_actor_add_constraint(media_browser,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_X_AXIS, 0.5f));
 
 		ClutterLayoutManager * media_list_layout = clutter_flow_layout_new(CLUTTER_FLOW_HORIZONTAL);
 		clutter_flow_layout_set_column_spacing(CLUTTER_FLOW_LAYOUT(media_list_layout), 15.0f);
@@ -331,13 +331,13 @@ namespace interface {
 		clutter_box_pack(CLUTTER_BOX(media_browser), media_list_, NULL, NULL);
 
 		clutter_actor_add_constraint(media_list_,
-				clutter_snap_constraint_new(actor_, CLUTTER_SNAP_EDGE_TOP, CLUTTER_SNAP_EDGE_TOP, 70.0f));
+		                             clutter_snap_constraint_new(actor_, CLUTTER_SNAP_EDGE_TOP, CLUTTER_SNAP_EDGE_TOP, 70.0f));
 
 		ClutterLayoutManager * scroll_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_CENTER,
-				CLUTTER_BIN_ALIGNMENT_FIXED);
+		                                       CLUTTER_BIN_ALIGNMENT_FIXED);
 		ClutterActor * scroll = clutter_box_new(scroll_layout);
 		clutter_actor_add_constraint(scroll,
-				clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
+		                             clutter_align_constraint_new(clutter_stage_get_default(), CLUTTER_ALIGN_Y_AXIS, 0.5f));
 
 		scroll_hidden_ = clutter_rectangle_new();
 		clutter_actor_set_width(scroll_hidden_, 18.0f);
@@ -383,9 +383,9 @@ namespace interface {
 		update_media_list();
 	}
 
-/*
-	Called whenever the display all media button is clicked
-*/
+	/*
+		Called whenever the display all media button is clicked
+	*/
 	void Browser::all_clicked() {
 		switch (type_) {
 		case toolkit::Library::Type::Movies:
@@ -405,9 +405,9 @@ namespace interface {
 		}
 	}
 
-/*
-	Clear the list of media items
-*/
+	/*
+		Clear the list of media items
+	*/
 	void Browser::clear_media_list() {
 		GList * children = clutter_container_get_children(CLUTTER_CONTAINER(media_list_));
 		while (children) {
@@ -420,9 +420,9 @@ namespace interface {
 		item_list_.clear();
 	}
 
-/*
-	Draws the display all media button
-*/
+	/*
+		Draws the display all media button
+	*/
 	void Browser::draw_all_button() {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(all_));
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(all_));
@@ -447,7 +447,7 @@ namespace interface {
 		cairo_text_extents_t extents;
 		cairo_text_extents(context, "All", &extents);
 		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
-				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+		              10.0 - ((extents.height / 2.0) + extents.y_bearing));
 
 		cairo_text_path(context, "All");
 
@@ -461,9 +461,9 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Draws the display movies button
-*/
+	/*
+		Draws the display movies button
+	*/
 	void Browser::draw_movies_button() {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(movies_));
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(movies_));
@@ -488,7 +488,7 @@ namespace interface {
 		cairo_text_extents_t extents;
 		cairo_text_extents(context, "Movies", &extents);
 		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
-				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+		              10.0 - ((extents.height / 2.0) + extents.y_bearing));
 
 		cairo_text_path(context, "Movies");
 
@@ -502,9 +502,9 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Draws the display music button
-*/
+	/*
+		Draws the display music button
+	*/
 	void Browser::draw_music_button() {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(music_));
 		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(music_));
@@ -524,7 +524,7 @@ namespace interface {
 		cairo_text_extents_t extents;
 		cairo_text_extents(context, "Music", &extents);
 		cairo_move_to(context, 40.0 - ((extents.width / 2.0) + extents.x_bearing),
-				10.0 - ((extents.height / 2.0) + extents.y_bearing));
+		              10.0 - ((extents.height / 2.0) + extents.y_bearing));
 
 		cairo_text_path(context, "Music");
 
@@ -538,32 +538,32 @@ namespace interface {
 		cairo_destroy(context);
 	}
 
-/*
-	Called whenever the stage's height changes
-*/
+	/*
+		Called whenever the stage's height changes
+	*/
 	void Browser::height_changed() {
 		clutter_actor_set_height(scroll_line_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
 		clutter_actor_set_height(scroll_hidden_, clutter_actor_get_height(clutter_stage_get_default()) * 0.6f);
 	}
 
-/*
-	Called whenever a key is pressed
-*/
+	/*
+		Called whenever a key is pressed
+	*/
 	void Browser::key_pressed(guint key, ClutterModifierType modifiers) {
 		switch (key) {
 		case CLUTTER_KEY_F11:
 			// Toggle fullscreen on the stage
 			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-					!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+			                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
 			break;
 		default:
 			;
 		}
 	}
 
-/*
-	Finds the height of the media list display
-*/
+	/*
+		Finds the height of the media list display
+	*/
 	float Browser::media_list_height() {
 		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
 
@@ -574,9 +574,9 @@ namespace interface {
 		return std::ceil(item_list_.size() / columns) * clutter_actor_get_height(item_list_.front().actor());
 	}
 
-/*
-	Called whenever the display movies button is clicked
-*/
+	/*
+		Called whenever the display movies button is clicked
+	*/
 	void Browser::movies_clicked() {
 		switch (type_) {
 		case toolkit::Library::Type::All:
@@ -598,9 +598,9 @@ namespace interface {
 		update_media_list();
 	}
 
-/*
-	Called whenever the display music button is clicked
-*/
+	/*
+		Called whenever the display music button is clicked
+	*/
 	void Browser::music_clicked() {
 		switch (type_) {
 		case toolkit::Library::Type::All:
@@ -622,9 +622,9 @@ namespace interface {
 		update_media_list();
 	}
 
-/*
-	Called whenever the scroll handle is dragged
-*/
+	/*
+		Called whenever the scroll handle is dragged
+	*/
 	void Browser::scroll_dragged(float y) {
 		if (item_list_.size() == 0) {
 			return;
@@ -648,9 +648,9 @@ namespace interface {
 		clutter_actor_set_y(scroll_handle_, handle_y > 0.0f ? handle_y : 0.0f);
 	}
 
-/*
-	Update the displayed list of media items
-*/
+	/*
+		Update the displayed list of media items
+	*/
 	void Browser::update_media_list() {
 		clear_media_list();
 
@@ -685,9 +685,9 @@ namespace interface {
 		}
 	}
 
-/*
-	Called whenever the mouse wheel is scrolled
-*/
+	/*
+		Called whenever the mouse wheel is scrolled
+	*/
 	void Browser::wheel_scrolled(bool up) {
 		if (item_list_.size() == 0) {
 			return;
@@ -717,13 +717,13 @@ namespace interface {
 		clutter_actor_set_anchor_point(media_list_, 0.0f, offset);
 
 		gfloat handle_y = ((offset / height) * clutter_actor_get_height(scroll_line_)) -
-				clutter_actor_get_height(scroll_handle_);
+		                  clutter_actor_get_height(scroll_handle_);
 		clutter_actor_set_y(scroll_handle_, handle_y > 0.0f ? handle_y : 0.0f);
 	}
 
-/*
-	List of media items needs updating
-*/
+	/*
+		List of media items needs updating
+	*/
 	void Browser::update() {
 		update_media_list();
 	}

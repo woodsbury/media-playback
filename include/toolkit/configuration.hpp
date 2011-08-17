@@ -24,7 +24,7 @@
 
 namespace toolkit {
 	class Configuration
-		: private core::Database {
+			: private core::Database {
 	public:
 		Configuration();
 		~Configuration();

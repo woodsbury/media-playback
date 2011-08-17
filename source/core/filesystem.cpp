@@ -35,9 +35,9 @@ namespace core {
 		set(path);
 	}
 
-/*
-	Set the path to a new location
-*/
+	/*
+		Set the path to a new location
+	*/
 	void Path::set(std::string const path) {
 		path_.clear();
 
@@ -70,23 +70,23 @@ namespace core {
 		}
 	}
 
-/*
-	Check if the path is absolute or relative
-*/
+	/*
+		Check if the path is absolute or relative
+	*/
 	bool Path::absolute() const {
 		return absolute_;
 	}
 
-/*
-	Check if the path exists
-*/
+	/*
+		Check if the path exists
+	*/
 	bool Path::exists() const {
 		return exists(toString());
 	}
 
-/*
-	Change the path to being absolute based on the current working directory
-*/
+	/*
+		Change the path to being absolute based on the current working directory
+	*/
 	bool Path::makeAbsolute() {
 		if (absolute_) {
 			return true;
@@ -101,9 +101,9 @@ namespace core {
 		return true;
 	}
 
-/*
-	Create the path as a series of directories
-*/
+	/*
+		Create the path as a series of directories
+	*/
 	bool Path::create() {
 		if (path_.size() == 0) {
 			return true;
@@ -141,9 +141,9 @@ namespace core {
 		return true;
 	}
 
-/*
-	Convert the path to a string
-*/
+	/*
+		Convert the path to a string
+	*/
 	std::string Path::toString() const {
 		std::string result;
 
@@ -166,9 +166,9 @@ namespace core {
 		return result;
 	}
 
-/*
-	Returns the path to the current working directory
-*/
+	/*
+		Returns the path to the current working directory
+	*/
 	std::string Path::current() {
 		size_t size = 256;
 		char * buffer = static_cast< char * >(std::malloc(size));
@@ -203,16 +203,16 @@ namespace core {
 		return std::string();
 	}
 
-/*
-	Returns the application's data directory for this user
-*/
+	/*
+		Returns the application's data directory for this user
+	*/
 	std::string Path::data() {
 		return home() + "/." + NAME;
 	}
 
-/*
-	Returns the current user's home directory
-*/
+	/*
+		Returns the current user's home directory
+	*/
 	std::string Path::home() {
 		char const * home_env = getenv("HOME");
 		if (home_env != NULL) {
@@ -223,16 +223,16 @@ namespace core {
 		return std::string(home_pwd->pw_dir);
 	}
 
-/*
-	Check if the given path exists
-*/
+	/*
+		Check if the given path exists
+	*/
 	bool Path::exists(std::string const path) {
 		return access(path.c_str(), F_OK) == 0;
 	}
 
-/*
-	Removes a directory
-*/
+	/*
+		Removes a directory
+	*/
 	bool Path::remove(std::string const path) {
 		return rmdir(path.c_str()) == 0;
 	}

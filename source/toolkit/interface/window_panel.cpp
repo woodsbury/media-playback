@@ -48,9 +48,9 @@ namespace interface {
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 10u);
 		actor_ = clutter_box_new(main_layout);
 		clutter_actor_add_constraint(actor_, clutter_align_constraint_new(clutter_stage_get_default(),
-				CLUTTER_ALIGN_X_AXIS, 0.95f));
+		                             CLUTTER_ALIGN_X_AXIS, 0.95f));
 		clutter_actor_add_constraint(actor_, clutter_bind_constraint_new(clutter_stage_get_default(),
-				CLUTTER_BIND_Y, 5.0f));
+		                             CLUTTER_BIND_Y, 5.0f));
 
 		fullscreen_button_ = clutter_cairo_texture_new(18, 16);
 		clutter_actor_set_reactive(fullscreen_button_, TRUE);
@@ -97,9 +97,9 @@ namespace interface {
 		g_signal_connect(clutter_stage_get_default(), "motion-event", G_CALLBACK(show_panel_cb), this);
 	}
 
-/*
-	Updates the window controls based on whether the stage is fullscreen
-*/
+	/*
+		Updates the window controls based on whether the stage is fullscreen
+	*/
 	void WindowPanel::draw_window_controls() {
 		clutter_cairo_texture_clear(CLUTTER_CAIRO_TEXTURE(fullscreen_button_));
 
@@ -138,17 +138,17 @@ namespace interface {
 		}
 	}
 
-/*
-	Called whenever the fullscreen button is clicked
-*/
+	/*
+		Called whenever the fullscreen button is clicked
+	*/
 	void WindowPanel::fullscreen_clicked() {
 		clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-				!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+		                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
 	}
 
-/*
-	Hides the panel
-*/
+	/*
+		Hides the panel
+	*/
 	void WindowPanel::hide_panel() {
 		if (clutter_actor_get_animation(actor_) != NULL) {
 			clutter_actor_detach_animation(actor_);
@@ -158,9 +158,9 @@ namespace interface {
 		hide_panel_timeout_id_ = 0;
 	}
 
-/*
-	Shows the panel
-*/
+	/*
+		Shows the panel
+	*/
 	void WindowPanel::show_panel() {
 		if (clutter_actor_get_animation(actor_) != NULL) {
 			return;
@@ -177,9 +177,9 @@ namespace interface {
 		}
 	}
 
-/*
-	Changes whether the panel hides itself after a timeout
-*/
+	/*
+		Changes whether the panel hides itself after a timeout
+	*/
 	void WindowPanel::setAutoHide(bool hide) {
 		auto_hide_ = hide;
 

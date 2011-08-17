@@ -25,7 +25,7 @@ namespace toolkit {
 	class InterfacePrivate;
 
 	class Interface
-		: core::NonCopiable {
+			: core::NonCopiable {
 		InterfacePrivate * p;
 
 	public:

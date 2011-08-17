@@ -43,12 +43,12 @@ namespace toolkit {
 	};
 
 	class Library
-		: private core::Database {
+			: private core::Database {
 	public:
 		enum class Type {
-			All,
-			Music,
-			Movies
+		    All,
+		    Music,
+		    Movies
 		};
 
 	private:
@@ -69,7 +69,8 @@ namespace toolkit {
 		Library();
 		~Library();
 
-		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string(), std::string album = std::string());
+		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string(),
+		         std::string album = std::string());
 
 		unsigned long long count(Type type);
 		std::vector< LibraryItem > list(Type type);

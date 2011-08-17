@@ -59,18 +59,18 @@ namespace toolkit {
 		browse();
 	}
 
-/*
-	Show the add file dialogue
-*/
+	/*
+		Show the add file dialogue
+	*/
 	void InterfacePrivate::add() {}
 
-/*
-	Browse the media library
-*/
+	/*
+		Browse the media library
+	*/
 	void InterfacePrivate::browse() {
 		clutter_actor_detach_animation(browser_.actor());
 		clutter_actor_animate(player_.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
-				"signal::completed", interface::Actor::hide_after_cb, player_.actor(), NULL);
+		                      "signal::completed", interface::Actor::hide_after_cb, player_.actor(), NULL);
 		clutter_actor_show_all(browser_.actor());
 		clutter_actor_animate(browser_.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
@@ -78,20 +78,20 @@ namespace toolkit {
 		panel_.setAutoHide(false);
 	}
 
-/*
-	Informs the other widgets that the library has been updated
-*/
+	/*
+		Informs the other widgets that the library has been updated
+	*/
 	void InterfacePrivate::libraryUpdated() {
 		browser_.update();
 	}
 
-/*
-	Plays the URI
-*/
+	/*
+		Plays the URI
+	*/
 	void InterfacePrivate::play(std::string uri, std::string title) {
 		clutter_actor_detach_animation(player_.actor());
 		clutter_actor_animate(browser_.actor(), CLUTTER_LINEAR, 250, "opacity", 0,
-				"signal::completed", interface::Actor::hide_after_cb, browser_.actor(), NULL);
+		                      "signal::completed", interface::Actor::hide_after_cb, browser_.actor(), NULL);
 		clutter_actor_show_all(player_.actor());
 		clutter_actor_animate(player_.actor(), CLUTTER_LINEAR, 250, "opacity", 255, NULL);
 
@@ -116,9 +116,9 @@ namespace toolkit {
 		p->play(std::move(uri), std::move(title));
 	}
 
-/*
-	Show the stage and start the main loop
-*/
+	/*
+		Show the stage and start the main loop
+	*/
 	void Interface::start() const {
 		clutter_actor_show(clutter_stage_get_default());
 		clutter_main();

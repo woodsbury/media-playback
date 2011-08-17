@@ -37,7 +37,7 @@ clean:
 	-rm -f $(OBJECTS) $(TEST_OBJECTS)
 
 format:
-	astyle --options=./astylerc -r './include/*.hpp' './source/*.cpp'
+	astyle --options=./astylerc -r './include/*.hpp' './source/*.cpp' './tests/*.hpp' './tests/*.cpp'
 
 test: $(NAME)_test
 	./$(NAME)_test
