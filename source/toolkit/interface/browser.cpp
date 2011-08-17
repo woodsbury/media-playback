@@ -254,10 +254,10 @@ namespace interface {
 		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(search_icon));
 
 		cairo_arc(context, 10.0, 8.0, 4.0, 0.0, 2.0 * M_PI);
-		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_move_to(context, 3.0, 15.0);
 		cairo_line_to(context, 7.0, 11.0);
 		cairo_set_line_width(context, 3.0);
+		cairo_set_source_rgb(context, 0.3, 0.3, 0.3);
 		cairo_stroke(context);
 
 		cairo_destroy(context);
@@ -275,6 +275,8 @@ namespace interface {
 		clutter_actor_set_width(search_text_, 280.0f);
 		clutter_actor_set_reactive(search_text_, TRUE);
 		g_signal_connect(search_text_, "activate", G_CALLBACK(search_activated_cb), this);
+		g_signal_connect(search_text_, "enter-event", G_CALLBACK(actor_highlight_on_cb), search_icon);
+		g_signal_connect(search_text_, "leave-event", G_CALLBACK(actor_highlight_off_cb), search_icon);
 		clutter_box_pack(CLUTTER_BOX(search), search_text_, NULL, NULL);
 
 		clutter_box_pack(CLUTTER_BOX(buttons), search, NULL, NULL);
