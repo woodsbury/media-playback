@@ -31,10 +31,6 @@ namespace {
 }
 
 namespace core {
-	unsigned long const Read(4ul);
-	unsigned long const Write(2ul);
-	unsigned long const Execute(1ul);
-
 	Path::Path(std::string const path) {
 		set(path);
 	}

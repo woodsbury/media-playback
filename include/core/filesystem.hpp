@@ -27,10 +27,6 @@ namespace core {
 		bool absolute_;
 
 	public:
-		static unsigned long const Read;
-		static unsigned long const Write;
-		static unsigned long const Execute;
-
 		Path(std::string const path = std::string());
 
 		void set(std::string const path = std::string());
