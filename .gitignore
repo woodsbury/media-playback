@@ -1,3 +1,4 @@
 mp
 mp_test
 *.o
+*.gcda
