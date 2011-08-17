@@ -25,12 +25,12 @@ namespace {
 /*
 	Fetches the next specified number of items
 */
-	inline std::vector< toolkit::MediaItem > fetch(core::Statement * stmt) {
+	inline std::vector< toolkit::LibraryItem > fetch(core::Statement * stmt) {
 		if ((stmt == nullptr) || (!stmt->hasData())) {
-			return std::vector< toolkit::MediaItem >();
+			return std::vector< toolkit::LibraryItem >();
 		}
 
-		std::vector< toolkit::MediaItem > items;
+		std::vector< toolkit::LibraryItem > items;
 
 		do {
 			if (stmt->dataType(3u) == core::Statement::Type::Null) {
@@ -45,44 +45,44 @@ namespace {
 }
 
 namespace toolkit {
-	MediaItem::MediaItem(long long id, std::string title, std::string uri, std::string thumbnail_file)
+	LibraryItem::LibraryItem(long long id, std::string title, std::string uri, std::string thumbnail_file)
 		: id_(id), title_(title), uri_(uri), thumbnail_(thumbnail_file) {}
 
-	MediaItem::MediaItem(MediaItem const & media_item)
-		: id_(media_item.id_), title_(media_item.title_), uri_(media_item.uri_), thumbnail_(media_item.thumbnail_) {}
+	LibraryItem::LibraryItem(LibraryItem const & library_item)
+		: id_(library_item.id_), title_(library_item.title_), uri_(library_item.uri_), thumbnail_(library_item.thumbnail_) {}
 
-	MediaItem::MediaItem(MediaItem && media_item)
-		: id_(media_item.id_) {
-		swap(title_, media_item.title_);
-		swap(uri_, media_item.uri_);
-		swap(thumbnail_, media_item.thumbnail_);
+	LibraryItem::LibraryItem(LibraryItem && library_item)
+		: id_(library_item.id_) {
+		swap(title_, library_item.title_);
+		swap(uri_, library_item.uri_);
+		swap(thumbnail_, library_item.thumbnail_);
 	}
 
 /*
-	Returns the database ID of the media item
+	Returns the database ID of the library item
 */
-	long long MediaItem::id() const {
+	long long LibraryItem::id() const {
 		return id_;
 	}
 
 /*
-	Returns the title of the media item
+	Returns the title of the library item
 */
-	std::string MediaItem::title() const {
+	std::string LibraryItem::title() const {
 		return title_;
 	}
 
 /*
-	Returns the URI pointing to the location of the media item
+	Returns the URI pointing to the location of the library item
 */
-	std::string MediaItem::uri() const {
+	std::string LibraryItem::uri() const {
 		return uri_;
 	}
 
 /*
-	Returns the file with a thumbnail of the media item
+	Returns the file with a thumbnail of the library item
 */
-	std::string MediaItem::thumbnailFile() const {
+	std::string LibraryItem::thumbnailFile() const {
 		return thumbnail_;
 	}
 
@@ -269,7 +269,7 @@ namespace toolkit {
 /*
 	Return the items of the given type from the media library
 */
-	std::vector< MediaItem > Library::list(Library::Type type) {
+	std::vector< LibraryItem > Library::list(Library::Type type) {
 		if (list_stmt_ == nullptr) {
 			list_stmt_ = new core::Statement(*this,
 					"SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "
@@ -299,7 +299,7 @@ namespace toolkit {
 /*
 	Return the items of the given type from the media library that contain the search term
 */
-	std::vector< MediaItem > Library::search(Library::Type type, std::string term) {
+	std::vector< LibraryItem > Library::search(Library::Type type, std::string term) {
 		if (search_stmt_ == nullptr) {
 			search_stmt_ = new core::Statement(*this,
 					"SELECT item_id, name, uri, thumbnail FROM items NATURAL JOIN albums NATURAL JOIN types "

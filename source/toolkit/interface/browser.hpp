@@ -38,7 +38,7 @@ namespace interface {
 
 		toolkit::InterfacePrivate * p;
 
-		toolkit::MediaItem item_;
+		toolkit::LibraryItem item_;
 
 		ClutterActor * thumbnail_;
 
@@ -49,7 +49,7 @@ namespace interface {
 		void item_clicked();
 
 	public:
-		BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private);
+		BrowserItem(toolkit::LibraryItem library_item, toolkit::InterfacePrivate * interface_private);
 		BrowserItem(BrowserItem const & browser_item);
 		BrowserItem(BrowserItem && browser_item);
 		~BrowserItem();

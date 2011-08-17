@@ -44,8 +44,8 @@ namespace interface {
 		return TRUE;
 	}
 
-	BrowserItem::BrowserItem(toolkit::MediaItem media_item, toolkit::InterfacePrivate * interface_private)
-		: p(interface_private), item_(std::move(media_item)) {
+	BrowserItem::BrowserItem(toolkit::LibraryItem library_item, toolkit::InterfacePrivate * interface_private)
+		: p(interface_private), item_(std::move(library_item)) {
 		ClutterLayoutManager * item_layout = clutter_box_layout_new();
 		clutter_box_layout_set_vertical(CLUTTER_BOX_LAYOUT(item_layout), TRUE);
 		actor_ = clutter_box_new(item_layout);
@@ -638,7 +638,7 @@ namespace interface {
 	void Browser::update_media_list() {
 		clear_media_list();
 
-		std::vector< toolkit::MediaItem > list;
+		std::vector< toolkit::LibraryItem > list;
 		if (*(clutter_text_get_text(CLUTTER_TEXT(search_text_))) == '\0') {
 			// Search box is empty
 			list = library_.list(type_);
@@ -648,7 +648,7 @@ namespace interface {
 		}
 		item_list_.reserve(list.size());
 
-		for (std::vector< toolkit::MediaItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
+		for (std::vector< toolkit::LibraryItem >::const_iterator i = list.begin(); i != list.end(); ++i) {
 			item_list_.emplace_back(*i, p);
 			clutter_box_pack(CLUTTER_BOX(media_list_), item_list_.back().actor(), NULL, NULL);
 		}

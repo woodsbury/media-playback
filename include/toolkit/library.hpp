@@ -23,7 +23,7 @@
 #include <core/database.hpp>
 
 namespace toolkit {
-	class MediaItem {
+	class LibraryItem {
 		long long id_;
 
 		std::string title_;
@@ -31,9 +31,9 @@ namespace toolkit {
 		std::string thumbnail_;
 
 	public:
-		MediaItem(long long id, std::string title, std::string uri, std::string thumbnail_file = std::string());
-		MediaItem(MediaItem const & media_item);
-		MediaItem(MediaItem && media_item);
+		LibraryItem(long long id, std::string title, std::string uri, std::string thumbnail_file = std::string());
+		LibraryItem(LibraryItem const & library_item);
+		LibraryItem(LibraryItem && library_item);
 
 		long long id() const;
 
@@ -72,8 +72,8 @@ namespace toolkit {
 		void add(std::string title, std::string uri, Type type, std::string thumbnail_file = std::string(), std::string album = std::string());
 
 		unsigned long long count(Type type);
-		std::vector< MediaItem > list(Type type);
-		std::vector< MediaItem > search(Type type, std::string term);
+		std::vector< LibraryItem > list(Type type);
+		std::vector< LibraryItem > search(Type type, std::string term);
 	};
 }
 
