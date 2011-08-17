@@ -82,13 +82,15 @@ namespace interface {
 
 		ClutterActor * media_list_;
 
+		ClutterActor * scroll_handle_;
 		ClutterActor * scroll_hidden_;
 		ClutterActor * scroll_line_;
-		ClutterActor * scroll_handle_;
 
 		void draw_all_button();
 		void draw_music_button();
 		void draw_movies_button();
+
+		float media_list_height();
 
 		void clear_media_list();
 		void update_media_list();

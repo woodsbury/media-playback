@@ -562,6 +562,19 @@ namespace interface {
 	}
 
 /*
+	Finds the height of the media list display
+*/
+	float Browser::media_list_height() {
+		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
+
+		if (item_list_.empty()) {
+			return 0.0f;
+		}
+
+		return std::ceil(item_list_.size() / columns) * clutter_actor_get_height(item_list_.front().actor());
+	}
+
+/*
 	Called whenever the display movies button is clicked
 */
 	void Browser::movies_clicked() {
@@ -617,10 +630,7 @@ namespace interface {
 			return;
 		}
 
-		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
-		gfloat height = std::ceil(item_list_.size() / columns) *
-				clutter_actor_get_height(item_list_.front().actor());
-
+		float height = media_list_height();
 		if (height < (clutter_actor_get_height(clutter_stage_get_default()) - 100.0f)) {
 			// List is completely visible
 			return;
@@ -662,6 +672,17 @@ namespace interface {
 		// Scroll to top of list
 		clutter_actor_move_anchor_point(media_list_, 0.0f, 0.0f);
 		clutter_actor_set_y(scroll_handle_, 0.0f);
+
+		if (media_list_height() < (clutter_actor_get_height(clutter_stage_get_default()) - 100.0f)) {
+			// The whole list is visible
+			clutter_actor_hide(scroll_handle_);
+			clutter_actor_hide(scroll_hidden_);
+			clutter_actor_hide(scroll_line_);
+		} else {
+			clutter_actor_show(scroll_handle_);
+			clutter_actor_show(scroll_hidden_);
+			clutter_actor_show(scroll_line_);
+		}
 	}
 
 /*
@@ -672,10 +693,7 @@ namespace interface {
 			return;
 		}
 
-		float columns = std::floor(clutter_actor_get_width(media_list_) / 195.0f);
-		gfloat height = std::ceil(item_list_.size() / columns) *
-				clutter_actor_get_height(item_list_.front().actor());
-
+		float height = media_list_height();
 		if (height < (clutter_actor_get_height(clutter_stage_get_default()) - 100.0f)) {
 			// List is completely visible
 			return;
