@@ -242,6 +242,7 @@ namespace interface {
 		cairo_curve_to(context, 0.0, 1.0, 1.0, 0.0, 5.0, 0.0);
 		cairo_set_source_rgb(context, 1.0, 1.0, 1.0);
 		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 2.0);
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_stroke(context);
 
@@ -436,6 +437,7 @@ namespace interface {
 		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::All);
 		cairo_fill_preserve(context);
 
+		cairo_set_line_width(context, 2.0);
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_stroke(context);
 
@@ -476,6 +478,7 @@ namespace interface {
 		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::Movies);
 		cairo_fill_preserve(context);
 
+		cairo_set_line_width(context, 2.0);
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_stroke(context);
 
@@ -511,6 +514,7 @@ namespace interface {
 		cairo_set_source_gradient(context, type_ == toolkit::Library::Type::Music);
 		cairo_fill_preserve(context);
 
+		cairo_set_line_width(context, 2.0);
 		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
 		cairo_stroke(context);
 
