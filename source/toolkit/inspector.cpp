@@ -47,6 +47,7 @@ namespace {
 namespace toolkit {
 	class InspectorPrivate
 			: gstreamer::Initialiser {
+		static void bus_message_cb(GstBus * bus, GstMessage * message, gpointer data);
 		static void pad_added_cb(GstElement * element, GstPad * pad, gpointer data);
 
 		GstElement * pipeline_;
@@ -54,6 +55,7 @@ namespace toolkit {
 		bool has_audio_;
 		bool has_video_;
 
+		void bus_message(GstMessage * message);
 		void pad_added(GstElement * element, GstPad * pad);
 
 	public:
@@ -63,6 +65,10 @@ namespace toolkit {
 		inline bool audio() const;
 		inline bool video() const;
 	};
+
+	void InspectorPrivate::bus_message_cb(GstBus *, GstMessage * message, gpointer data) {
+		reinterpret_cast< InspectorPrivate * >(data)->bus_message(message);
+	}
 
 	void InspectorPrivate::pad_added_cb(GstElement * element, GstPad * pad, gpointer data) {
 		reinterpret_cast< InspectorPrivate * >(data)->pad_added(element, pad);
@@ -74,8 +80,13 @@ namespace toolkit {
 
 		GstElement * decoder = gst_element_factory_make("uridecodebin", NULL);
 		g_object_set(G_OBJECT(decoder), "uri", uri, NULL);
-		g_signal_connect(decoder, "pad-added", G_CALLBACK(pad_added_cb), this);
 		gst_bin_add(GST_BIN(pipeline_), decoder);
+		g_signal_connect(decoder, "pad-added", G_CALLBACK(pad_added_cb), this);
+
+		GstBus * bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline_));
+		gst_bus_enable_sync_message_emission(bus);
+		g_signal_connect(bus, "sync-message::tag", G_CALLBACK(bus_message_cb), this);
+		gst_object_unref(GST_OBJECT(bus));
 
 		gst_element_set_state(pipeline_, GST_STATE_PAUSED);
 		gst_element_get_state(pipeline_, NULL, NULL, GST_CLOCK_TIME_NONE);
@@ -84,6 +95,34 @@ namespace toolkit {
 	InspectorPrivate::~InspectorPrivate() {
 		gst_element_set_state(pipeline_, GST_STATE_NULL);
 		gst_object_unref(GST_OBJECT(pipeline_));
+	}
+
+	/*
+		Called whenever a message is posted on the bus
+	*/
+	void InspectorPrivate::bus_message(GstMessage * message) {
+		switch (GST_MESSAGE_TYPE(message)) {
+		case GST_MESSAGE_TAG:
+			GstTagList * tags;
+			gst_message_parse_tag(message, &tags);
+
+			char * tag_string;
+
+			if (gst_tag_list_get_string(tags, GST_TAG_TITLE, &tag_string)) {
+				dprint("Found title");
+				g_free(tag_string);
+			}
+
+			if (gst_tag_list_get_string(tags, GST_TAG_ALBUM, &tag_string)) {
+				dprint("Found album");
+				g_free(tag_string);
+			}
+
+			gst_tag_list_free(tags);
+			break;
+		default:
+			;
+		}
 	}
 
 	/*
@@ -103,6 +142,8 @@ namespace toolkit {
 			} else if (type.find("video") == 0) {
 				dprint("Found video stream");
 				has_video_ = true;
+			} else {
+				dprint("Found other stream");
 			}
 
 			gst_caps_unref(caps);

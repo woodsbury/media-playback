@@ -15,6 +15,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <core/filesystem.hpp>
 #include <toolkit/inspector.hpp>
 
 namespace test {
@@ -28,8 +29,18 @@ namespace test {
 			isFalse(inspect.video());
 		}
 
+		/*
+			Test with audio file
+		*/
+		void audioTest() {
+			::toolkit::Inspector inspect("file://" + ::core::Path::current() + "/tests/audio.ogg");
+			isTrue(inspect.audio());
+			isFalse(inspect.video());
+		}
+
 		void runTests() {
 			invalidTest();
+			audioTest();
 		}
 	}
 }

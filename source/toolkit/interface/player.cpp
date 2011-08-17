@@ -428,7 +428,6 @@ namespace interface {
 			}
 
 			gst_tag_list_free(tags);
-
 			break;
 		default:
 			;
