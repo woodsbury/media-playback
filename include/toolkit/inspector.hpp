@@ -15,12 +15,26 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#ifndef _TOOLKIT_INSPECTOR_HPP
+#define _TOOLKIT_INSPECTOR_HPP
 
-#include "toolkit/configuration.hpp"
-#include "toolkit/inspector.hpp"
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+#include <string>
+#include <core/noncopiable.hpp>
+
+namespace toolkit {
+	class InspectorPrivate;
+
+	class Inspector
+			: core::NonCopiable {
+		InspectorPrivate * p;
+
+	public:
+		Inspector(std::string uri);
+		~Inspector();
+
+		bool audio() const;
+		bool video() const;
+	};
+}
 
 #endif

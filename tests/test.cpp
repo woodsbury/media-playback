@@ -225,6 +225,7 @@ namespace {
 
 #include "database_tests.hpp"
 #include "filesystem_tests.hpp"
+#include "inspector_tests.hpp"
 
 int main(int, char **) {
 	std::cout << "Programme Name: " << NAME << std::endl;
@@ -236,6 +237,10 @@ int main(int, char **) {
 
 	std::cout << "\nRunning filesystem tests" << std::endl;
 	test::filesystem::runTests();
+	printResults();
+
+	std::cout << "\nRunning inspector tests" << std::endl;
+	test::inspector::runTests();
 	printResults();
 
 	return 0;

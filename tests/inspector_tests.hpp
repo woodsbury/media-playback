@@ -15,12 +15,21 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLKIT_HPP
-#define _TOOLKIT_HPP
+#include <toolkit/inspector.hpp>
 
-#include "toolkit/configuration.hpp"
-#include "toolkit/inspector.hpp"
-#include "toolkit/interface.hpp"
-#include "toolkit/library.hpp"
+namespace test {
+	namespace inspector {
+		/*
+			Test with invalid URI
+		*/
+		void invalidTest() {
+			::toolkit::Inspector inspect("asdf://asdf");
+			isFalse(inspect.audio());
+			isFalse(inspect.video());
+		}
 
-#endif
+		void runTests() {
+			invalidTest();
+		}
+	}
+}
