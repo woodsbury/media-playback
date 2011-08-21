@@ -55,6 +55,9 @@ namespace toolkit {
 		bool has_audio_;
 		bool has_video_;
 
+		std::string title_;
+		std::string album_;
+
 		void bus_message(GstMessage * message);
 		void pad_added(GstElement * element, GstPad * pad);
 
@@ -64,6 +67,9 @@ namespace toolkit {
 
 		inline bool audio() const;
 		inline bool video() const;
+
+		inline std::string title() const;
+		inline std::string album() const;
 	};
 
 	void InspectorPrivate::bus_message_cb(GstBus *, GstMessage * message, gpointer data) {
@@ -110,11 +116,13 @@ namespace toolkit {
 
 			if (gst_tag_list_get_string(tags, GST_TAG_TITLE, &tag_string)) {
 				dprint("Found title");
+				title_ = tag_string;
 				g_free(tag_string);
 			}
 
 			if (gst_tag_list_get_string(tags, GST_TAG_ALBUM, &tag_string)) {
 				dprint("Found album");
+				album_ = tag_string;
 				g_free(tag_string);
 			}
 
@@ -169,6 +177,20 @@ namespace toolkit {
 		return has_video_;
 	}
 
+	/*
+		Returns any detected album name
+	*/
+	std::string InspectorPrivate::album() const {
+		return album_;
+	}
+
+	/*
+		Returns any detected track title
+	*/
+	std::string InspectorPrivate::title() const {
+		return title_;
+	}
+
 	Inspector::Inspector(std::string uri)
 		: p(new InspectorPrivate(uri.c_str())) {}
 
@@ -182,5 +204,13 @@ namespace toolkit {
 
 	bool Inspector::video() const {
 		return p->video();
+	}
+
+	std::string Inspector::album() const {
+		return std::move(p->album());
+	}
+
+	std::string Inspector::title() const {
+		return std::move(p->title());
 	}
 }

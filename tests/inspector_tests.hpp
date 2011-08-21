@@ -27,6 +27,8 @@ namespace test {
 			::toolkit::Inspector inspect("asdf://asdf");
 			isFalse(inspect.audio());
 			isFalse(inspect.video());
+			isTrue(inspect.title().empty());
+			isTrue(inspect.album().empty());
 		}
 
 		/*
@@ -36,11 +38,35 @@ namespace test {
 			::toolkit::Inspector inspect("file://" + ::core::Path::current() + "/tests/audio.ogg");
 			isTrue(inspect.audio());
 			isFalse(inspect.video());
+			equal(inspect.title(), "Test Audio");
+			equal(inspect.album(), "Test Album");
+		}
+
+		/*
+			Test with video file
+		*/
+		void videoTest() {
+			::toolkit::Inspector inspect("file://" + ::core::Path::current() + "/tests/video.ogg");
+			isFalse(inspect.audio());
+			isTrue(inspect.video());
+			isTrue(inspect.title().empty());
+			isTrue(inspect.album().empty());
+		}
+
+		/*
+			Test with file with audio and video
+		*/
+		void multiTest() {
+			::toolkit::Inspector inspect("file://" + ::core::Path::current() + "/tests/multi.ogg");
+			isTrue(inspect.audio());
+			isTrue(inspect.video());
 		}
 
 		void runTests() {
 			invalidTest();
 			audioTest();
+			videoTest();
+			multiTest();
 		}
 	}
 }

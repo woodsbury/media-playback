@@ -31,7 +31,7 @@ $(NAME)_test: $(COMBINED_OBJECTS)
 
 $(TEST_OBJECTS): $(TEST_HEADERS) $(TEST_SOURCES)
 
-.PHONY: clean test
+.PHONY: clean format test
 
 clean:
 	-rm -f $(OBJECTS) $(TEST_OBJECTS)

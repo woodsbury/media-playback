@@ -34,6 +34,9 @@ namespace toolkit {
 
 		bool audio() const;
 		bool video() const;
+
+		std::string album() const;
+		std::string title() const;
 	};
 }
 
