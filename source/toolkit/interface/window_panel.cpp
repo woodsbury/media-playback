@@ -25,6 +25,7 @@ namespace interface {
 
 	gboolean WindowPanel::fullscreen_clicked_cb(ClutterActor *, ClutterEvent *, gpointer data) {
 		reinterpret_cast< WindowPanel * >(data)->fullscreen_clicked();
+		reinterpret_cast< WindowPanel * >(data)->show_panel();
 		return TRUE;
 	}
 
@@ -170,6 +171,7 @@ namespace interface {
 
 		if (hide_panel_timeout_id_ != 0) {
 			g_source_remove(hide_panel_timeout_id_);
+			hide_panel_timeout_id_ = 0;
 		}
 
 		if (auto_hide_) {
