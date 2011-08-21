@@ -550,14 +550,25 @@ namespace interface {
 		Called whenever a key is pressed
 	*/
 	void Browser::key_pressed(guint key, ClutterModifierType modifiers) {
-		switch (key) {
-		case CLUTTER_KEY_F11:
-			// Toggle fullscreen on the stage
-			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-			                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
-			break;
-		default:
-			;
+		if ((static_cast< int >(modifiers) & static_cast< int >(CLUTTER_CONTROL_MASK)) != 0) {
+			switch (key) {
+			case CLUTTER_KEY_f:
+				// Focus the search box
+				clutter_stage_set_key_focus(CLUTTER_STAGE(clutter_stage_get_default()), search_text_);
+				break;
+			default:
+				;
+			}
+		} else {
+			switch (key) {
+			case CLUTTER_KEY_F11:
+				// Toggle fullscreen on the stage
+				clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
+											!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+				break;
+			default:
+				;
+			}
 		}
 	}
 

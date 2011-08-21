@@ -374,18 +374,21 @@ namespace interface {
 		Called whenever a key is pressed
 	*/
 	void Player::key_pressed(guint key, ClutterModifierType modifiers) {
-		switch (key) {
-		case CLUTTER_KEY_F11:
-			// Toggle fullscreen on the stage
-			clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-			                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
-			break;
-		case CLUTTER_KEY_space:
-			// Emulate play click
-			play_clicked();
-			break;
-		default:
-			;
+		if ((static_cast< int >(modifiers) | static_cast< int >(CLUTTER_CONTROL_MASK)) != 0) {
+		} else {
+			switch (key) {
+			case CLUTTER_KEY_F11:
+				// Toggle fullscreen on the stage
+				clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
+											!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+				break;
+			case CLUTTER_KEY_space:
+				// Emulate play click
+				play_clicked();
+				break;
+			default:
+				;
+			}
 		}
 	}
 
