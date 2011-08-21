@@ -564,7 +564,7 @@ namespace interface {
 			case CLUTTER_KEY_F11:
 				// Toggle fullscreen on the stage
 				clutter_stage_set_fullscreen(CLUTTER_STAGE(clutter_stage_get_default()),
-											!clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
+				                             !clutter_stage_get_fullscreen(CLUTTER_STAGE(clutter_stage_get_default())));
 				break;
 			default:
 				;

@@ -47,11 +47,16 @@ namespace interface {
 		static gboolean show_controls_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean stop_clicked_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static gboolean update_seek_handle_cb(gpointer data);
+		static gboolean volume_dragged_cb(ClutterActor * actor, ClutterEvent * event, gpointer data);
 		static void width_changed_cb(GObject * object, GParamSpec * param, gpointer data);
 
 		toolkit::InterfacePrivate * p;
 
 		ClutterMedia * media_;
+
+		ClutterActor * volume_;
+		ClutterActor * volume_handle_;
+		ClutterActor * volume_hidden_;
 
 		ClutterActor * hud_;
 
@@ -71,6 +76,7 @@ namespace interface {
 		guint hide_controls_timeout_id_;
 
 		void set_title(std::string title);
+		void set_volume(double volume);
 
 		void draw_play_button();
 
@@ -85,6 +91,7 @@ namespace interface {
 		void show_controls();
 		void stop_clicked();
 		void update_seek_handle();
+		void volume_dragged(float x);
 		void width_changed();
 
 	public:

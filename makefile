@@ -2,7 +2,7 @@ NAME = mp
 DISPLAY_NAME = Media Player
 VERSION = 0.1
 
-DEFINES = DEBUG OPTIMISE
+DEFINES = DEBUG
 INCLUDES = /usr/include/atk-1.0 /usr/include/cairo /usr/include/clutter-1.0 /usr/include/gdk-pixbuf-2.0 \
 	/usr/include/glib-2.0 /usr/include/gstreamer-0.10 /usr/include/gtk-3.0 /usr/include/json-glib-1.0 \
 	/usr/include/pango-1.0 /usr/include/libxml2 /usr/lib/glib-2.0/include

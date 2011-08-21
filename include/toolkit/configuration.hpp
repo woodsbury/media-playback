@@ -25,6 +25,8 @@
 namespace toolkit {
 	class Configuration
 			: private core::Database {
+		void initialise_db();
+
 	public:
 		Configuration();
 		~Configuration();

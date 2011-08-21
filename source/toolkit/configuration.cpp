@@ -19,12 +19,32 @@
 #include <core/filesystem.hpp>
 #include <toolkit/configuration.hpp>
 
+namespace {
+	long long const db_version(1);
+}
+
 namespace toolkit {
+	/*
+		Initialises the configuration database
+	*/
+	void Configuration::initialise_db() {
+		dprint("Creating configuration database");
+		clear();
+	}
+
 	Configuration::Configuration()
 		: core::Database(core::Path::data() + "/configuration.db") {
-		if (opened() && (tables().size() == 0u)) {
-			// Configuration database hasn't been initialised yet
-			dprint("Creating configuration");
+		core::Statement check_version(*this, "SELECT version FROM version");
+		if (!check_version.valid()) {
+			// Database is likely empty
+			initialise_db();
+		} else {
+			check_version.execute();
+			if (check_version.toInteger(0u) != db_version) {
+				// Database is out of date
+				dprint("Old database found");
+				initialise_db();
+			}
 		}
 	}
 
