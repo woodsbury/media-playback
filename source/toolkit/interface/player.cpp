@@ -176,10 +176,7 @@ namespace interface {
 		ClutterLayoutManager * volume_layout = clutter_box_layout_new();
 		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(volume_layout), 5u);
 		volume_ = clutter_box_new(volume_layout);
-		clutter_actor_add_constraint(volume_,
-		                             clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_X, 10.0f));
-		clutter_actor_add_constraint(volume_,
-		                             clutter_bind_constraint_new(clutter_stage_get_default(), CLUTTER_BIND_Y, 5.0f));
+		clutter_actor_set_position(volume_, 140.0f, 5.0f);
 
 		ClutterActor * volume_icon = clutter_cairo_texture_new(15, 18);
 

@@ -45,12 +45,50 @@ namespace interface {
 
 	WindowPanel::WindowPanel()
 		: auto_hide_(false) {
-		ClutterLayoutManager * main_layout = clutter_box_layout_new();
-		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(main_layout), 10u);
+		ClutterLayoutManager * main_layout = clutter_bin_layout_new(CLUTTER_BIN_ALIGNMENT_FIXED,
+		                                                            CLUTTER_BIN_ALIGNMENT_FIXED);
 		actor_ = clutter_box_new(main_layout);
-		clutter_actor_add_constraint(actor_, clutter_align_constraint_new(clutter_stage_get_default(),
+
+		ClutterActor * menu = clutter_cairo_texture_new(110, 22);
+		clutter_actor_set_position(menu, 10.0f, 0.0f);
+
+		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(menu));
+
+		cairo_move_to(context, 0.0, 0.0);
+		cairo_line_to(context, 0.0, 19.0);
+		cairo_curve_to(context, 1.0, 21.0, 2.0, 22.0, 3.0, 22.0);
+		cairo_line_to(context, 107.0, 22.0);
+		cairo_curve_to(context, 108.0, 22.0, 109.0, 21.0, 110.0, 19.0);
+		cairo_line_to(context, 110.0, 0.0);
+		cairo_close_path(context);
+		cairo_set_source_rgb(context, 0.8, 0.8, 0.8);
+		cairo_fill_preserve(context);
+		cairo_set_line_width(context, 1.0);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_stroke(context);
+
+		cairo_select_font_face(context, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+		cairo_set_font_size(context, 12.0);
+
+		cairo_text_extents_t extents;
+		cairo_text_extents(context, DISPLAY_NAME, &extents);
+		cairo_move_to(context, 55.0 - ((extents.width / 2.0) + extents.x_bearing),
+		              11.0 - ((extents.height / 2.0) + extents.y_bearing));
+
+		cairo_text_path(context, DISPLAY_NAME);
+		cairo_set_source_rgb(context, 0.0, 0.0, 0.0);
+		cairo_fill(context);
+
+		cairo_destroy(context);
+
+		clutter_box_pack(CLUTTER_BOX(actor_), menu, NULL, NULL);
+
+		ClutterLayoutManager * controls_layout = clutter_box_layout_new();
+		clutter_box_layout_set_spacing(CLUTTER_BOX_LAYOUT(controls_layout), 10u);
+		ClutterActor * controls = clutter_box_new(controls_layout);
+		clutter_actor_add_constraint(controls, clutter_align_constraint_new(clutter_stage_get_default(),
 		                             CLUTTER_ALIGN_X_AXIS, 0.95f));
-		clutter_actor_add_constraint(actor_, clutter_bind_constraint_new(clutter_stage_get_default(),
+		clutter_actor_add_constraint(controls, clutter_bind_constraint_new(clutter_stage_get_default(),
 		                             CLUTTER_BIND_Y, 5.0f));
 
 		fullscreen_button_ = clutter_cairo_texture_new(18, 16);
@@ -58,11 +96,11 @@ namespace interface {
 		g_signal_connect(fullscreen_button_, "button-press-event", G_CALLBACK(fullscreen_clicked_cb), this);
 		g_signal_connect(fullscreen_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb), fullscreen_button_);
 		g_signal_connect(fullscreen_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb), fullscreen_button_);
-		clutter_box_pack(CLUTTER_BOX(actor_), fullscreen_button_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), fullscreen_button_, NULL, NULL);
 
 		close_button_ = clutter_cairo_texture_new(15, 15);
 
-		cairo_t * context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(close_button_));
+		context = clutter_cairo_texture_create(CLUTTER_CAIRO_TEXTURE(close_button_));
 
 		cairo_move_to(context, 1.0, 3.0);
 		cairo_line_to(context, 3.0, 1.0);
@@ -89,9 +127,11 @@ namespace interface {
 		g_signal_connect(close_button_, "button-press-event", G_CALLBACK(close_clicked_cb), NULL);
 		g_signal_connect(close_button_, "enter-event", G_CALLBACK(actor_highlight_on_cb), close_button_);
 		g_signal_connect(close_button_, "leave-event", G_CALLBACK(actor_highlight_off_cb), close_button_);
-		clutter_box_pack(CLUTTER_BOX(actor_), close_button_, NULL, NULL);
+		clutter_box_pack(CLUTTER_BOX(controls), close_button_, NULL, NULL);
 
 		draw_window_controls();
+
+		clutter_box_pack(CLUTTER_BOX(actor_), controls, NULL, NULL);
 
 		g_signal_connect(clutter_stage_get_default(), "fullscreen", G_CALLBACK(fullscreen_status_changed_cb), this);
 		g_signal_connect(clutter_stage_get_default(), "unfullscreen", G_CALLBACK(fullscreen_status_changed_cb), this);
